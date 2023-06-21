@@ -13,7 +13,8 @@ http.listen(3001, () => {
 
 io.on('connection', (socket) => {
     console.log('A client connected');
-
+    io.emit('foo', 'tata');
+    
     socket.on('chat message', (message) => {
         console.log('Received message:', message);
         io.emit('chat message', message);
