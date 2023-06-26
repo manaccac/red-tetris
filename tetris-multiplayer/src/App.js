@@ -1,15 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import Game from './components/Game/Game';
 import Home from './components/Home/Home';
+import UsernamePrompt from './components/UsernamePrompt';
 import { socket } from './socket';
-import { useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
 import './App.css';
 
 function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
+  const [username, setUsername] = useState('');
+  console.log('username = ', username);
 
   useEffect(() => {
+    const cookieUsername = Cookies.get('username');
+    if (cookieUsername) {
+      setUsername(cookieUsername);
+    }
+
     function onConnect() {
       setIsConnected(true);
     }
@@ -36,10 +44,14 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/:hash" element={<Game />} />
-      </Routes>
+      {!username ? (
+        <UsernamePrompt />
+      ) : (
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/:hash" element={<Game />} />
+        </Routes>
+      )}
     </Router>
   );
 }
