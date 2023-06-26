@@ -1,5 +1,5 @@
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 
-const socket = io('http://192.168.1.14:3000'); // remplacer par l'URL de votre serveur
+const URL = process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:3001';
 
-export default socket;
+export const socket = io(URL);
