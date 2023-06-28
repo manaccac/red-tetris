@@ -1,20 +1,8 @@
-.board {
-	width: 70%;
-	height: 90%;
-	background-color: #f0f0f0;
-	display: grid;
-	grid-template-columns: repeat(10, 1fr);
-	grid-template-rows: repeat(20, 1fr);
+.game-container {
+	width: 100%;
+	height: 100%;
+	display: flex;
   }
-  
-  .cell {
-	border: 1px solid #ddd;
-  }
-  
-  .filled {
-	background-color: #333;
-  }
-  
   .game-over-screen {
 	position: absolute;
 	top: 0;
@@ -28,3 +16,51 @@
 	justify-content: center;
 	align-items: center;
   }
+  
+  .board {
+	width: 70%;
+	height: 90%;
+	background-color: #f0f0f0;
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);
+	grid-template-rows: repeat(20, 1fr);
+	border: 1px solid #ddd;
+  }
+  
+  .cell {
+	border: 1px solid #ddd;
+  }
+  
+  .filled {
+	background-color: #333;
+  }
+
+  .next-piece {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	margin: 20px;
+	padding: 10px;
+	border: 2px solid #000;
+	width: 100px;  /* ajustez en fonction de la taille souhaitée */
+	height: 100px; /* ajustez en fonction de la taille souhaitée */
+  }
+  
+  .next-piece-row {
+	display: flex;
+	justify-content: center;
+  }
+  
+  .next-piece-cell {
+	width: 20px;  /* ajustez en fonction de la taille souhaitée */
+	height: 20px; /* ajustez en fonction de la taille souhaitée */
+	margin: 1px;
+	background-color: #fff;
+	border: 1px solid #000;
+  }
+  
+  .next-piece-cell.filled {
+	background-color: #000;
+  }
+  

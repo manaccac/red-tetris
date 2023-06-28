@@ -28,6 +28,8 @@ class Board extends React.Component {
           [1, 1]
         ],
         position: { x: 4, y: 0 },  // position initiale en haut à gauche
+		nextPiece: null,
+
       },
 	  score: 0,
     };
@@ -239,7 +241,9 @@ class Board extends React.Component {
 		if (this.state.gameOver) {
 		  return;
 		}
-		console.log("tick");
+		if (this.state.nextPiece === undefined) {
+			this.randpiece();
+		}
 		this.setState((state) => {
 		  // Mettre à jour la position de la pièce active
 		  const piece = { ...state.piece };
@@ -321,54 +325,67 @@ class Board extends React.Component {
 		});
 	  }
 	  
+	  randpiece() {
+		const pieceShapes = [
+			[[0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],   // Carré
+			[[0, 0, 0, 0],[1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],   // Ligne
+			[[0, 0, 0, 0],[0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]],   // T
+			[[0, 0, 0, 0],[0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]],   // S
+			[[0, 0, 0, 0],[1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]],   // Z
+			[[0, 0, 0, 0],[0, 1, 0, 0], [0, 1, 0, 0], [1, 1, 0, 0]],   // L inverse
+			[[0, 0, 0, 0],[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0]],   // L
+		  ];
+		  
+		  let shape = this.state.nextPiece ? this.state.nextPiece : pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
+		  const position = { x: 4, y: 0 };
+		
+		  let newPiece = {
+			shape: shape,
+			position: position
+		  };
+		
+		  let nextPiece = pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
+		  this.setState({nextPiece: nextPiece});
+		  return newPiece;
+		}
 	  
-  
-  generateNewPiece() {
-	if (this.state.gameOver) return null;
-
-	
-	// Liste des différentes formes de pièces possibles
-	const pieceShapes = [
-	  [[1, 1], [1, 1]],   // Carré
-	  [[1, 1, 1, 1]],     // Ligne
-	  [[1, 1, 1], [0, 1, 0]],  // T
-	  [[0, 1, 1], [1, 1, 0]],  // S
-	  [[1, 1, 0], [0, 1, 1]],  // Z
-	  [[0, 1, 0],[0, 1, 0], [1, 1, 0]],  // L inverse
-	  [[0, 1, 0],[0, 1, 0], [0, 1, 1]],  // L
-
-
-	  // Ajoutez d'autres formes de pièces selon vos règles du jeu
-	];
-  
-	// Génération aléatoire d'un index pour sélectionner une forme de pièce
-	const randomIndex = Math.floor(Math.random() * pieceShapes.length);
-	const shape = pieceShapes[randomIndex];
-  
-	// Position initiale en haut du plateau
-	const position = { x: 4, y: 0 };
-  
-	// Créez un nouvel objet représentant la nouvelle pièce
-	const newPiece = {
-	  shape: shape,
-	  position: position
-	};
-
-	// Check for collision of new piece at top
-  // Check for collision of new piece at top
-  if (this.isCollision(newPiece, position.x, position.y)) {
-    console.log('Game Over. Restarting...');
-    this.setState({
-      board: Array.from({ length: 20 }, () => Array(10).fill(0)),
-	  gameOver: true, 
-    });
-    // Game Over, return a simple piece (or null) here
-  }
-
-  
-	return newPiece;
-  }
-  
+	  generateNewPiece() {
+		if (this.state.gameOver) return null;
+	  
+		// Liste des différentes formes de pièces possibles
+const pieceShapes = [
+			[[0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],   // Carré
+			[[0, 0, 0, 0],[1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],   // Ligne
+			[[0, 0, 0, 0],[0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]],   // T
+			[[0, 0, 0, 0],[0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]],   // S
+			[[0, 0, 0, 0],[1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]],   // Z
+			[[0, 0, 0, 0],[0, 1, 0, 0], [0, 1, 0, 0], [1, 1, 0, 0]],   // L inverse
+			[[0, 0, 0, 0],[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0]],   // L
+		  ];
+	  
+		let shape = this.state.nextPiece ? this.state.nextPiece : pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
+		const position = { x: 4, y: 0 };
+	  
+		let newPiece = {
+		  shape: shape,
+		  position: position
+		};
+	  
+		let nextPiece = pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
+	  
+		if (this.isCollision(newPiece, position.x, position.y)) { 
+		  console.log('Game Over. Restarting...');
+		  this.setState({
+			board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+			gameOver: true, 
+		  });
+		  return null;
+		}
+	  
+		this.setState({nextPiece: nextPiece});
+		return newPiece;
+	  }
+	  
   goHome() {
 	window.location.href = '/';
   }
@@ -376,37 +393,83 @@ class Board extends React.Component {
   
 
   render() {
-	if (this.state.gameOver) {
-		return (
-		  <div className="board">
-			{this.state.board.map((row, y) =>
-			  row.map((cell, x) => (
-				<div key={`${y}-${x}`} className={`cell ${cell !== 0 ? 'filled' : ''}`}></div>
-			  ))
-			)}
-			<div className="game-over-screen">
-			  <h1>Game Over</h1>
-			  <button onClick={this.goHome}>Home</button>
-			</div>
-		  </div>
-		);
-	  }
+	const { nextPiece } = this.state;
+	const boardw = Array.from({ length: 4 }, () => Array(4).fill(0));
+	
+	// Remplir le tableau avec la forme de la nextPiece en la centrant
+	if (nextPiece) {
+	  const offsetX = Math.floor((boardw[0].length - nextPiece[0].length) / 2);
+	  const offsetY = Math.floor((boardw.length - nextPiece.length) / 2);
+	
+	  nextPiece.forEach((row, rowIndex) => {
+		row.forEach((value, colIndex) => {
+		  if (value !== 0) {
+			boardw[rowIndex + offsetY][colIndex + offsetX] = value;
+		  }
+		});
+	  });
+	}
+	
+	
+	
+    if (this.state.gameOver) {
+      // Affichage du message de fin de partie
+      return (
+        <div className="board">
+          {/* Affichage du tableau */}
+          {this.state.board.map((row, y) =>
+            row.map((cell, x) => (
+              <div key={`${y}-${x}`} className={`cell ${cell !== 0 ? 'filled' : ''}`}></div>
+            ))
+          )}
+          {/* Affichage de l'écran de fin de partie */}
+          <div className="game-over-screen">
+            <h1>Game Over</h1>
+            <button onClick={this.goHome}>Home</button>
+          </div>
+        </div>
+      );
+    }
+
+    // Affichage du tableau de jeu
     return (
+		<div className="game-container">
       <div className="board">
+        {/* Affichage du tableau */}
         {this.state.board.map((row, y) =>
           row.map((cell, x) => {
             // Vérifiez si la pièce active est sur cette cellule
-            const active = this.state.piece.position.y <= y && y < this.state.piece.position.y + this.state.piece.shape.length
-              && this.state.piece.position.x <= x && x < this.state.piece.position.x + this.state.piece.shape[0].length
-              && this.state.piece.shape[y - this.state.piece.position.y][x - this.state.piece.position.x];
+            const active =
+              this.state.piece.position.y <= y &&
+              y < this.state.piece.position.y + this.state.piece.shape.length &&
+              this.state.piece.position.x <= x &&
+              x < this.state.piece.position.x + this.state.piece.shape[0].length &&
+              this.state.piece.shape[y - this.state.piece.position.y][x - this.state.piece.position.x];
 
             return (
-              <div key={`${y}-${x}`} className={`cell ${cell !== 0 || active ? 'filled' : ''}`}>
-				
-			  </div>
+              <div
+                key={`${y}-${x}`}
+                className={`cell ${cell !== 0 || active ? 'filled' : ''}`}
+              ></div>
             );
           })
         )}
+		</div>
+        {/* Affichage de la prochaine pièce */}
+		<div className="next-piece">
+		{boardw.map((row, y) => (
+			<div key={`row-${y}`} className="next-piece-row">
+			{row.map((cell, x) => (
+				<div
+				key={`cell-${y}-${x}`}
+				className={`next-piece-cell ${cell !== 0 ? 'filled' : ''}`}
+				></div>
+			))}
+			</div>
+		))}
+		</div>
+
+
       </div>
     );
   }
