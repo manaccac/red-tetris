@@ -33,7 +33,6 @@ class Board extends React.Component {
       },
 	  score: 0,
     };
-      // Bind des méthodes pour assurer le bon contexte
 	  this.handleKeyDown = this.handleKeyDown.bind(this);
 	  this.moveLeft = this.moveLeft.bind(this);
 	  this.moveRight = this.moveRight.bind(this);
@@ -353,7 +352,7 @@ class Board extends React.Component {
 		if (this.state.gameOver) return null;
 	  
 		// Liste des différentes formes de pièces possibles
-const pieceShapes = [
+		const pieceShapes = [
 			[[0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],   // Carré
 			[[0, 0, 0, 0],[1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],   // Ligne
 			[[0, 0, 0, 0],[0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]],   // T
