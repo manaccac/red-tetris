@@ -1,477 +1,138 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
+import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece } from '../../redux/actions';
 
-function calculateScore(completedLines) {
-	if (completedLines === 1) {
-	  return 100;
-	} else if (completedLines === 2) {
-	  return 400;
-	} else if (completedLines === 3) {
-	  return 800;
-	} else if (completedLines === 4) {
-	  return 1600;
-	}
-	return 0;
-  }
-
-class Board extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-		gameOver: false,
-
-      // Créez une matrice 2D vide avec 20 lignes et 10 colonnes
-      board: Array.from({ length: 20 }, () => Array(10).fill(0)),
-      // Ajouter une matrice 2D pour la pièce active
-      piece: {
-        shape: [
-          [1, 1],
-          [1, 1]
-        ],
-        position: { x: 4, y: 0 },  // position initiale en haut à gauche
-		nextPiece: null,
-
-      },
-	  score: 0,
-    };
-	  this.handleKeyDown = this.handleKeyDown.bind(this);
-	  this.moveLeft = this.moveLeft.bind(this);
-	  this.moveRight = this.moveRight.bind(this);
-	  this.rotatePiece = this.rotatePiece.bind(this);
-	  this.moveDown = this.moveDown.bind(this);
-	  this.movePieceToBottom = this.movePieceToBottom.bind(this);
-	}
-  
-	componentDidMount() {
-	  this.timerID = setInterval(() => this.tick(), 500);
-	  document.addEventListener("keydown", this.handleKeyDown);
-	}
-  
-	componentWillUnmount() {
-	  clearInterval(this.timerID);
-	  document.removeEventListener("keydown", this.handleKeyDown);
-	}
-  
-	handleKeyDown(event) {
-		if (this.state.gameOver) {
-			return;
-		  }
-	  switch (event.key) {
+function Board(props) {
+  const handleKeyDown = async (event) => {
+    if (props.isGameOver) {
+      return;
+    }
+	switch (event.key) {
 		case "ArrowLeft":
-		  this.moveLeft();
+		  await props.moveLeft(); // Attendre la fin du déplacement
 		  break;
 		case "ArrowRight":
-		  this.moveRight();
+		  await props.moveRight(); // Attendre la fin du déplacement
 		  break;
 		case "ArrowUp":
-		  this.rotatePiece();
+		  await props.rotate(); // Attendre la fin du déplacement
 		  break;
 		case "ArrowDown":
-		  this.moveDown();
+		  await props.moveDown(); // Attendre la fin du déplacement
 		  break;
 		case " ":
-		  this.movePieceToBottom();
+		  await props.dropPiece(); // Attendre la fin du déplacement
 		  break;
 		default:
 		  break;
 	  }
-	}
-  
-	moveLeft() {
-		this.setState((state) => {
-		  const piece = { ...state.piece };
-		  const newPosition = { ...piece.position };
-		  newPosition.x -= 1;
-		  if (!this.isCollision(piece, newPosition.x, newPosition.y)) {
-			piece.position = newPosition;
-		  }
-		  return { piece: piece };
-		});
-	  }
-	  
-	  moveRight() {
-		this.setState((state) => {
-		  const piece = { ...state.piece };
-		  const newPosition = { ...piece.position };
-		  newPosition.x += 1;
-		  if (!this.isCollision(piece, newPosition.x, newPosition.y)) {
-			piece.position = newPosition;
-		  }
-		  return { piece: piece };
-		});
-	  }
-	  
-  
-	  rotatePiece() {
-		this.setState((state) => {
-		  const piece = { ...state.piece };
-		  const rotatedShape = this.rotateMatrix(piece.shape);
-		  const newPosition = { ...piece.position };
-		  piece.shape = rotatedShape;
-	  
-		  // Vérifier les collisions avec les murs après la rotation
-		  if (this.isCollision(piece, newPosition.x, newPosition.y)) {
-			// Si une collision est détectée, annuler la rotation
-			piece.shape = state.piece.shape;
-		  }
-	  
-		  return { piece: piece };
-		});
-	  }
-	  
-	  
-	  moveDown() {
-		if (this.state.gameOver) {
-			return;
-		  }
-		this.setState((state) => {
-		  const piece = { ...state.piece };
-		  const newPosition = { ...piece.position };
-		  newPosition.y += 1;
-	  
-		  // Vérifier les collisions avec les autres pièces après le déplacement vers le bas
-		  if (this.isCollision(piece, newPosition.x, newPosition.y)) {
-			// Si une collision est détectée, la pièce a atteint le bas ou a collisionné avec une autre pièce
-			// Mettre à jour le plateau avec la pièce actuelle
-			const updatedBoard = [...state.board];
-			piece.shape.forEach((row, y) => {
-			  row.forEach((cell, x) => {
-				if (cell !== 0) {
-				  const boardX = piece.position.x + x;
-				  const boardY = piece.position.y + y;
-				  updatedBoard[boardY][boardX] = cell;
-				}
-			  });
-			});
+  };
 
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (!props.isGameOver) {
+        await props.moveDown();
+      }
+    }, 500);
 
-			      // Vérifier les lignes complètes
-				  const completedLines = [];
-				  updatedBoard.forEach((row, y) => {
-					if (row.every((cell) => cell !== 0)) {
-					  completedLines.push(y);
-					}
-				  });
-			
-				  // Supprimer les lignes complètes et ajouter de nouvelles lignes vides en haut
-				  if (completedLines.length > 0) {
-					const newBoard = completedLines.reduce((acc, lineIndex) => {
-					  acc.splice(lineIndex, 1);
-					  acc.unshift(Array(10).fill(0));
-					  return acc;
-					}, updatedBoard);
-					const score = state.score + calculateScore(completedLines.length);
-					return {
-					  board: newBoard,
-					  piece: this.generateNewPiece(),
-					  score: score,
-					};
-				  }
-			
-	  
-			// Générer une nouvelle pièce
-			const newPiece = this.generateNewPiece();
-	  
-			return {
-			  board: updatedBoard,
-			  piece: newPiece
-			};
-		  }
-	  
-		  // La pièce peut continuer à descendre
-		  piece.position = newPosition;
-	  
-		  return { piece: piece };
-		});
-	  }
-	  
-	  
-	  movePieceToBottom() {
-		this.setState((state) => {
-		  const piece = { ...state.piece };
-		  const newPosition = { ...piece.position };
-		  while (!this.isCollision(piece, newPosition.x, newPosition.y + 1)) {
-			newPosition.y += 1;
-		  }
-		  piece.position = newPosition;
-		  return { piece: piece };
-		});
-	  }
-	  
-	  rotateMatrix(matrix) {
-		const rows = matrix.length;
-		const columns = matrix[0].length;
-		const rotatedMatrix = [];
-		for (let i = 0; i < columns; i++) {
-		  rotatedMatrix[i] = Array(rows);
-		  for (let j = 0; j < rows; j++) {
-			rotatedMatrix[i][j] = matrix[rows - j - 1][i];
-		  }
+    return () => {
+      clearInterval(interval); // stop interval
+    };
+  }, []);
+
+  const renderGameOverScreen = () => (
+    <div className="game-over-screen">
+      <h1>Game Over</h1>
+      <button onClick={props.goHome}>Home</button>
+    </div>
+  );
+
+  const renderCells = () =>
+	props.board.map((row, y) =>
+		row.map((cell, x) => {
+		let active = false;
+		if (props.piece) {
+			active =
+			props.piece.position.y <= y &&
+			y < props.piece.position.y + props.piece.shape.length &&
+			props.piece.position.x <= x &&
+			x < props.piece.position.x + props.piece.shape[0].length &&
+			props.piece.shape[y - props.piece.position.y][x - props.piece.position.x];
 		}
-		return rotatedMatrix;
-	  }
-	  
-	  isCollision(piece, x, y) {
-		const { board } = this.state;
-		const shape = piece.shape;
-		const shapeHeight = shape.length;
-		const shapeWidth = shape[0].length;
-	  
-		for (let row = 0; row < shapeHeight; row++) {
-		  for (let col = 0; col < shapeWidth; col++) {
-			if (
-			  shape[row][col] !== 0 &&
-			  (y + row >= board.length ||
-				x + col < 0 ||
-				x + col >= board[0].length ||
-				board[y + row][x + col] !== 0)
-			) {
-			  return true;
-			}
-		  }
-		}
-	  
-		return false;
-	  }
 
-	  
-	  
+		return (
+			<div
+			key={`${y}-${x}`}
+			className={`cell ${cell !== 0 || active ? 'filled' : ''}`}
+			></div>
+		);
+		})
+	);
 
-	  tick() {
-		if (this.state.gameOver) {
-		  return;
-		}
-		if (this.state.nextPiece === undefined) {
-			this.randpiece();
-		}
-		this.setState((state) => {
-		  // Mettre à jour la position de la pièce active
-		  const piece = { ...state.piece };
-		  const newPosition = { ...piece.position };
-		  newPosition.y += 1;
-	  
-		  const bottomCollision = piece.shape.some((row, rowIndex) =>
-			row.some((cell, columnIndex) => {
-				if (cell === 0) {
-				// Cette cellule de la pièce est vide, donc elle ne peut pas causer de collision.
-				return false;
-				}
-				const boardX = newPosition.x + columnIndex;
-				const boardY = newPosition.y + rowIndex;
-				// Vérifie si la cellule de la pièce est hors du plateau ou si elle est sur une cellule déjà occupée.
-				return boardY >= state.board.length || state.board[boardY][boardX] !== 0;
-			})
-			);
 
+	const renderNextPiece = () => {
+		const boardw = Array.from({ length: 4 }, () => Array(4).fill(0));
 	  
-		  // Vérifier les collisions avec d'autres pièces
-		  const pieceCollision = piece.shape.some((row, y) =>
-			row.some((cell, x) => {
-			  if (cell === 0) return false;
-			  const boardX = newPosition.x + x;
-			  const boardY = newPosition.y + y;
-			  return (
-				boardY >= 0 &&
-				(boardY >= state.board.length || state.board[boardY][boardX] !== 0)
-			  );
-			})
-		  );
+		if (props.nextPiece.shape && Array.isArray(props.nextPiece.shape) && props.nextPiece.shape.length > 0) {
+		  const offsetX = Math.floor((boardw[0].length - props.nextPiece.shape[0].length) / 2);
+		  const offsetY = Math.floor((boardw.length - props.nextPiece.shape.length) / 2);
 	  
-		  if (bottomCollision || pieceCollision) {
-			// La pièce a atteint le bas ou a collisionné avec une autre pièce
-			const updatedBoard = [...state.board];
-			piece.shape.forEach((row, y) => {
-			  row.forEach((cell, x) => {
-				if (cell !== 0) {
-				  const boardX = piece.position.x + x;
-				  const boardY = piece.position.y + y;
-				  updatedBoard[boardY][boardX] = cell;
-				}
-			  });
-			});
-	  
-			const completedLines = [];
-			updatedBoard.forEach((row, y) => {
-			  if (row.every((cell) => cell !== 0)) {
-				completedLines.push(y);
+		  props.nextPiece.shape.forEach((row, rowIndex) => {
+			row.forEach((value, colIndex) => {
+			  if (value !== 0) {
+				boardw[rowIndex + offsetY][colIndex + offsetX] = value;
 			  }
 			});
-	  
-			if (completedLines.length > 0) {
-			  const newBoard = completedLines.reduce((acc, lineIndex) => {
-				acc.splice(lineIndex, 1);
-				acc.unshift(Array(10).fill(0));
-				return acc;
-			  }, updatedBoard);
-	  
-			  const score = state.score + calculateScore(completedLines.length);
-
-			  return {
-				board: newBoard,
-				piece: this.generateNewPiece(),
-				score: score,
-			  };
-			}
-	  
-			return {
-			  board: updatedBoard,
-			  piece: this.generateNewPiece(),
-			};
-		  }
-	  
-		  piece.position = newPosition;
-	  
-		  return { piece: piece };
-		});
-	  }
-	  
-	  randpiece() {
-		const pieceShapes = [
-			[[0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],   // Carré
-			[[0, 0, 0, 0],[1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],   // Ligne
-			[[0, 0, 0, 0],[0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]],   // T
-			[[0, 0, 0, 0],[0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]],   // S
-			[[0, 0, 0, 0],[1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]],   // Z
-			[[0, 0, 0, 0],[0, 1, 0, 0], [0, 1, 0, 0], [1, 1, 0, 0]],   // L inverse
-			[[0, 0, 0, 0],[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0]],   // L
-		  ];
-		  
-		  let shape = this.state.nextPiece ? this.state.nextPiece : pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
-		  const position = { x: 4, y: 0 };
-		
-		  let newPiece = {
-			shape: shape,
-			position: position
-		  };
-		
-		  let nextPiece = pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
-		  this.setState({nextPiece: nextPiece});
-		  return newPiece;
-		}
-	  
-	  generateNewPiece() {
-		if (this.state.gameOver) return null;
-	  
-		// Liste des différentes formes de pièces possibles
-		const pieceShapes = [
-			[[0, 0, 0, 0],[0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],   // Carré
-			[[0, 0, 0, 0],[1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],   // Ligne
-			[[0, 0, 0, 0],[0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]],   // T
-			[[0, 0, 0, 0],[0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]],   // S
-			[[0, 0, 0, 0],[1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]],   // Z
-			[[0, 0, 0, 0],[0, 1, 0, 0], [0, 1, 0, 0], [1, 1, 0, 0]],   // L inverse
-			[[0, 0, 0, 0],[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0]],   // L
-		  ];
-	  
-		let shape = this.state.nextPiece ? this.state.nextPiece : pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
-		const position = { x: 4, y: 0 };
-	  
-		let newPiece = {
-		  shape: shape,
-		  position: position
-		};
-	  
-		let nextPiece = pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
-	  
-		if (this.isCollision(newPiece, position.x, position.y)) { 
-		  console.log('Game Over. Restarting...');
-		  this.setState({
-			board: Array.from({ length: 20 }, () => Array(10).fill(0)),
-			gameOver: true, 
 		  });
-		  return null;
 		}
-	  
-		this.setState({nextPiece: nextPiece});
-		return newPiece;
-	  }
-	  
-  goHome() {
-	window.location.href = '/';
-  }
-  
-  
-
-  render() {
-	const { nextPiece } = this.state;
-	const boardw = Array.from({ length: 4 }, () => Array(4).fill(0));
-	
-	// Remplir le tableau avec la forme de la nextPiece en la centrant
-	if (nextPiece) {
-	  const offsetX = Math.floor((boardw[0].length - nextPiece[0].length) / 2);
-	  const offsetY = Math.floor((boardw.length - nextPiece.length) / 2);
-	
-	  nextPiece.forEach((row, rowIndex) => {
-		row.forEach((value, colIndex) => {
-		  if (value !== 0) {
-			boardw[rowIndex + offsetY][colIndex + offsetX] = value;
-		  }
-		});
-	  });
-	}
-	
-	
-	
-    if (this.state.gameOver) {
-      // Affichage du message de fin de partie
-      return (
-        <div className="board">
-          {/* Affichage du tableau */}
-          {this.state.board.map((row, y) =>
-            row.map((cell, x) => (
-              <div key={`${y}-${x}`} className={`cell ${cell !== 0 ? 'filled' : ''}`}></div>
-            ))
-          )}
-          {/* Affichage de l'écran de fin de partie */}
-          <div className="game-over-screen">
-            <h1>Game Over</h1>
-            <button onClick={this.goHome}>Home</button>
-          </div>
-        </div>
-      );
-    }
-
-    // Affichage du tableau de jeu
-    return (
-		<div className="game-container">
-      <div className="board">
-        {/* Affichage du tableau */}
-        {this.state.board.map((row, y) =>
-          row.map((cell, x) => {
-            // Vérifiez si la pièce active est sur cette cellule
-            const active =
-              this.state.piece.position.y <= y &&
-              y < this.state.piece.position.y + this.state.piece.shape.length &&
-              this.state.piece.position.x <= x &&
-              x < this.state.piece.position.x + this.state.piece.shape[0].length &&
-              this.state.piece.shape[y - this.state.piece.position.y][x - this.state.piece.position.x];
-
-            return (
-              <div
-                key={`${y}-${x}`}
-                className={`cell ${cell !== 0 || active ? 'filled' : ''}`}
-              ></div>
-            );
-          })
-        )}
-		</div>
-        {/* Affichage de la prochaine pièce */}
-		<div className="next-piece">
-		{boardw.map((row, y) => (
-			<div key={`row-${y}`} className="next-piece-row">
-			{row.map((cell, x) => (
-				<div
-				key={`cell-${y}-${x}`}
-				className={`next-piece-cell ${cell !== 0 ? 'filled' : ''}`}
-				></div>
-			))}
-			</div>
-		))}
-		</div>
 
 
+    return boardw.map((row, y) => (
+      <div key={`row-${y}`} className="next-piece-row">
+        {row.map((cell, x) => (
+          <div
+            key={`cell-${y}-${x}`}
+            className={`next-piece-cell ${cell !== 0 ? 'filled' : ''}`}
+          ></div>
+        ))}
       </div>
-    );
-  }
+    ));
+  };
+
+  return (
+    <div
+      className="game-container"
+      onKeyDown={handleKeyDown}
+      tabIndex="0"
+    >
+      <div className="board">
+        {renderCells()}
+      </div>
+      <div className="next-piece">
+        {renderNextPiece()}
+      </div>
+      {props.isGameOver && renderGameOverScreen()}
+    </div>
+  );
 }
 
-export default Board;
+const mapStateToProps = (state) => ({
+  board: state.board,
+  piece: state.piece,
+  nextPiece: state.nextPiece,
+  isGameOver: state.isGameOver,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  moveLeft: () => new Promise((resolve) => dispatch(moveLeft(resolve))),
+  moveRight: () => new Promise((resolve) => dispatch(moveRight(resolve))),
+  rotate: () => new Promise((resolve) => dispatch(rotate(resolve))),
+  moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
+  dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
+  generatePiece: () =>  new Promise((resolve) => dispatch(generatePiece(resolve))),
+  goHome: () => {
+    // Code pour renvoyer à la page d'accueil
+  },
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Board);

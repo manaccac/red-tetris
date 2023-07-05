@@ -23,7 +23,7 @@ export function calculateScore(completedLines) {
 	];
   
 	const shape = pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
-	const position = { x: 4, y: 0 };
+	const position = { x: 4, y: -1 }; // cqr le tick et fait passer deja a y +1 donc au moins on start a 0
   
 	return {
 	  shape: shape,
@@ -44,8 +44,12 @@ export function rotateMatrix(matrix) {
 	return rotatedMatrix;
   };
 
-export function isCollision(piece, x, y) {
-	const { board } = this.state;
+  export function isCollision(piece, x, y, board) {
+	if (!board || !piece || y === -1) {
+		if (x >= 9 || x <= 0)
+			return true;
+        return false;
+    }
 	const shape = piece.shape;
 	const shapeHeight = shape.length;
 	const shapeWidth = shape[0].length;
@@ -65,8 +69,8 @@ export function isCollision(piece, x, y) {
 	}
   
 	return false;
-  };
-
+  }
+  
   export function createEmptyBoard() {
 	const board = [];
 	for (let row = 0; row < 20; row++) {
