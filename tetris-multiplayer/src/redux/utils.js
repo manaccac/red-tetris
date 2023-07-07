@@ -51,6 +51,7 @@ export function rotateMatrix(matrix) {
         return false;
     }
 	const shape = piece.shape;
+	console.log("SHAPE ", shape);
 	const shapeHeight = shape.length;
 	const shapeWidth = shape[0].length;
   

@@ -2,43 +2,57 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece } from '../../redux/actions';
 
-function Board(props) {
-  const handleKeyDown = async (event) => {
-    if (props.isGameOver) {
-      return;
-    }
-	switch (event.key) {
-		case "ArrowLeft":
-		  await props.moveLeft(); // Attendre la fin du déplacement
-		  break;
-		case "ArrowRight":
-		  await props.moveRight(); // Attendre la fin du déplacement
-		  break;
-		case "ArrowUp":
-		  await props.rotate(); // Attendre la fin du déplacement
-		  break;
-		case "ArrowDown":
-		  await props.moveDown(); // Attendre la fin du déplacement
-		  break;
-		case " ":
-		  await props.dropPiece(); // Attendre la fin du déplacement
-		  break;
-		default:
-		  break;
-	  }
+const lastMove = {
+	ArrowLeft: 0,
+	ArrowRight: 0,
+	ArrowUp: 0,
+	ArrowDown: 0,
+	" ": 0,
   };
+  
+  const delay = 200; // Délai entre chaque déplacement
 
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      if (!props.isGameOver) {
-        await props.moveDown();
-      }
-    }, 500);
+function Board(props) {
+	const handleKeyDown = async (event) => {
+		if (props.isGameOver || Date.now() - lastMove[event.key] < delay) {
+		  return;
+		}
+		lastMove[event.key] = Date.now();
+	
+		switch (event.key) {
+		  case "ArrowLeft":
+			await props.moveLeft();
+			break;
+		  case "ArrowRight":
+			await props.moveRight();
+			break;
+		  case "ArrowUp":
+			await props.rotate();
+			break;
+		  case "ArrowDown":
+			await props.moveDown();
+			break;
+		  case " ":
+			await props.dropPiece();
+			break;
+		  default:
+			break;
+		}
+	  };
 
-    return () => {
-      clearInterval(interval); // stop interval
-    };
-  }, []);
+	  useEffect(() => {
+		window.addEventListener('keydown', handleKeyDown);
+		const interval = setInterval(async () => {
+		  if (!props.isGameOver) {
+			await props.moveDown();
+		  }
+		}, 500);
+	
+		return () => {
+		  window.removeEventListener('keydown', handleKeyDown);
+		  clearInterval(interval); // stop interval
+		};
+	  }, []);
 
   const renderGameOverScreen = () => (
     <div className="game-over-screen">
@@ -51,6 +65,13 @@ function Board(props) {
 	props.board.map((row, y) =>
 		row.map((cell, x) => {
 		let active = false;
+		if (props.piece === undefined || props.piece.position === undefined)
+			return (
+				<div
+				key={`${y}-${x}`}
+				className={`cell ${cell !== 0 || active ? 'filled' : ''}`}
+				></div>
+			);
 		if (props.piece) {
 			active =
 			props.piece.position.y <= y &&
