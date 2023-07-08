@@ -5,6 +5,8 @@ export const MOVE_DOWN = 'MOVE_DOWN';
 export const DROP_PIECE = 'DROP_PIECE';
 export const GENERATE_PIECE = 'GENERATE_PIECE';
 export const UPDATE_BOARD = 'UPDATE_BOARD';
+export const RESET_STATE = 'RESET_STATE';
+
 
 export function moveLeft(resolve) {
   return { type: MOVE_LEFT, resolve };
@@ -24,6 +26,10 @@ export function moveDown(resolve) {
 
 export function dropPiece(resolve) {
   return { type: DROP_PIECE, resolve };
+}
+
+export function resetState(resolve) {
+  return { type: RESET_STATE, resolve };
 }
 
 export function generatePiece() {

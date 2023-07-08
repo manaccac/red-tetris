@@ -168,6 +168,19 @@ import {
 		case 'UPDATE_BOARD':
 		  action.resolve();
 		  return { ...state, board: action.board };
+		case 'RESET_STATE':
+			console.log('Game Over. Restarting...');
+			action.resolve();
+			return {
+				piece: generateNewPiece(),
+				position: { x: 0, y: 0 },
+				rotation: 0,
+				board: createEmptyBoard(),
+				score: 0,
+				isGameOver: false,
+				nextPiece: generateNewPiece(),
+			};
+		  
 		default:
 		  return state;
 	  }

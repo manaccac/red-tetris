@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece } from '../../redux/actions';
+import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece, resetState } from '../../redux/actions';
+import { useNavigate } from 'react-router-dom';
 
 const lastMove = {
   ArrowLeft: 0,
@@ -12,7 +13,33 @@ const lastMove = {
 
 const delay = 40; // Délai entre chaque déplacement
 
+
+const mapStateToProps = (state) => ({
+	board: state.board,
+	piece: state.piece,
+	nextPiece: state.nextPiece,
+	isGameOver: state.isGameOver,
+  });
+  
+  const mapDispatchToProps = (dispatch) => ({
+	moveLeft: () => new Promise((resolve) => dispatch(moveLeft(resolve))),
+	moveRight: () => new Promise((resolve) => dispatch(moveRight(resolve))),
+	rotate: () => new Promise((resolve) => dispatch(rotate(resolve))),
+	moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
+	dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
+	generatePiece: () => new Promise((resolve) => dispatch(generatePiece(resolve))),
+	resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
+  });
+  
+
 function Board(props) {
+  let navigate = useNavigate(); // utilisez useNavigate ici au lieu de useHistory
+
+  const goHome = () => {
+	props.resetState();
+    navigate('/'); // utilisez navigate ici au lieu de history.push
+  };
+
   const handleKeyDown = async (event) => {
     try {
       if (props.isGameOver || Date.now() - lastMove[event.key] < delay) {
@@ -58,14 +85,14 @@ function Board(props) {
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      clearInterval(interval); // stop interval
+      clearInterval(interval);
     };
-  }, []);
+	}, [props.isGameOver]); 
 
   const renderGameOverScreen = () => (
     <div className="game-over-screen">
       <h1>Game Over</h1>
-      <button onClick={props.goHome}>Home</button>
+      <button onClick={goHome}>Home</button>
     </div>
   );
 
@@ -147,24 +174,5 @@ function Board(props) {
     </div>
   );
 }
-
-const mapStateToProps = (state) => ({
-  board: state.board,
-  piece: state.piece,
-  nextPiece: state.nextPiece,
-  isGameOver: state.isGameOver,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  moveLeft: () => new Promise((resolve) => dispatch(moveLeft(resolve))),
-  moveRight: () => new Promise((resolve) => dispatch(moveRight(resolve))),
-  rotate: () => new Promise((resolve) => dispatch(rotate(resolve))),
-  moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
-  dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
-  generatePiece: () => new Promise((resolve) => dispatch(generatePiece(resolve))),
-  goHome: () => {
-    // Code pour renvoyer à la page d'accueil
-  },
-});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);
