@@ -97,33 +97,31 @@ function Board(props) {
   );
 
   const renderCells = () =>
-    props.board.map((row, y) =>
-      row.map((cell, x) => {
-        let active = false;
-        if (props.piece === undefined || props.piece.position === undefined)
-          return (
-            <div
-              key={`${y}-${x}`}
-              className={`cell ${cell !== 0 || active ? 'filled' : ''}`}
-            ></div>
-          );
-        if (props.piece) {
-          active =
-            props.piece.position.y <= y &&
-            y < props.piece.position.y + props.piece.shape.length &&
-            props.piece.position.x <= x &&
-            x < props.piece.position.x + props.piece.shape[0].length &&
-            props.piece.shape[y - props.piece.position.y][x - props.piece.position.x];
+  props.board.map((row, y) =>
+    row.map((cell, x) => {
+      let active = false;
+      let activePieceId = 0;
+      if (props.piece) {
+        active =
+          props.piece.position.y <= y &&
+          y < props.piece.position.y + props.piece.shape.length &&
+          props.piece.position.x <= x &&
+          x < props.piece.position.x + props.piece.shape[0].length &&
+          props.piece.shape[y - props.piece.position.y][x - props.piece.position.x];
+        if (active) {
+          activePieceId = props.piece.id;
         }
+      }
 
-        return (
-          <div
-            key={`${y}-${x}`}
-            className={`cell ${cell !== 0 || active ? 'filled' : ''}`}
-          ></div>
-        );
-      })
-    );
+      return (
+        <div
+          key={`${y}-${x}`}
+          className={`cell ${cell !== 0 || active ? 'filled' : ''} id-${cell !== 0 ? cell : activePieceId}`}
+        ></div>
+      );
+    })
+  );
+
 
 
   const renderNextPiece = () => {

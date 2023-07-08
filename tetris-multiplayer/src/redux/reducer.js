@@ -74,7 +74,7 @@ import {
 				if (cell !== 0) {
 				  const boardX = piece.position.x + x;
 				  const boardY = piece.position.y + y;
-				  updatedBoard[boardY][boardX] = cell;
+				  updatedBoard[boardY][boardX] = piece.id; 
 				}
 			  });
 			});
@@ -138,19 +138,23 @@ import {
 			action.resolve();
 			return null;
 		  }
-		  const pieceShapes = [
-			[[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]], // Carré
-			[[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], // Ligne
-			[[0, 0, 0, 0], [0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]], // T
-			[[0, 0, 0, 0], [0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]], // S
-			[[0, 0, 0, 0], [1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]], // Z
-			[[0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0]], // L inverse
-			[[0, 0, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0]], // L
-		  ];
+		const pieceShapes = [
+			{shape: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]], id: 1}, // Carré
+			{shape: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], id: 2}, // Ligne
+			{shape: [[0, 0, 0, 0], [0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]], id: 3}, // T
+			{shape: [[0, 0, 0, 0], [0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]], id: 4}, // S
+			{shape: [[0, 0, 0, 0], [1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]], id: 5}, // Z
+			{shape: [[0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0]], id: 6}, // L inverse
+			{shape: [[0, 0, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0]], id: 7}, // L
+		];
+  
+
+  
 		  let shape = state.nextPiece ? state.nextPiece : pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
 		  const position = { x: 4, y: 0 };
 		  let generatedPiece = {
 			shape: shape,
+			id: shape.id,
 			position: position,
 		  };
 		  let nextPiece = pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
