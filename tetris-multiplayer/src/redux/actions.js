@@ -6,6 +6,7 @@ export const DROP_PIECE = 'DROP_PIECE';
 export const GENERATE_PIECE = 'GENERATE_PIECE';
 export const UPDATE_BOARD = 'UPDATE_BOARD';
 export const RESET_STATE = 'RESET_STATE';
+export const ADD_INDESTRUCTIBLE_LINE = 'ADD_INDESTRUCTIBLE_LINE';
 
 
 export function moveLeft(resolve) {
@@ -39,6 +40,11 @@ export function generatePiece() {
 	  });
 	};
   }
+
 export function updateBoard(board) {
   return { type: UPDATE_BOARD, board };
+}
+
+export function addIndestructibleLine() {
+	  return { type: ADD_INDESTRUCTIBLE_LINE };
 }

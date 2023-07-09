@@ -1,3 +1,4 @@
+import { addIndestructibleLine } from './actions';
 import {
 	isCollision,
 	rotateMatrix,
@@ -93,24 +94,24 @@ import {
 			  }
 			});
 			if (completedLines.length > 0) {
-			  completedLines.reduce((acc, lineIndex) => {
-				acc.splice(lineIndex, 1);
-				acc.unshift(Array(10).fill(0));
-				action.resolve();
-				return acc;
-			  }, updatedBoard);
-			  const score = state.score + calculateScore(completedLines.length);
-			  const newPiece = state.nextPiece;
-			  const nextPiece = generateNewPiece();
-			  action.resolve();
-			  return {
-				...state,
-				board: updatedBoard,
-				piece: newPiece,
-				nextPiece: nextPiece,
-				score: score,
-			  };
-			}
+				let completedLinesWithoutIndestructible = completedLines.filter(lineIndex => !updatedBoard[lineIndex].includes(-1));
+				completedLinesWithoutIndestructible.reduce((acc, lineIndex) => {
+				  acc.splice(lineIndex, 1);
+				  acc.unshift(Array(10).fill(0));
+				  return acc;
+				}, updatedBoard);
+				const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
+				const newPiece = state.nextPiece;
+				const nextPiece = generateNewPiece();
+				return {
+				  ...state,
+				  board: updatedBoard,
+				  piece: newPiece,
+				  nextPiece: nextPiece,
+				  score: score,
+				};
+			  }
+			  
 			const newPiece = state.nextPiece;
 			const nextPiece = generateNewPiece();
 			action.resolve();
@@ -184,7 +185,15 @@ import {
 				isGameOver: false,
 				nextPiece: generateNewPiece(),
 			};
-		  
+		case 'ADD_INDESTRUCTIBLE_LINE':
+			console.log('Adding indestructible line...');
+			let newBoard = [...state.board];
+			newBoard.shift(); // remove the first line from the top
+			newBoard.push(new Array(10).fill(-1)); // add an indestructible line at the bottom
+			return {
+			  ...state,
+			  board: newBoard,
+			};
 		default:
 		  return state;
 	  }

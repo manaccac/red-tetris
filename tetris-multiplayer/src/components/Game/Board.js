@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece, resetState } from '../../redux/actions';
+import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece, resetState, addIndestructibleLine } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 
 const lastMove = {
@@ -28,6 +28,7 @@ const mapStateToProps = (state) => ({
 	moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
 	dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
 	generatePiece: () => new Promise((resolve) => dispatch(generatePiece(resolve))),
+	addIndestructibleLine: () => dispatch(addIndestructibleLine()),
 	resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
   });
   
@@ -61,6 +62,7 @@ function Board(props) {
           await props.moveDown();
           break;
         case " ":
+		  props.addIndestructibleLine();
           await props.dropPiece();
           break;
         default:
