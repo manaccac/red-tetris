@@ -28,7 +28,7 @@ const mapStateToProps = (state) => ({
 	moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
 	dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
 	generatePiece: () => new Promise((resolve) => dispatch(generatePiece(resolve))),
-	addIndestructibleLine: () => dispatch(addIndestructibleLine()),
+	addIndestructibleLine: () => new Promise((resolve) => dispatch(addIndestructibleLine(resolve))),
 	resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
   });
   
@@ -62,8 +62,9 @@ function Board(props) {
           await props.moveDown();
           break;
         case " ":
-		  props.addIndestructibleLine();
+		  await props.addIndestructibleLine();
           await props.dropPiece();
+
           break;
         default:
           break;

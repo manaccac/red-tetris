@@ -45,6 +45,6 @@ export function updateBoard(board) {
   return { type: UPDATE_BOARD, board };
 }
 
-export function addIndestructibleLine() {
-	  return { type: ADD_INDESTRUCTIBLE_LINE };
+export function addIndestructibleLine(resolve) {
+	return { type: ADD_INDESTRUCTIBLE_LINE, resolve};
 }

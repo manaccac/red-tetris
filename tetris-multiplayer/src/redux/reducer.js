@@ -1,4 +1,3 @@
-import { addIndestructibleLine } from './actions';
 import {
 	isCollision,
 	rotateMatrix,
@@ -103,6 +102,8 @@ import {
 				const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
 				const newPiece = state.nextPiece;
 				const nextPiece = generateNewPiece();
+
+				action.resolve();
 				return {
 				  ...state,
 				  board: updatedBoard,
@@ -190,6 +191,8 @@ import {
 			let newBoard = [...state.board];
 			newBoard.shift(); // remove the first line from the top
 			newBoard.push(new Array(10).fill(-1)); // add an indestructible line at the bottom
+			action.resolve();
+			console.log(newBoard);
 			return {
 			  ...state,
 			  board: newBoard,
