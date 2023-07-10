@@ -14,6 +14,7 @@ import {
 	score: 0,
 	isGameOver: false,
 	nextPiece: generateNewPiece(),
+	gameStart: false,
   };
   
   function gameReducer(state = initialState, action) {
@@ -174,25 +175,22 @@ import {
 		case 'UPDATE_BOARD':
 		  action.resolve();
 		  return { ...state, board: action.board };
-		case 'RESET_STATE':
-			console.log('Game Over. Restarting...');
-			action.resolve();
+		  case 'RESET_STATE':
 			return {
-				piece: generateNewPiece(),
-				position: { x: 0, y: 0 },
-				rotation: 0,
-				board: createEmptyBoard(),
-				score: 0,
-				isGameOver: false,
+				...initialState,
+				board: Array.from({ length: 20 }, () => Array(10).fill(0)),
 				nextPiece: generateNewPiece(),
+				piece: generateNewPiece(),
 			};
+		
 		case 'ADD_INDESTRUCTIBLE_LINE':
-			console.log('Adding indestructible line...');
+			console.log('Adding indestructible lines...');
 			let newBoard = [...state.board];
-			newBoard.shift(); // remove the first line from the top
-			newBoard.push(new Array(10).fill(-1)); // add an indestructible line at the bottom
+			for (let i = 0; i < action.x; i++) {
+			  newBoard.shift(); // remove the first line from the top
+			  newBoard.push(new Array(10).fill(-1)); // add an indestructible line at the bottom
+			}
 			action.resolve();
-			console.log(newBoard);
 			return {
 			  ...state,
 			  board: newBoard,

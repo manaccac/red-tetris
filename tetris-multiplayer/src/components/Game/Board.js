@@ -1,7 +1,42 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece, resetState, addIndestructibleLine } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
+
+function WaitingScreen() {
+	return (
+	  <div className="overlay">
+		<div className="message">
+		  <h1>En attente d'un adversaire...</h1>
+		  <div className="loading-animation"></div>
+		</div>
+	  </div>
+	);
+  }
+  
+  function CountdownScreen({ countdown }) {
+	return (
+	  <div className="overlay">
+		<div className="message">
+		  <h1>Le jeu commence dans...</h1>
+		  <div className="countdown">{countdown}</div>
+		</div>
+	  </div>
+	);
+  }
+  
+  function GameOverScreen({onGoHome, onRestart }) {
+	return (
+	  <div className="overlay">
+		<div className="message">
+		  <h1>Partie terminée</h1>
+		  <button onClick={onGoHome}>Retour à la page d'accueil.</button>
+		  <button onClick={onRestart}>Recommencer</button>
+		</div>
+	  </div>
+	);
+  }
+  
 
 const lastMove = {
   ArrowLeft: 0,
@@ -19,6 +54,7 @@ const mapStateToProps = (state) => ({
 	piece: state.piece,
 	nextPiece: state.nextPiece,
 	isGameOver: state.isGameOver,
+	gameStart: state.gameStart,
   });
   
   const mapDispatchToProps = (dispatch) => ({
@@ -28,21 +64,32 @@ const mapStateToProps = (state) => ({
 	moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
 	dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
 	generatePiece: () => new Promise((resolve) => dispatch(generatePiece(resolve))),
-	addIndestructibleLine: () => new Promise((resolve) => dispatch(addIndestructibleLine(resolve))),
+	addIndestructibleLine: (x) => new Promise((resolve) => dispatch(addIndestructibleLine(x, resolve))),
 	resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
   });
-  
 
 function Board(props) {
-  let navigate = useNavigate(); // utilisez useNavigate ici au lieu de useHistory
+  let navigate = useNavigate();
+  const [countdown, setCountdown] = useState(5);
+  const [gameRunning, setGameRunning] = useState(false);
+
+
 
   const goHome = () => {
 	props.resetState();
-    navigate('/'); // utilisez navigate ici au lieu de history.push
+    navigate('/');
   };
+  const restartGame = () => {
+	props.resetState().then(() => {
+	  props.generatePiece();
+	});
+  };
+  
 
   const handleKeyDown = async (event) => {
     try {
+	  if (!gameRunning) return;
+
       if (props.isGameOver || Date.now() - lastMove[event.key] < delay) {
         return;
       }
@@ -62,7 +109,7 @@ function Board(props) {
           await props.moveDown();
           break;
         case " ":
-		  await props.addIndestructibleLine();
+		  await props.addIndestructibleLine(1);
           await props.dropPiece();
 
           break;
@@ -75,14 +122,38 @@ function Board(props) {
   };
 
   useEffect(() => {
+    let countdownInterval;
+  
+    if (props.gameStart) {
+      countdownInterval = setInterval(() => {
+        setCountdown((prevCountdown) => {
+          if (prevCountdown <= 1) {
+            clearInterval(countdownInterval);
+            setGameRunning(true);
+            return 5;
+          } else {
+            return prevCountdown - 1;
+          }
+        });
+      }, 1000); 
+    } else {
+      setGameRunning(false);
+    }
+  
+    return () => {
+      clearInterval(countdownInterval);
+    };
+  }, [props.gameStart]);
+
+  useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     const interval = setInterval(async () => {
       try {
-        if (!props.isGameOver) {
+        if (!props.isGameOver && gameRunning) {
           await props.moveDown();
         }
       } catch (error) {
-        console.error('Erreur lors du déplacement vers le bas automatique :', error);
+        console.error('Error while automatically moving down:', error);
       }
     }, 500);
 
@@ -90,14 +161,7 @@ function Board(props) {
       window.removeEventListener('keydown', handleKeyDown);
       clearInterval(interval);
     };
-	}, [props.isGameOver]); 
-
-  const renderGameOverScreen = () => (
-    <div className="game-over-screen">
-      <h1>Game Over</h1>
-      <button onClick={goHome}>Home</button>
-    </div>
-  );
+  }, [props.isGameOver, gameRunning]);
 
   const renderCells = () =>
   props.board.map((row, y) =>
@@ -171,8 +235,13 @@ function Board(props) {
       <div className="next-piece">
         {renderNextPiece()}
       </div>
-      {props.isGameOver && renderGameOverScreen()}
-    </div>
+      {props.isGameOver && <GameOverScreen onGoHome={goHome} onRestart={restartGame} />}
+      {!props.isGameOver && !props.gameStart && <WaitingScreen />}
+      {!props.isGameOver && props.gameStart && !gameRunning && (
+        <CountdownScreen countdown={countdown} />)}
+	</div>		
+
+
   );
 }
 
