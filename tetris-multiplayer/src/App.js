@@ -27,8 +27,7 @@ function App() {
     }
 
     function onFooEvent() {
-      console.log('wtf');
-      console.log('previous = ');
+
     }
 
     socket.on('connect', onConnect);

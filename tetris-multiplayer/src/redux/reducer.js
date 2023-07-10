@@ -14,6 +14,7 @@ import {
 	score: 0,
 	isGameOver: false,
 	nextPiece: generateNewPiece(),
+	gameStart: false,
   };
   
   function gameReducer(state = initialState, action) {
@@ -74,7 +75,7 @@ import {
 				if (cell !== 0) {
 				  const boardX = piece.position.x + x;
 				  const boardY = piece.position.y + y;
-				  updatedBoard[boardY][boardX] = cell;
+				  updatedBoard[boardY][boardX] = piece.id; 
 				}
 			  });
 			});
@@ -93,24 +94,26 @@ import {
 			  }
 			});
 			if (completedLines.length > 0) {
-			  completedLines.reduce((acc, lineIndex) => {
-				acc.splice(lineIndex, 1);
-				acc.unshift(Array(10).fill(0));
+				let completedLinesWithoutIndestructible = completedLines.filter(lineIndex => !updatedBoard[lineIndex].includes(-1));
+				completedLinesWithoutIndestructible.reduce((acc, lineIndex) => {
+				  acc.splice(lineIndex, 1);
+				  acc.unshift(Array(10).fill(0));
+				  return acc;
+				}, updatedBoard);
+				const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
+				const newPiece = state.nextPiece;
+				const nextPiece = generateNewPiece();
+
 				action.resolve();
-				return acc;
-			  }, updatedBoard);
-			  const score = state.score + calculateScore(completedLines.length);
-			  const newPiece = state.nextPiece;
-			  const nextPiece = generateNewPiece();
-			  action.resolve();
-			  return {
-				...state,
-				board: updatedBoard,
-				piece: newPiece,
-				nextPiece: nextPiece,
-				score: score,
-			  };
-			}
+				return {
+				  ...state,
+				  board: updatedBoard,
+				  piece: newPiece,
+				  nextPiece: nextPiece,
+				  score: score,
+				};
+			  }
+			  
 			const newPiece = state.nextPiece;
 			const nextPiece = generateNewPiece();
 			action.resolve();
@@ -138,19 +141,23 @@ import {
 			action.resolve();
 			return null;
 		  }
-		  const pieceShapes = [
-			[[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]], // Carré
-			[[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], // Ligne
-			[[0, 0, 0, 0], [0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]], // T
-			[[0, 0, 0, 0], [0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]], // S
-			[[0, 0, 0, 0], [1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]], // Z
-			[[0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0]], // L inverse
-			[[0, 0, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0]], // L
-		  ];
+		const pieceShapes = [
+			{shape: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]], id: 1}, // Carré
+			{shape: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], id: 2}, // Ligne
+			{shape: [[0, 0, 0, 0], [0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]], id: 3}, // T
+			{shape: [[0, 0, 0, 0], [0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]], id: 4}, // S
+			{shape: [[0, 0, 0, 0], [1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]], id: 5}, // Z
+			{shape: [[0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0]], id: 6}, // L inverse
+			{shape: [[0, 0, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0]], id: 7}, // L
+		];
+  
+
+  
 		  let shape = state.nextPiece ? state.nextPiece : pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
 		  const position = { x: 4, y: 0 };
 		  let generatedPiece = {
 			shape: shape,
+			id: shape.id,
 			position: position,
 		  };
 		  let nextPiece = pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
@@ -168,6 +175,26 @@ import {
 		case 'UPDATE_BOARD':
 		  action.resolve();
 		  return { ...state, board: action.board };
+		  case 'RESET_STATE':
+			return {
+				...initialState,
+				board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+				nextPiece: generateNewPiece(),
+				piece: generateNewPiece(),
+			};
+		
+		case 'ADD_INDESTRUCTIBLE_LINE':
+			console.log('Adding indestructible lines...');
+			let newBoard = [...state.board];
+			for (let i = 0; i < action.x; i++) {
+			  newBoard.shift(); // remove the first line from the top
+			  newBoard.push(new Array(10).fill(-1)); // add an indestructible line at the bottom
+			}
+			action.resolve();
+			return {
+			  ...state,
+			  board: newBoard,
+			};
 		default:
 		  return state;
 	  }

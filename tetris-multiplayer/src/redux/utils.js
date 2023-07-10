@@ -19,20 +19,21 @@ export function calculateScore(completedLines) {
   export const generateNewPiece = () => {
 	try {
 	  const pieceShapes = [
-		[[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]], // Carré
-		[[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], // Ligne
-		[[0, 0, 0, 0], [0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]], // T
-		[[0, 0, 0, 0], [0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]], // S
-		[[0, 0, 0, 0], [1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]], // Z
-		[[0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0]], // L inverse
-		[[0, 0, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0]], // L
+		{shape: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]], id: 1}, // Carré
+		{shape: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], id: 2}, // Ligne
+		{shape: [[0, 0, 0, 0], [0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]], id: 3}, // T
+		{shape: [[0, 0, 0, 0], [0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]], id: 4}, // S
+		{shape: [[0, 0, 0, 0], [1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]], id: 5}, // Z
+		{shape: [[0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0]], id: 6}, // L inverse
+		{shape: [[0, 0, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0]], id: 7}, // L
 	  ];
   
-	  const shape = pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
+	  const newPiece = pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
 	  const position = { x: 4, y: -1 };
   
 	  return {
-		shape: shape,
+		shape: newPiece.shape,
+		id: newPiece.id,
 		position: position,
 	  };
 	} catch (error) {
@@ -40,6 +41,7 @@ export function calculateScore(completedLines) {
 	  return null;
 	}
   };
+  
   
   export function rotateMatrix(matrix) {
 	try {
