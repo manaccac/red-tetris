@@ -15,6 +15,7 @@ import {
 	isGameOver: false,
 	nextPiece: generateNewPiece(),
 	gameStart: false,
+	awaitingOpponent: false,
   };
   
   function gameReducer(state = initialState, action) {
@@ -194,6 +195,20 @@ import {
 			return {
 			  ...state,
 			  board: newBoard,
+			};
+		case 'GAME_STARTED':
+			if (state.awaitingOpponent) {
+			  return {
+				...state,
+				gameStart: true,
+			  };
+			} else {
+			  return state;
+			}
+		case 'SET_AWAITING_OPPONENT':
+			return {
+				...state,
+				awaitingOpponent: action.payload,
 			};
 		default:
 		  return state;
