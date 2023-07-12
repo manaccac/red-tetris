@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece, resetState, addIndestructibleLine } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
+import Cookies from 'js-cookie';
 
 function WaitingScreen() {
   return (
@@ -70,6 +71,8 @@ const mapStateToProps = (state) => ({
   });
 
 function Board(props) {
+  const username = Cookies.get('username');
+
   let navigate = useNavigate();
   const [countdown, setCountdown] = useState(5);
   const [gameRunning, setGameRunning] = useState(false);
@@ -126,7 +129,7 @@ function Board(props) {
   useEffect(() => {
     let countdownInterval;
   
-    if (props.gameStart) {
+    if (gameStarted) {
       countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => {
           if (prevCountdown <= 1) {
@@ -145,7 +148,7 @@ function Board(props) {
     return () => {
       clearInterval(countdownInterval);
     };
-  }, [props.gameStart]);
+  }, [gameStarted]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -168,7 +171,7 @@ function Board(props) {
   useEffect(() => {
     console.log('weird useEffect called twice ?');
     socket.on('gameStart', () => setGameStarted(true));
-    socket.emit('lookingForAGame', 'userNameTototototo');
+    socket.emit('lookingForAGame', username);
     return () => {
       socket.off('gameStart', () => setGameStarted(true));
     };
@@ -246,8 +249,8 @@ function Board(props) {
         {renderNextPiece()}
       </div>
       {props.isGameOver && <GameOverScreen onGoHome={goHome} onRestart={restartGame} />}
-      {!props.isGameOver && !props.gameStart && <WaitingScreen />}
-      {!props.isGameOver && props.gameStart && !gameRunning && (
+      {!props.isGameOver && !gameStarted && <WaitingScreen />}
+      {!props.isGameOver && gameStarted && !gameRunning && (
         <CountdownScreen countdown={countdown} />)}
 	</div>		
 

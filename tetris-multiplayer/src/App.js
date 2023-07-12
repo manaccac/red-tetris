@@ -7,12 +7,14 @@ import { socket } from './socket';
 import Cookies from 'js-cookie';
 import './App.css';
 
+console.log('username = ', Cookies.get('username'));
+
 function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [username, setUsername] = useState('');
-  console.log('username = ', username);
 
   useEffect(() => {
+	console.log('useeffect');
     const cookieUsername = Cookies.get('username');
     if (cookieUsername) {
       setUsername(cookieUsername);
