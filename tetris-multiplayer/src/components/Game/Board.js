@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece, resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent } from '../../redux/actions';
+import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece,
+	resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
 import Cookies from 'js-cookie';
@@ -70,7 +71,7 @@ const mapStateToProps = (state) => ({
 	resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
 	gameStarted: () => dispatch(gameStarted()),
 	setAwaitingOpponent: (awaiting) => dispatch(setAwaitingOpponent(awaiting)),
-
+	updateOpponentBoard: (board) => dispatch(updateOpponentBoard(board)),
   });
 
 function Board(props) {
@@ -84,11 +85,13 @@ function Board(props) {
 
   const goHome = () => {
 	props.resetState();
+	props.setAwaitingOpponent(false);
     navigate('/');
   };
   const restartGame = () => {
 	props.resetState().then(() => {
 	  props.generatePiece();
+	  props.setAwaitingOpponent(false);
 	});
   };
   
@@ -164,6 +167,10 @@ function Board(props) {
       }
     }, 500);
 
+	socket.on('opponentBoardData', (opponentBoardData) => {
+		props.updateOpponentBoard(opponentBoardData);
+	}); // ici a mettre le board
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       clearInterval(interval);
@@ -171,16 +178,12 @@ function Board(props) {
   }, [props.isGameOver, gameRunning]);
 
   useEffect(() => {
-	console.log('weird useEffect called twice ?');
 	socket.on('gameStart', () => props.gameStarted());
 	socket.emit('lookingForAGame', username);
-	console.log(props.gameStart);
   
-	// Définir awaitingOpponent sur true ici
 	props.setAwaitingOpponent(true);
   
 	return () => {
-	  console.log(props.gameStart);
 	  socket.off('gameStart', () => props.gameStarted());
 	};
   }, []);

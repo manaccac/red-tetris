@@ -16,6 +16,8 @@ import {
 	nextPiece: generateNewPiece(),
 	gameStart: false,
 	awaitingOpponent: false,
+	opponentBoard: [],
+
   };
   
   function gameReducer(state = initialState, action) {
@@ -209,6 +211,11 @@ import {
 			return {
 				...state,
 				awaitingOpponent: action.payload,
+			};
+		case 'UPDATE_OPPONENT_BOARD':
+			return {
+			  ...state,
+			  opponentBoard: action.payload,
 			};
 		default:
 		  return state;

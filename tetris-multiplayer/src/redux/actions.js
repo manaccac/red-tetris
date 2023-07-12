@@ -9,7 +9,7 @@ export const RESET_STATE = 'RESET_STATE';
 export const ADD_INDESTRUCTIBLE_LINE = 'ADD_INDESTRUCTIBLE_LINE';
 export const GAME_STARTED = 'GAME_STARTED';
 export const SET_AWAITING_OPPONENT = 'SET_AWAITING_OPPONENT';
-
+export const UPDATE_OPPONENT_BOARD = 'UPDATE_OPPONENT_BOARD';
 
 
 export function moveLeft(resolve) {
@@ -60,3 +60,9 @@ export const setAwaitingOpponent = (awaiting) => ({
 	type: SET_AWAITING_OPPONENT,
 	payload: awaiting,
 });
+
+export const updateOpponentBoard = (board) => ({
+	type: UPDATE_OPPONENT_BOARD,
+	payload: board,
+  });
+  
