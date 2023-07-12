@@ -2,41 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece, resetState, addIndestructibleLine } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
+import { socket } from '../../socket';
 
 function WaitingScreen() {
-	return (
-	  <div className="overlay">
-		<div className="message">
-		  <h1>En attente d'un adversaire...</h1>
-		  <div className="loading-animation"></div>
-		</div>
-	  </div>
-	);
-  }
-  
-  function CountdownScreen({ countdown }) {
-	return (
-	  <div className="overlay">
-		<div className="message">
-		  <h1>Le jeu commence dans...</h1>
-		  <div className="countdown">{countdown}</div>
-		</div>
-	  </div>
-	);
-  }
-  
-  function GameOverScreen({onGoHome, onRestart }) {
-	return (
-	  <div className="overlay">
-		<div className="message">
-		  <h1>Partie terminée</h1>
-		  <button onClick={onGoHome}>Retour à la page d'accueil.</button>
-		  <button onClick={onRestart}>Recommencer</button>
-		</div>
-	  </div>
-	);
-  }
-  
+  return (
+    <div className="overlay">
+      <div className="message">
+        <h1>En attente d'un adversaire...</h1>
+        <div className="loading-animation"></div>
+      </div>
+    </div>
+  );
+}
+
+function CountdownScreen({ countdown }) {
+  return (
+    <div className="overlay">
+      <div className="message">
+        <h1>Le jeu commence dans...</h1>
+        <div className="countdown">{countdown}</div>
+      </div>
+    </div>
+  );
+}
+
+function GameOverScreen({ onGoHome, onRestart }) {
+  return (
+    <div className="overlay">
+      <div className="message">
+        <h1>Partie terminée</h1>
+        <button onClick={onGoHome}>Retour à la page d'accueil.</button>
+        <button onClick={onRestart}>Recommencer</button>
+      </div>
+    </div>
+  );
+}
+
 
 const lastMove = {
   ArrowLeft: 0,
@@ -72,6 +73,7 @@ function Board(props) {
   let navigate = useNavigate();
   const [countdown, setCountdown] = useState(5);
   const [gameRunning, setGameRunning] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
 
 
 
@@ -163,6 +165,15 @@ function Board(props) {
     };
   }, [props.isGameOver, gameRunning]);
 
+  useEffect(() => {
+    console.log('weird useEffect called twice ?');
+    socket.on('gameStart', () => setGameStarted(true));
+    socket.emit('lookingForAGame', 'userNameTototototo');
+    return () => {
+      socket.off('gameStart', () => setGameStarted(true));
+    };
+  }, []);
+
   const renderCells = () =>
   props.board.map((row, y) =>
     row.map((cell, x) => {
@@ -188,7 +199,6 @@ function Board(props) {
       );
     })
   );
-
 
 
   const renderNextPiece = () => {
