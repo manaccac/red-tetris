@@ -16,7 +16,7 @@ import {
 	nextPiece: generateNewPiece(),
 	gameStart: false,
 	awaitingOpponent: false,
-	opponentBoard: [],
+	opponentBoard: createEmptyBoard(),
 
   };
   
@@ -104,6 +104,7 @@ import {
 				  return acc;
 				}, updatedBoard);
 				const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
+
 				const newPiece = state.nextPiece;
 				const nextPiece = generateNewPiece();
 
@@ -114,6 +115,7 @@ import {
 				  piece: newPiece,
 				  nextPiece: nextPiece,
 				  score: score,
+				  opponentBoard: updatedBoard,
 				};
 			  }
 			  
@@ -125,6 +127,7 @@ import {
 			  board: updatedBoard,
 			  piece: newPiece,
 			  nextPiece: nextPiece,
+			  opponentBoard: updatedBoard,
 			};
 		  }
 		  piece.position = newPosition;

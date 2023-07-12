@@ -58,6 +58,7 @@ const mapStateToProps = (state) => ({
 	nextPiece: state.nextPiece,
 	isGameOver: state.isGameOver,
 	gameStart: state.gameStart,
+	opponentBoard: state.opponentBoard
   });
   
   const mapDispatchToProps = (dispatch) => ({
@@ -250,6 +251,22 @@ function Board(props) {
     ));
   };
 
+  const renderOpponentBoard = () => {
+	console.log(props.opponentBoard);
+	if (props.opponentBoard && Array.isArray(props.opponentBoard) && props.opponentBoard.length > 0) {
+	  return props.opponentBoard.flatMap((row, y) =>
+		row.map((cell, x) => (
+		  <div
+			key={`cell-${y}-${x}`}
+			className={`opponent-board-cell ${cell !== 0 ? 'filled' : ''}`}
+		  ></div>
+		))
+	  );
+	} else {
+	  return null;
+	}
+  };
+  
   return (
     <div
       className="game-container"
@@ -262,6 +279,10 @@ function Board(props) {
       <div className="next-piece">
         {renderNextPiece()}
       </div>
+	  <div className="opponent-board">
+		{renderOpponentBoard()}
+	  </div>
+
       {props.isGameOver && <GameOverScreen onGoHome={goHome} onRestart={restartGame} />}
       {!props.isGameOver && !props.gameStart && <WaitingScreen />}
       {!props.isGameOver && props.gameStart && !gameRunning && (
