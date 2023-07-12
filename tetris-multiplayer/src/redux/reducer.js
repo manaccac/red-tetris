@@ -14,7 +14,7 @@ import {
 	score: 0,
 	isGameOver: false,
 	nextPiece: generateNewPiece(),
-	gameStart: false,
+	gameStart: true,
   };
   
   function gameReducer(state = initialState, action) {
