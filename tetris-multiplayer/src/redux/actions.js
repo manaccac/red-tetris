@@ -10,6 +10,7 @@ export const ADD_INDESTRUCTIBLE_LINE = 'ADD_INDESTRUCTIBLE_LINE';
 export const GAME_STARTED = 'GAME_STARTED';
 export const SET_AWAITING_OPPONENT = 'SET_AWAITING_OPPONENT';
 export const UPDATE_OPPONENT_BOARD = 'UPDATE_OPPONENT_BOARD';
+export const IS_VICTORY = 'IS_VICTORY';
 
 
 export function moveLeft(resolve) {
@@ -37,6 +38,7 @@ export function resetState(resolve) {
 }
 
 export function generatePiece() {
+	console.log('generatePiece');
 	return (dispatch) => {
 	  return new Promise((resolve) => {
 		dispatch({ type: GENERATE_PIECE, resolve });
@@ -64,5 +66,9 @@ export const setAwaitingOpponent = (awaiting) => ({
 export const updateOpponentBoard = (board) => ({
 	type: UPDATE_OPPONENT_BOARD,
 	payload: board,
-  });
-  
+});
+
+export const setIsVictory = (status) => ({
+	type: IS_VICTORY,
+	payload: status
+});

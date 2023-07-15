@@ -1,3 +1,4 @@
+import { socket } from '../socket';
 import {
 	isCollision,
 	rotateMatrix,
@@ -17,7 +18,7 @@ import {
 	gameStart: false,
 	awaitingOpponent: false,
 	opponentBoard: createEmptyBoard(),
-
+	isGameWon: undefined,
   };
   
   function gameReducer(state = initialState, action) {
@@ -68,11 +69,13 @@ import {
 			action.resolve();
 			return state;
 		  }
+		  socket.emit('updateBoard', state.board);
 		  piece = { ...state.piece };
 		  newPosition = { ...piece.position };
 		  newPosition.y += 1;
 		  if (isCollision(piece, newPosition.x, newPosition.y, state.board)) {
 			const updatedBoard = [...state.board];
+			// socket.emit("updateBoard", updatedBoard);
 			piece.shape.forEach((row, y) => {
 			  row.forEach((cell, x) => {
 				if (cell !== 0) {
@@ -84,6 +87,7 @@ import {
 			});
 			if (piece.position.y < 0) {
 			  action.resolve();
+			  socket.emit('gameOver');
 			  return {
 				...state,
 				board: updatedBoard,
@@ -104,10 +108,11 @@ import {
 				  return acc;
 				}, updatedBoard);
 				const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
-
 				const newPiece = state.nextPiece;
 				const nextPiece = generateNewPiece();
-
+				if(completedLines.length > 1) {
+					socket.emit('sendLines',completedLines.length-1);
+				}
 				action.resolve();
 				return {
 				  ...state,
@@ -115,7 +120,7 @@ import {
 				  piece: newPiece,
 				  nextPiece: nextPiece,
 				  score: score,
-				  opponentBoard: updatedBoard,
+				//   opponentBoard: updatedBoard,
 				};
 			  }
 			  
@@ -127,7 +132,7 @@ import {
 			  board: updatedBoard,
 			  piece: newPiece,
 			  nextPiece: nextPiece,
-			  opponentBoard: updatedBoard,
+			//   opponentBoard: updatedBoard,
 			};
 		  }
 		  piece.position = newPosition;
@@ -169,6 +174,7 @@ import {
 		  let nextPiece = pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
 		  if (isCollision(generatedPiece, position.x, position.y, state.board)) {
 			console.log('Game Over. Restarting...');
+			socket.emit('gameOver');
 			action.resolve();
 			return {
 			  ...state,
@@ -182,11 +188,14 @@ import {
 		  action.resolve();
 		  return { ...state, board: action.board };
 		  case 'RESET_STATE':
+			action.resolve();
 			return {
 				...initialState,
 				board: Array.from({ length: 20 }, () => Array(10).fill(0)),
 				nextPiece: generateNewPiece(),
 				piece: generateNewPiece(),
+				gameStart: false,
+				isGameOver: false,
 			};
 		
 		case 'ADD_INDESTRUCTIBLE_LINE':
@@ -197,18 +206,22 @@ import {
 			  newBoard.push(new Array(10).fill(-1)); // add an indestructible line at the bottom
 			}
 			action.resolve();
+			console.log('board after indestructible line');
+			console.log(newBoard);
 			return {
 			  ...state,
 			  board: newBoard,
 			};
 		case 'GAME_STARTED':
-			if (state.awaitingOpponent) {
-			  return {
+			return {
 				...state,
-				gameStart: true,
-			  };
-			} else {
-			  return state;
+				gameStart: action.payload,
+			};
+		case 'IS_VICTORY':
+			return {
+				...state,
+				isGameWon: true,
+				isGameOver: true,
 			}
 		case 'SET_AWAITING_OPPONENT':
 			return {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece,
-	resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard } from '../../redux/actions';
+	resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard,setIsVictory } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
 import Cookies from 'js-cookie';
@@ -40,6 +40,18 @@ function GameOverScreen({ onGoHome, onRestart }) {
   );
 }
 
+function VictoryScreen({ onGoHome, onRestart }) {
+	return (
+	  <div className="overlay">
+		<div className="message">
+		  <h1>Victoire !</h1>
+		  <button onClick={onGoHome}>Retour à la page d'accueil.</button>
+		  <button onClick={onRestart}>Recommencer</button>
+		</div>
+	  </div>
+	);
+  }
+
 
 const lastMove = {
   ArrowLeft: 0,
@@ -57,6 +69,7 @@ const mapStateToProps = (state) => ({
 	piece: state.piece,
 	nextPiece: state.nextPiece,
 	isGameOver: state.isGameOver,
+	isGameWon: state.isGameWon,
 	gameStart: state.gameStart,
 	opponentBoard: state.opponentBoard
   });
@@ -70,7 +83,8 @@ const mapStateToProps = (state) => ({
 	generatePiece: () => new Promise((resolve) => dispatch(generatePiece(resolve))),
 	addIndestructibleLine: (x) => new Promise((resolve) => dispatch(addIndestructibleLine(x, resolve))),
 	resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
-	gameStarted: () => dispatch(gameStarted()),
+	gameStarted: (status) => dispatch(gameStarted(status)),
+	setIsVictory: (status) => dispatch(setIsVictory(status)),
 	setAwaitingOpponent: (awaiting) => dispatch(setAwaitingOpponent(awaiting)),
 	updateOpponentBoard: (board) => dispatch(updateOpponentBoard(board)),
   });
@@ -79,7 +93,7 @@ function Board(props) {
   const username = Cookies.get('username');
 
   let navigate = useNavigate();
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(1);
   const [gameRunning, setGameRunning] = useState(false);
 
 
@@ -89,11 +103,15 @@ function Board(props) {
 	props.setAwaitingOpponent(false);
     navigate('/');
   };
-  const restartGame = () => {
-	props.resetState().then(() => {
-	  props.generatePiece();
-	  props.setAwaitingOpponent(false);
-	});
+  const restartGame = async () => {
+	console.log('restart game function called');
+	setGameRunning(false);
+	await props.resetState();
+	// await props.generatePiece();
+	await props.setAwaitingOpponent(true);
+
+	console.log('going to emit soon');
+	socket.emit('lookingForAGame', username);
   };
   
 
@@ -120,7 +138,6 @@ function Board(props) {
           await props.moveDown();
           break;
         case " ":
-		  await props.addIndestructibleLine(1);
           await props.dropPiece();
 
           break;
@@ -161,6 +178,7 @@ function Board(props) {
     const interval = setInterval(async () => {
       try {
         if (!props.isGameOver && gameRunning) {
+		  console.log('calling moveDown wtf');
           await props.moveDown();
         }
       } catch (error) {
@@ -179,12 +197,19 @@ function Board(props) {
   }, [props.isGameOver, gameRunning]);
 
   useEffect(() => {
-	socket.on('gameStart', () => props.gameStarted());
+	socket.on('gameStart', () => props.gameStarted(true));
+	socket.on('receivedLines',(numberOfLines) => {
+		props.addIndestructibleLine(numberOfLines);
+	});
+	socket.on('Victory', () => {props.setIsVictory(true);});
 	socket.emit('lookingForAGame', username);
-  
 	props.setAwaitingOpponent(true);
-  
 	return () => {
+	  socket.emit('leftGame');
+	  props.resetState();
+	  props.gameStarted(false);
+	  socket.off('Victory');
+	  socket.off('receivedLines');
 	  socket.off('gameStart', () => props.gameStarted());
 	};
   }, []);
@@ -252,8 +277,10 @@ function Board(props) {
   };
 
   const renderOpponentBoard = () => {
-	console.log(props.opponentBoard);
+	// console.log(props.opponentBoard);
 	if (props.opponentBoard && Array.isArray(props.opponentBoard) && props.opponentBoard.length > 0) {
+	//   console.log('opponentBOard:');
+	//   console.log(props.opponentBoard);
 	  return props.opponentBoard.flatMap((row, y) =>
 		row.map((cell, x) => (
 		  <div
@@ -283,7 +310,8 @@ function Board(props) {
 		{renderOpponentBoard()}
 	  </div>
 
-      {props.isGameOver && <GameOverScreen onGoHome={goHome} onRestart={restartGame} />}
+      {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={goHome} onRestart={restartGame} />}
+      {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={goHome} onRestart={restartGame} />}
       {!props.isGameOver && !props.gameStart && <WaitingScreen />}
       {!props.isGameOver && props.gameStart && !gameRunning && (
         <CountdownScreen countdown={countdown} />)}
