@@ -15,6 +15,9 @@ import {
 	isGameOver: false,
 	nextPiece: generateNewPiece(),
 	gameStart: false,
+	awaitingOpponent: false,
+	opponentBoard: createEmptyBoard(),
+
   };
   
   function gameReducer(state = initialState, action) {
@@ -101,6 +104,7 @@ import {
 				  return acc;
 				}, updatedBoard);
 				const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
+
 				const newPiece = state.nextPiece;
 				const nextPiece = generateNewPiece();
 
@@ -111,6 +115,7 @@ import {
 				  piece: newPiece,
 				  nextPiece: nextPiece,
 				  score: score,
+				  opponentBoard: updatedBoard,
 				};
 			  }
 			  
@@ -122,6 +127,7 @@ import {
 			  board: updatedBoard,
 			  piece: newPiece,
 			  nextPiece: nextPiece,
+			  opponentBoard: updatedBoard,
 			};
 		  }
 		  piece.position = newPosition;
@@ -194,6 +200,25 @@ import {
 			return {
 			  ...state,
 			  board: newBoard,
+			};
+		case 'GAME_STARTED':
+			if (state.awaitingOpponent) {
+			  return {
+				...state,
+				gameStart: true,
+			  };
+			} else {
+			  return state;
+			}
+		case 'SET_AWAITING_OPPONENT':
+			return {
+				...state,
+				awaitingOpponent: action.payload,
+			};
+		case 'UPDATE_OPPONENT_BOARD':
+			return {
+			  ...state,
+			  opponentBoard: action.payload,
 			};
 		default:
 		  return state;

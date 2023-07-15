@@ -85,11 +85,10 @@ export function calculateScore(completedLines) {
 		  }
 		}
 	  }
-  
 	  return false;
 	} catch (error) {
 	  console.error('Erreur lors de la vérification de la collision :', error);
-	  return false;
+	  return true;
 	}
   }
   

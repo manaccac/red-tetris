@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece, resetState, addIndestructibleLine } from '../../redux/actions';
+import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece,
+	resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
+import Cookies from 'js-cookie';
 
 function WaitingScreen() {
   return (
@@ -51,43 +53,54 @@ const delay = 40; // Délai entre chaque déplacement
 
 
 const mapStateToProps = (state) => ({
-  board: state.board,
-  piece: state.piece,
-  nextPiece: state.nextPiece,
-  isGameOver: state.isGameOver,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  moveLeft: () => new Promise((resolve) => dispatch(moveLeft(resolve))),
-  moveRight: () => new Promise((resolve) => dispatch(moveRight(resolve))),
-  rotate: () => new Promise((resolve) => dispatch(rotate(resolve))),
-  moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
-  dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
-  generatePiece: () => new Promise((resolve) => dispatch(generatePiece(resolve))),
-  addIndestructibleLine: (x) => new Promise((resolve) => dispatch(addIndestructibleLine(x, resolve))),
-  resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
-});
+	board: state.board,
+	piece: state.piece,
+	nextPiece: state.nextPiece,
+	isGameOver: state.isGameOver,
+	gameStart: state.gameStart,
+	opponentBoard: state.opponentBoard
+  });
+  
+  const mapDispatchToProps = (dispatch) => ({
+	moveLeft: () => new Promise((resolve) => dispatch(moveLeft(resolve))),
+	moveRight: () => new Promise((resolve) => dispatch(moveRight(resolve))),
+	rotate: () => new Promise((resolve) => dispatch(rotate(resolve))),
+	moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
+	dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
+	generatePiece: () => new Promise((resolve) => dispatch(generatePiece(resolve))),
+	addIndestructibleLine: (x) => new Promise((resolve) => dispatch(addIndestructibleLine(x, resolve))),
+	resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
+	gameStarted: () => dispatch(gameStarted()),
+	setAwaitingOpponent: (awaiting) => dispatch(setAwaitingOpponent(awaiting)),
+	updateOpponentBoard: (board) => dispatch(updateOpponentBoard(board)),
+  });
 
 function Board(props) {
+  const username = Cookies.get('username');
+
   let navigate = useNavigate();
   const [countdown, setCountdown] = useState(5);
   const [gameRunning, setGameRunning] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false);
+
+
 
   const goHome = () => {
-    props.resetState();
+	props.resetState();
+	props.setAwaitingOpponent(false);
     navigate('/');
   };
   const restartGame = () => {
-    props.resetState().then(() => {
-      props.generatePiece();
-    });
+	props.resetState().then(() => {
+	  props.generatePiece();
+	  props.setAwaitingOpponent(false);
+	});
   };
-
+  
 
   const handleKeyDown = async (event) => {
     try {
-      if (!gameRunning) return;
+	  if (!gameRunning) return;
+
       if (props.isGameOver || Date.now() - lastMove[event.key] < delay) {
         return;
       }
@@ -107,7 +120,7 @@ function Board(props) {
           await props.moveDown();
           break;
         case " ":
-          await props.addIndestructibleLine(1);
+		  await props.addIndestructibleLine(1);
           await props.dropPiece();
 
           break;
@@ -121,7 +134,8 @@ function Board(props) {
 
   useEffect(() => {
     let countdownInterval;
-    if (gameStarted) {
+  
+    if (props.gameStart) {
       countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => {
           if (prevCountdown <= 1) {
@@ -132,15 +146,15 @@ function Board(props) {
             return prevCountdown - 1;
           }
         });
-      }, 1000);
+      }, 1000); 
     } else {
       setGameRunning(false);
     }
-
+  
     return () => {
       clearInterval(countdownInterval);
     };
-  }, [gameStarted]);
+  }, [props.gameStart]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -154,6 +168,10 @@ function Board(props) {
       }
     }, 500);
 
+	socket.on('opponentBoardData', (opponentBoardData) => {
+		props.updateOpponentBoard(opponentBoardData);
+	}); // ici a mettre le board
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       clearInterval(interval);
@@ -161,40 +179,44 @@ function Board(props) {
   }, [props.isGameOver, gameRunning]);
 
   useEffect(() => {
-    console.log('weird useEffect called twice ?');
-    socket.on('gameStart', () => setGameStarted(true));
-    socket.emit('lookingForAGame', 'userNameTototototo');
-    return () => {
-      socket.off('gameStart', () => setGameStarted(true));
-    };
+	socket.on('gameStart', () => props.gameStarted());
+	socket.emit('lookingForAGame', username);
+  
+	props.setAwaitingOpponent(true);
+  
+	return () => {
+	  socket.off('gameStart', () => props.gameStarted());
+	};
   }, []);
+  
+  
+  
 
   const renderCells = () =>
-    props.board.map((row, y) =>
-      row.map((cell, x) => {
-        let active = false;
-        let activePieceId = 0;
-        if (props.piece) {
-          active =
-            props.piece.position.y <= y &&
-            y < props.piece.position.y + props.piece.shape.length &&
-            props.piece.position.x <= x &&
-            x < props.piece.position.x + props.piece.shape[0].length &&
-            props.piece.shape[y - props.piece.position.y][x - props.piece.position.x];
-          if (active) {
-            activePieceId = props.piece.id;
-          }
+  props.board.map((row, y) =>
+    row.map((cell, x) => {
+      let active = false;
+      let activePieceId = 0;
+      if (props.piece) {
+        active =
+          props.piece.position.y <= y &&
+          y < props.piece.position.y + props.piece.shape.length &&
+          props.piece.position.x <= x &&
+          x < props.piece.position.x + props.piece.shape[0].length &&
+          props.piece.shape[y - props.piece.position.y][x - props.piece.position.x];
+        if (active) {
+          activePieceId = props.piece.id;
         }
+      }
 
-        return (
-          <div
-            key={`${y}-${x}`}
-            className={`cell ${cell !== 0 || active ? 'filled' : ''} id-${cell !== 0 ? cell : activePieceId}`}
-          ></div>
-        );
-      })
-    );
-
+      return (
+        <div
+          key={`${y}-${x}`}
+          className={`cell ${cell !== 0 || active ? 'filled' : ''} id-${cell !== 0 ? cell : activePieceId}`}
+        ></div>
+      );
+    })
+  );
 
 
   const renderNextPiece = () => {
@@ -229,6 +251,22 @@ function Board(props) {
     ));
   };
 
+  const renderOpponentBoard = () => {
+	console.log(props.opponentBoard);
+	if (props.opponentBoard && Array.isArray(props.opponentBoard) && props.opponentBoard.length > 0) {
+	  return props.opponentBoard.flatMap((row, y) =>
+		row.map((cell, x) => (
+		  <div
+			key={`cell-${y}-${x}`}
+			className={`opponent-board-cell ${cell !== 0 ? 'filled' : ''}`}
+		  ></div>
+		))
+	  );
+	} else {
+	  return null;
+	}
+  };
+  
   return (
     <div
       className="game-container"
@@ -241,11 +279,15 @@ function Board(props) {
       <div className="next-piece">
         {renderNextPiece()}
       </div>
+	  <div className="opponent-board">
+		{renderOpponentBoard()}
+	  </div>
+
       {props.isGameOver && <GameOverScreen onGoHome={goHome} onRestart={restartGame} />}
-      {!props.isGameOver && !gameStarted && <WaitingScreen />}
-      {!props.isGameOver && gameStarted && !gameRunning && (
+      {!props.isGameOver && !props.gameStart && <WaitingScreen />}
+      {!props.isGameOver && props.gameStart && !gameRunning && (
         <CountdownScreen countdown={countdown} />)}
-    </div>
+	</div>		
 
 
   );
