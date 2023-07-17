@@ -11,43 +11,44 @@ export const GAME_STARTED = 'GAME_STARTED';
 export const SET_AWAITING_OPPONENT = 'SET_AWAITING_OPPONENT';
 export const UPDATE_OPPONENT_BOARD = 'UPDATE_OPPONENT_BOARD';
 export const IS_VICTORY = 'IS_VICTORY';
+export const SET_OPPONENT_NAME = 'SET_OPPONENT_NAME';
 
 
 export function moveLeft(resolve) {
-  return { type: MOVE_LEFT, resolve };
+	return { type: MOVE_LEFT, resolve };
 }
 
 export function moveRight(resolve) {
-  return { type: MOVE_RIGHT, resolve };
+	return { type: MOVE_RIGHT, resolve };
 }
 
 export function rotate(resolve) {
-  return { type: ROTATE, resolve };
+	return { type: ROTATE, resolve };
 }
 
 export function moveDown(resolve) {
-  return { type: MOVE_DOWN, resolve };
+	return { type: MOVE_DOWN, resolve };
 }
 
 export function dropPiece(resolve) {
-  return { type: DROP_PIECE, resolve };
+	return { type: DROP_PIECE, resolve };
 }
 
 export function resetState(resolve) {
-  return { type: RESET_STATE, resolve };
+	return { type: RESET_STATE, resolve };
 }
 
 export function generatePiece() {
 	console.log('generatePiece');
 	return (dispatch) => {
-	  return new Promise((resolve) => {
-		dispatch({ type: GENERATE_PIECE, resolve });
-	  });
+		return new Promise((resolve) => {
+			dispatch({ type: GENERATE_PIECE, resolve });
+		});
 	};
-  }
+}
 
 export function updateBoard(board) {
-  return { type: UPDATE_BOARD, board };
+	return { type: UPDATE_BOARD, board };
 }
 
 export function addIndestructibleLine(x, resolve) {
@@ -55,7 +56,7 @@ export function addIndestructibleLine(x, resolve) {
 }
 
 export function gameStarted(value) {
-  return { type: GAME_STARTED, payload: value };
+	return { type: GAME_STARTED, payload: value };
 }
 
 export const setAwaitingOpponent = (awaiting) => ({
@@ -71,4 +72,9 @@ export const updateOpponentBoard = (board) => ({
 export const setIsVictory = (status) => ({
 	type: IS_VICTORY,
 	payload: status
+});
+
+export const setOpponentName = (oppName) => ({
+	type: SET_OPPONENT_NAME,
+	payload: oppName
 });
