@@ -52,6 +52,7 @@ function VictoryScreen({ onGoHome, onRestart }) {
 	);
   }
 
+  
 
 const lastMove = {
   ArrowLeft: 0,
@@ -71,7 +72,7 @@ const mapStateToProps = (state) => ({
 	isGameOver: state.isGameOver,
 	isGameWon: state.isGameWon,
 	gameStart: state.gameStart,
-	opponentBoard: state.opponentBoard
+	opponentBoard: state.opponentBoard,
   });
   
   const mapDispatchToProps = (dispatch) => ({
@@ -90,6 +91,10 @@ const mapStateToProps = (state) => ({
   });
 
 function Board(props) {
+  const [gravity, setGravity] = useState(500); // Valeur par défaut pour la gravité
+
+  const gameMode = props.gameMode;
+
   const username = Cookies.get('username');
 
   let navigate = useNavigate();
@@ -97,6 +102,16 @@ function Board(props) {
   const [gameRunning, setGameRunning] = useState(false);
 
 
+  function getRandomDelay() {
+	if (gameMode === 'graviter'){
+		let grav = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
+		console.log('graviter mode = ' + grav);
+		setGravity(grav); // Met à jour la valeur de gravité à chaque descente de pièce
+		return grav;
+	}
+	else
+		return 500;
+  }
 
   const goHome = () => {
 	props.resetState();
@@ -178,13 +193,12 @@ function Board(props) {
     const interval = setInterval(async () => {
       try {
         if (!props.isGameOver && gameRunning) {
-		  console.log('calling moveDown wtf');
           await props.moveDown();
         }
       } catch (error) {
         console.error('Error while automatically moving down:', error);
       }
-    }, 500);
+    }, getRandomDelay());
 
 	socket.on('opponentBoardData', (opponentBoardData) => {
 		props.updateOpponentBoard(opponentBoardData);
@@ -194,7 +208,7 @@ function Board(props) {
       window.removeEventListener('keydown', handleKeyDown);
       clearInterval(interval);
     };
-  }, [props.isGameOver, gameRunning]);
+  }, [props.isGameOver, gameRunning, props.board]);
 
   useEffect(() => {
 	socket.on('gameStart', () => props.gameStarted(true));
@@ -234,14 +248,24 @@ function Board(props) {
         }
       }
 
+      const isGameOver = props.isGameOver && !props.isGameWon;
+      let shouldShowPiece = true;
+      if (gameMode === 'invisible' && !isGameOver) {
+        shouldShowPiece = false;
+      }
+
       return (
         <div
           key={`${y}-${x}`}
-          className={`cell ${cell !== 0 || active ? 'filled' : ''} id-${cell !== 0 ? cell : activePieceId}`}
+          className={`cell ${
+            (cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
+          } id-${cell !== 0 ? cell && shouldShowPiece : activePieceId}`}
         ></div>
       );
     })
   );
+
+
 
 
   const renderNextPiece = () => {
