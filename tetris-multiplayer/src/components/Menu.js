@@ -9,13 +9,13 @@ const Menu = () => {
     <div>
       <div className="menu">
         <li>
-          <Link className="button" to={`mode1[${username}]`}>Mode 1</Link>
+          <Link className="button" to={`normal[${username}]`}>Normal</Link>
         </li>
         <li>
-          <Link className="button" to={`mode2[${username}]`}>Mode 2</Link>
+          <Link className="button" to={`invisible[${username}]`}>Invisible</Link>
         </li>
         <li>
-          <Link className="button" to={`mode3[${username}]`}>Mode 3</Link>
+          <Link className="button" to={`graviter[${username}]`}>Graviter Aléatoire</Link>
         </li>
       </div>
     </div>
