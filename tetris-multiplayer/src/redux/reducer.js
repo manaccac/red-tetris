@@ -3,7 +3,6 @@ import {
 	isCollision,
 	rotateMatrix,
 	calculateScore,
-	generateNewPiece,
 	createEmptyBoard,
 } from './utils';
 
@@ -13,6 +12,7 @@ const initialState = {
 	rotation: 0,
 	board: createEmptyBoard(),
 	score: 0,
+	isFirstPlayer: false,
 	isGameOver: false,
 	nextPiece: null,
 	gameStart: false,
@@ -144,9 +144,7 @@ function gameReducer(state = initialState, action) {
 				action.resolve();
 				return { ...state, piece: droppedPiece };
 			case 'UPDATE_PIECE':
-				console.log('in UPDATE_PIECE');
 				const pieces = action.payload;
-				console.log(action.payload);
 				if (pieces.length == 1) {
 					return { ...state, nextPiece: action.payload[0] };
 				} else if (pieces.length == 2) {

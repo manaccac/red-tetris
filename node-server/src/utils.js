@@ -1,4 +1,5 @@
 const leavingGame = (socket, rooms, io, type) => {
+	console.log('leavingGame called');
 	for (const [roomId, roomData] of rooms.entries()) {
 		const clients = roomData.clients;
 		if (!clients) return;
@@ -19,6 +20,7 @@ const leavingGame = (socket, rooms, io, type) => {
 };
 
 const sendBoardAndPieceToPlayer = (socket, rooms, dataBoard) => {
+	console.log('client emetteur: ' + client.username)
 	for (const [roomId, roomData] of rooms.entries()) {
 		const clients = roomData.clients;
 		const index = clients.indexOf(socket);
@@ -29,11 +31,6 @@ const sendBoardAndPieceToPlayer = (socket, rooms, dataBoard) => {
 			}
 			//on envoit la pièce suivante au joueur qui vient de poser
 			socket.emit('updateNextPiece', [roomData.pieces[socket.pieceId]]);
-			console.log('socket.pieceId: ' + socket.pieceId);
-			console.log('nextPiece generated');
-			console.log(roomData.pieces[socket.pieceId]);
-			console.log('pieces list:');
-			console.log(roomData.pieces);
 			socket.pieceId++;
 			//on envoit le board a l'adversaire
 			socket.broadcast.to(roomId).emit('opponentBoardData', dataBoard);
@@ -58,13 +55,50 @@ const gameOver = (socket, rooms) => {
 		if (index !== -1) {
 			// on prévient l'autre joueur de sa victoire
 			socket.broadcast.to(roomId).emit('Victory');
-			rooms.delete(roomId);
 			console.log('after deleting, roomsleft : ' + rooms.size);
 		}
 	}
 }
 
-const handleMatchMaking = (socket, rooms, dataStartGame, io) => {
+const restartGame = (socket, rooms, dataStartGame) => {
+	if (!socket.username) { socket.username = dataStartGame.userName; }
+	for (const [roomId, roomData] of rooms.entries()) {
+		const clients = roomData.clients;
+		const index = clients.indexOf(socket);
+		if (index !== -1) {
+			if (clients.length == 2) {
+				for (const client of clients) {
+					client.pieceId = 0;
+				}
+				room = roomId;
+				rooms.get(room).pieces = [];
+				const players = rooms.get(room).clients;
+				let piece = generateNewPiece();
+				let nextPiece = generateNewPiece();
+				// pas besoin de stocker les deux premères pieces dans la room, elles sont envoyées direct
+				players[0].emit('gameStart', {
+					isFirstPlayer: true,
+					opponentName: players[1].username,
+					piece: piece,
+					nextPiece: nextPiece
+				})
+				players[1].emit('gameStart', {
+					isFirstPlayer: false,
+					opponentName: players[0].username,
+					piece: piece,
+					nextPiece: nextPiece
+				})
+				break;
+			} else { //l'autre a quitté, on repart en matchmaking
+				console.log('opponent left ?');
+				rooms.delete(roomId);
+				handleMatchMaking(socket, rooms, dataStartGame);
+			}
+		}
+	}
+}
+
+const handleMatchMaking = (socket, rooms, dataStartGame) => {
 	if (!socket.username) {
 		socket.username = dataStartGame.userName;
 	}
@@ -136,4 +170,4 @@ const generateNewPiece = () => {
 };
 // sending to all clients in 'game' room(channel) except sender
 //socket.broadcast.to('game').emit('message', 'nice game');
-module.exports = { leavingGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking, generateNewPiece }
+module.exports = { restartGame, leavingGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking, generateNewPiece }

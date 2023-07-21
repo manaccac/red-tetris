@@ -69,7 +69,7 @@ export const setIsVictory = (status) => ({
 	payload: status
 });
 
-export const setOpponentName = (oppName) => ({
+export const setOpponentName = (opponentName) => ({
 	type: SET_OPPONENT_NAME,
-	payload: oppName
+	payload: opponentName
 });

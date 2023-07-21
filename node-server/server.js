@@ -1,5 +1,5 @@
 const express = require('express');
-const { leavingGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking } = require('./src/utils');
+const { leavingGame, restartGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking } = require('./src/utils');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http, {
@@ -17,7 +17,11 @@ const rooms = new Map();
 io.on('connection', (socket) => {
     console.log('socket Id connected :' + socket.id);
     socket.on('lookingForAGame', (dataStartGame) => {
-        handleMatchMaking(socket, rooms, dataStartGame, io);
+        handleMatchMaking(socket, rooms, dataStartGame);
+    });
+
+    socket.on('restartGame', (dataStartGame) => {
+        restartGame(socket, rooms, dataStartGame);
     });
 
     socket.on('disconnect', () => {

@@ -30,25 +30,25 @@ function CountdownScreen({ countdown }) {
   );
 }
 
-function GameOverScreen({ onGoHome, onRestart }) {
+function GameOverScreen({ onGoHome, onRestart, isFirstPlayer }) {
   return (
     <div className="overlay">
       <div className="message">
         <h1>Partie terminée</h1>
         <button onClick={onGoHome}>Retour à la page d'accueil.</button>
-        <button onClick={onRestart}>Recommencer</button>
+        {isFirstPlayer && <button onClick={onRestart}>Recommencer</button>}
       </div>
-    </div>
+    </div >
   );
 }
 
-function VictoryScreen({ onGoHome, onRestart }) {
+function VictoryScreen({ onGoHome, onRestart, isFirstPlayer }) {
   return (
     <div className="overlay">
       <div className="message">
         <h1>Victoire !</h1>
         <button onClick={onGoHome}>Retour à la page d'accueil.</button>
-        <button onClick={onRestart}>Recommencer</button>
+        {isFirstPlayer && <button onClick={onRestart}>Recommencer</button>}
       </div>
     </div>
   );
@@ -104,7 +104,7 @@ function Board(props) {
   let navigate = useNavigate();
   const [countdown, setCountdown] = useState(1);
   const [gameRunning, setGameRunning] = useState(false);
-
+  const [isFirstPlayer, setIsFirstPlayer] = useState(false);
 
   function getRandomDelay() {
     if (gameMode === 'graviter') {
@@ -122,15 +122,9 @@ function Board(props) {
     props.setAwaitingOpponent(false);
     navigate('/');
   };
-  const restartGame = async () => {
-    console.log('restart game function called');
-    setGameRunning(false);
-    await props.resetState();
-    // await props.generatePiece();
-    await props.setAwaitingOpponent(true);
 
-    console.log('going to emit soon');
-    socket.emit('lookingForAGame', username);
+  const restartGame = () => {
+    socket.emit('restartGame', { userName: username, gameMode: gameMode });
   };
 
 
@@ -171,6 +165,7 @@ function Board(props) {
   useEffect(() => {
     let countdownInterval;
 
+    console.log('value of gameSTart after restart' + props.gameStart);
     if (props.gameStart) {
       countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => {
@@ -211,9 +206,29 @@ function Board(props) {
   }, [props.isGameOver, gameRunning, props.board]);
 
   useEffect(() => {
+    const resetState = async () => {
+      await props.resetState();
+      // await props.generatePiece();
+      await props.setAwaitingOpponent(true);
+      await props.gameStarted(true);
+      setGameRunning(false);
+      setCountdown(1);
+    }
+
     socket.on('gameStart', (response) => {
-      props.gameStarted(true);
-      if (response.isFirstPlayer) console.log('im first player'); else console.log('im second player');
+      resetState();
+      // !props.isGameOver && props.gameStart && !gameRunning && (
+
+      console.log('isGameOver: ' + props.isGameOver);
+      console.log('gameStart: ' + props.gameStart);
+      console.log('gameRunning: ' + gameRunning);
+      if (response.isFirstPlayer) {
+        console.log('i am first player');
+        setIsFirstPlayer(true);
+      } else {
+        console.log('i am second player');
+        setIsFirstPlayer(false);
+      }
       props.updatePiece([response.piece, response.nextPiece]);
       props.setOpponentName(response.opponentName);
     });
@@ -227,8 +242,6 @@ function Board(props) {
       props.updateOpponentBoard(dataBoard);
     })
     socket.on('updateNextPiece', (nextPiece) => {
-      console.log('nextPiece received from server');
-      console.log(nextPiece);
       props.updatePiece(nextPiece);
     });
 
@@ -340,13 +353,13 @@ function Board(props) {
     <div
       className="game-container"
       onKeyDown={handleKeyDown}
-      tabIndex="0"
+        tabIndex="0"
     >
       <div className="board">
         {renderCells()}
       </div>
       <div className="next-piece">
-        {props.gameStart && renderNextPiece()}
+        {props.gameStart && props.nextPiece && renderNextPiece()}
       </div>
       <div className="opponent-board">
         {renderOpponentBoard()}
@@ -355,8 +368,8 @@ function Board(props) {
         {props.opponentName}
       </div>
 
-      {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={goHome} onRestart={restartGame} />}
-      {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={goHome} onRestart={restartGame} />}
+      {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={goHome} onRestart={restartGame} isFirstPlayer={isFirstPlayer} />}
+      {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={goHome} onRestart={restartGame} isFirstPlayer={isFirstPlayer} />}
       {!props.isGameOver && !props.gameStart && <WaitingScreen />}
       {!props.isGameOver && props.gameStart && !gameRunning && (
         <CountdownScreen countdown={countdown} />)}
