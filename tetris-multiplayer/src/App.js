@@ -46,7 +46,7 @@ function App() {
   return (
     <Router>
       {!username ? (
-        <UsernamePrompt />
+        <UsernamePrompt data-testid="usernamePrompt" />
       ) : (
         <Routes>
           <Route path="/" element={<Home />} />
