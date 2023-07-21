@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece,
-	resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard,setIsVictory } from '../../redux/actions';
+import {
+  moveLeft, moveRight, rotate, moveDown, dropPiece, updatePiece,
+  resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard, setIsVictory, setOpponentName
+} from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
 import Cookies from 'js-cookie';
@@ -41,18 +43,18 @@ function GameOverScreen({ onGoHome, onRestart }) {
 }
 
 function VictoryScreen({ onGoHome, onRestart }) {
-	return (
-	  <div className="overlay">
-		<div className="message">
-		  <h1>Victoire !</h1>
-		  <button onClick={onGoHome}>Retour à la page d'accueil.</button>
-		  <button onClick={onRestart}>Recommencer</button>
-		</div>
-	  </div>
-	);
-  }
+  return (
+    <div className="overlay">
+      <div className="message">
+        <h1>Victoire !</h1>
+        <button onClick={onGoHome}>Retour à la page d'accueil.</button>
+        <button onClick={onRestart}>Recommencer</button>
+      </div>
+    </div>
+  );
+}
 
-  
+
 
 const lastMove = {
   ArrowLeft: 0,
@@ -66,29 +68,31 @@ const delay = 40; // Délai entre chaque déplacement
 
 
 const mapStateToProps = (state) => ({
-	board: state.board,
-	piece: state.piece,
-	nextPiece: state.nextPiece,
-	isGameOver: state.isGameOver,
-	isGameWon: state.isGameWon,
-	gameStart: state.gameStart,
-	opponentBoard: state.opponentBoard,
-  });
-  
-  const mapDispatchToProps = (dispatch) => ({
-	moveLeft: () => new Promise((resolve) => dispatch(moveLeft(resolve))),
-	moveRight: () => new Promise((resolve) => dispatch(moveRight(resolve))),
-	rotate: () => new Promise((resolve) => dispatch(rotate(resolve))),
-	moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
-	dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
-	generatePiece: () => new Promise((resolve) => dispatch(generatePiece(resolve))),
-	addIndestructibleLine: (x) => new Promise((resolve) => dispatch(addIndestructibleLine(x, resolve))),
-	resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
-	gameStarted: (status) => dispatch(gameStarted(status)),
-	setIsVictory: (status) => dispatch(setIsVictory(status)),
-	setAwaitingOpponent: (awaiting) => dispatch(setAwaitingOpponent(awaiting)),
-	updateOpponentBoard: (board) => dispatch(updateOpponentBoard(board)),
-  });
+  board: state.board,
+  piece: state.piece,
+  nextPiece: state.nextPiece,
+  isGameOver: state.isGameOver,
+  isGameWon: state.isGameWon,
+  gameStart: state.gameStart,
+  opponentBoard: state.opponentBoard
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  moveLeft: () => new Promise((resolve) => dispatch(moveLeft(resolve))),
+  moveRight: () => new Promise((resolve) => dispatch(moveRight(resolve))),
+  rotate: () => new Promise((resolve) => dispatch(rotate(resolve))),
+  moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
+  dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
+  //pieces est un array, si size 2, alors init les deux pieces, si size 1 alors init nextPiece
+  updatePiece: (pieces) => dispatch(updatePiece(pieces)),
+  gameStarted: (status) => dispatch(gameStarted(status)),
+  addIndestructibleLine: (x) => new Promise((resolve) => dispatch(addIndestructibleLine(x, resolve))),
+  resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
+  setIsVictory: (status) => dispatch(setIsVictory(status)),
+  setAwaitingOpponent: (awaiting) => dispatch(setAwaitingOpponent(awaiting)),
+  updateOpponentBoard: (board) => dispatch(updateOpponentBoard(board)),
+  setOpponentName: (oppName) => dispatch(setOpponentName(oppName)),
+});
 
 function Board(props) {
   const [gravity, setGravity] = useState(500); // Valeur par défaut pour la gravité
@@ -103,36 +107,36 @@ function Board(props) {
 
 
   function getRandomDelay() {
-	if (gameMode === 'graviter'){
-		let grav = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
-		console.log('graviter mode = ' + grav);
-		setGravity(grav); // Met à jour la valeur de gravité à chaque descente de pièce
-		return grav;
-	}
-	else
-		return 500;
+    if (gameMode === 'graviter') {
+      let grav = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
+      console.log('graviter mode = ' + grav);
+      setGravity(grav); // Met à jour la valeur de gravité à chaque descente de pièce
+      return grav;
+    }
+    else
+      return 500;
   }
 
   const goHome = () => {
-	props.resetState();
-	props.setAwaitingOpponent(false);
+    props.resetState();
+    props.setAwaitingOpponent(false);
     navigate('/');
   };
   const restartGame = async () => {
-	console.log('restart game function called');
-	setGameRunning(false);
-	await props.resetState();
-	// await props.generatePiece();
-	await props.setAwaitingOpponent(true);
+    console.log('restart game function called');
+    setGameRunning(false);
+    await props.resetState();
+    // await props.generatePiece();
+    await props.setAwaitingOpponent(true);
 
-	console.log('going to emit soon');
-	socket.emit('lookingForAGame', username);
+    console.log('going to emit soon');
+    socket.emit('lookingForAGame', username);
   };
-  
+
 
   const handleKeyDown = async (event) => {
     try {
-	  if (!gameRunning) return;
+      if (!gameRunning) return;
 
       if (props.isGameOver || Date.now() - lastMove[event.key] < delay) {
         return;
@@ -166,7 +170,7 @@ function Board(props) {
 
   useEffect(() => {
     let countdownInterval;
-  
+
     if (props.gameStart) {
       countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => {
@@ -178,11 +182,11 @@ function Board(props) {
             return prevCountdown - 1;
           }
         });
-      }, 1000); 
+      }, 1000);
     } else {
       setGameRunning(false);
     }
-  
+
     return () => {
       clearInterval(countdownInterval);
     };
@@ -200,10 +204,6 @@ function Board(props) {
       }
     }, getRandomDelay());
 
-	socket.on('opponentBoardData', (opponentBoardData) => {
-		props.updateOpponentBoard(opponentBoardData);
-	}); // ici a mettre le board
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       clearInterval(interval);
@@ -211,48 +211,67 @@ function Board(props) {
   }, [props.isGameOver, gameRunning, props.board]);
 
   useEffect(() => {
-	socket.on('gameStart', () => props.gameStarted(true));
-	socket.on('receivedLines',(numberOfLines) => {
-		props.addIndestructibleLine(numberOfLines);
-	});
-	socket.on('Victory', () => {props.setIsVictory(true);});
-	socket.emit('lookingForAGame', username);
-	props.setAwaitingOpponent(true);
-	return () => {
-	  socket.emit('leftGame');
-	  props.resetState();
-	  props.gameStarted(false);
-	  socket.off('Victory');
-	  socket.off('receivedLines');
-	  socket.off('gameStart', () => props.gameStarted());
-	};
+    socket.on('gameStart', (response) => {
+      props.gameStarted(true);
+      if (response.isFirstPlayer) console.log('im first player'); else console.log('im second player');
+      props.updatePiece([response.piece, response.nextPiece]);
+      props.setOpponentName(response.opponentName);
+    });
+    socket.on('receivedLines', (numberOfLines) => {
+      props.addIndestructibleLine(numberOfLines);
+    });
+    socket.on('Victory', () => {
+      props.setIsVictory(true);
+    });
+    socket.on('opponentBoardData', (opponentBoardData) => {
+      props.updateOpponentBoard(opponentBoardData);
+    })
+    socket.on('updateNextPiece', (nextPiece) => {
+      console.log('nextPiece received from server');
+      console.log(nextPiece);
+      props.updatePiece(nextPiece);
+    });
+
+    socket.emit('lookingForAGame', { userName: username, gameMode: gameMode });
+    props.setAwaitingOpponent(true);
+    return () => {
+      socket.emit('leftGame');
+      socket.off('Victory');
+      socket.off('receivedLines');
+      socket.off('gameStart');
+      socket.off('opponentBoardData');
+      socket.off('updateNextPiece');
+
+      props.resetState();
+      props.gameStarted(false);
+    };
   }, []);
-  
-  
-  
+
+
+
 
   const renderCells = () =>
-  props.board.map((row, y) =>
-    row.map((cell, x) => {
-      let active = false;
-      let activePieceId = 0;
-      if (props.piece) {
-        active =
-          props.piece.position.y <= y &&
-          y < props.piece.position.y + props.piece.shape.length &&
-          props.piece.position.x <= x &&
-          x < props.piece.position.x + props.piece.shape[0].length &&
-          props.piece.shape[y - props.piece.position.y][x - props.piece.position.x];
-        if (active) {
-          activePieceId = props.piece.id;
+    props.board.map((row, y) =>
+      row.map((cell, x) => {
+        let active = false;
+        let activePieceId = 0;
+        if (props.piece) {
+          active =
+            props.piece.position.y <= y &&
+            y < props.piece.position.y + props.piece.shape.length &&
+            props.piece.position.x <= x &&
+            x < props.piece.position.x + props.piece.shape[0].length &&
+            props.piece.shape[y - props.piece.position.y][x - props.piece.position.x];
+          if (active) {
+            activePieceId = props.piece.id;
+          }
         }
-      }
 
-      const isGameOver = props.isGameOver && !props.isGameWon;
-      let shouldShowPiece = true;
-      if (gameMode === 'invisible' && !isGameOver) {
-        shouldShowPiece = false;
-      }
+        const isGameOver = props.isGameOver && !props.isGameWon;
+        let shouldShowPiece = true;
+        if (gameMode === 'invisible' && !isGameOver) {
+          shouldShowPiece = false;
+        }
 
       return (
         <div
@@ -301,23 +320,23 @@ function Board(props) {
   };
 
   const renderOpponentBoard = () => {
-	// console.log(props.opponentBoard);
-	if (props.opponentBoard && Array.isArray(props.opponentBoard) && props.opponentBoard.length > 0) {
-	//   console.log('opponentBOard:');
-	//   console.log(props.opponentBoard);
-	  return props.opponentBoard.flatMap((row, y) =>
-		row.map((cell, x) => (
-		  <div
-			key={`cell-${y}-${x}`}
-			className={`opponent-board-cell ${cell !== 0 ? 'filled' : ''}`}
-		  ></div>
-		))
-	  );
-	} else {
-	  return null;
-	}
+    // console.log(props.opponentBoard);
+    if (props.opponentBoard && Array.isArray(props.opponentBoard) && props.opponentBoard.length > 0) {
+      //   console.log('opponentBOard:');
+      //   console.log(props.opponentBoard);
+      return props.opponentBoard.flatMap((row, y) =>
+        row.map((cell, x) => (
+          <div
+            key={`cell-${y}-${x}`}
+            className={`opponent-board-cell ${cell !== 0 ? 'filled' : ''}`}
+          ></div>
+        ))
+      );
+    } else {
+      return null;
+    }
   };
-  
+
   return (
     <div
       className="game-container"
@@ -328,18 +347,21 @@ function Board(props) {
         {renderCells()}
       </div>
       <div className="next-piece">
-        {renderNextPiece()}
+        {props.gameStart && renderNextPiece()}
       </div>
-	  <div className="opponent-board">
-		{renderOpponentBoard()}
-	  </div>
+      <div className="opponent-board">
+        {renderOpponentBoard()}
+      </div>
+      <div className="opponent-name">
+        {props.opponentName}
+      </div>
 
       {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={goHome} onRestart={restartGame} />}
       {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={goHome} onRestart={restartGame} />}
       {!props.isGameOver && !props.gameStart && <WaitingScreen />}
       {!props.isGameOver && props.gameStart && !gameRunning && (
         <CountdownScreen countdown={countdown} />)}
-	</div>		
+    </div>
 
 
   );
