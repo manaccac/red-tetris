@@ -259,7 +259,7 @@ function Board(props) {
           key={`${y}-${x}`}
           className={`cell ${
             (cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
-          } id-${cell !== 0 ? cell && shouldShowPiece : activePieceId}`}
+          } id-${cell !== 0 && shouldShowPiece ? cell : activePieceId}`}
         ></div>
       );
     })
