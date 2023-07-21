@@ -273,14 +273,15 @@ function Board(props) {
           shouldShowPiece = false;
         }
 
-      return (
-        <div
-          key={`${y}-${x}`}
-          className={`cell ${
-            (cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
-          } id-${cell !== 0 && shouldShowPiece ? cell : activePieceId}`}
-        ></div>
-      );
+		return (
+			<div
+				key={`${y}-${x}`}
+				className={`cell ${
+					(cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
+				} id-${cell !== 0 && shouldShowPiece ? cell : activePieceId}`}
+				data-testid={`cell-${y}-${x}`}
+			></div>
+		);		
     })
   );
 
@@ -310,10 +311,11 @@ function Board(props) {
     return boardw.map((row, y) => (
       <div key={`row-${y}`} className="next-piece-row">
         {row.map((cell, x) => (
-          <div
-            key={`cell-${y}-${x}`}
-            className={`next-piece-cell ${cell !== 0 ? 'filled' : ''}`}
-          ></div>
+			<div
+				key={`cell-${y}-${x}`}
+				className={`next-piece-cell ${cell !== 0 ? 'filled' : ''}`}
+				data-testid={`next-cell-${y}-${x}`}
+			></div>
         ))}
       </div>
     ));
@@ -343,9 +345,10 @@ function Board(props) {
       onKeyDown={handleKeyDown}
       tabIndex="0"
     >
-      <div className="board">
-        {renderCells()}
-      </div>
+	  <div className="board" data-testid="board-container">
+	  	{renderCells()}
+	  </div>
+
       <div className="next-piece">
         {props.gameStart && renderNextPiece()}
       </div>

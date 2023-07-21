@@ -55,5 +55,4 @@ describe('UsernamePrompt', () => {
   
 	expect(mockReload).toHaveBeenCalledTimes(2);
   });
-  
 });
