@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import {
-  moveLeft, moveRight, rotate, moveDown, dropPiece, generatePiece,
+  moveLeft, moveRight, rotate, moveDown, dropPiece, updatePiece,
   resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard, setIsVictory, setOpponentName
 } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
@@ -54,7 +54,7 @@ function VictoryScreen({ onGoHome, onRestart }) {
   );
 }
 
-  
+
 
 const lastMove = {
   ArrowLeft: 0,
@@ -83,10 +83,11 @@ const mapDispatchToProps = (dispatch) => ({
   rotate: () => new Promise((resolve) => dispatch(rotate(resolve))),
   moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
   dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
-  generatePiece: () => new Promise((resolve) => dispatch(generatePiece(resolve))),
+  //pieces est un array, si size 2, alors init les deux pieces, si size 1 alors init nextPiece
+  updatePiece: (pieces) => dispatch(updatePiece(pieces)),
+  gameStarted: (status) => dispatch(gameStarted(status)),
   addIndestructibleLine: (x) => new Promise((resolve) => dispatch(addIndestructibleLine(x, resolve))),
   resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
-  gameStarted: (status) => dispatch(gameStarted(status)),
   setIsVictory: (status) => dispatch(setIsVictory(status)),
   setAwaitingOpponent: (awaiting) => dispatch(setAwaitingOpponent(awaiting)),
   updateOpponentBoard: (board) => dispatch(updateOpponentBoard(board)),
@@ -106,14 +107,14 @@ function Board(props) {
 
 
   function getRandomDelay() {
-	if (gameMode === 'graviter'){
-		let grav = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
-		console.log('graviter mode = ' + grav);
-		setGravity(grav); // Met à jour la valeur de gravité à chaque descente de pièce
-		return grav;
-	}
-	else
-		return 500;
+    if (gameMode === 'graviter') {
+      let grav = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
+      console.log('graviter mode = ' + grav);
+      setGravity(grav); // Met à jour la valeur de gravité à chaque descente de pièce
+      return grav;
+    }
+    else
+      return 500;
   }
 
   const goHome = () => {
@@ -211,11 +212,9 @@ function Board(props) {
 
   useEffect(() => {
     socket.on('gameStart', (response) => {
-      console.log('in gameStart');
       props.gameStarted(true);
       if (response.isFirstPlayer) console.log('im first player'); else console.log('im second player');
       props.setOpponentName(response.opponentName);
-      console.log('opponentName: ' + response.opponentName);
     });
     socket.on('receivedLines', (numberOfLines) => {
       props.addIndestructibleLine(numberOfLines);
@@ -226,16 +225,23 @@ function Board(props) {
     socket.on('opponentBoardData', (opponentBoardData) => {
       props.updateOpponentBoard(opponentBoardData);
     })
-    socket.emit('lookingForAGame', username);
+    socket.on('updateNextPiece', (nextPiece) => {
+      console.log('nextPiece received from server');
+      console.log(nextPiece);
+      props.updatePiece(nextPiece);
+    });
+
+    socket.emit('lookingForAGame', { userName: username, gameMode: gameMode });
     props.setAwaitingOpponent(true);
     return () => {
       socket.emit('leftGame');
-      props.resetState();
-      props.gameStarted(false);
       socket.off('Victory');
       socket.off('receivedLines');
       socket.off('gameStart');
       socket.off('opponentBoardData');
+
+      props.resetState();
+      props.gameStarted(false);
     };
   }, []);
 
@@ -259,22 +265,21 @@ function Board(props) {
           }
         }
 
-      const isGameOver = props.isGameOver && !props.isGameWon;
-      let shouldShowPiece = true;
-      if (gameMode === 'invisible' && !isGameOver) {
-        shouldShowPiece = false;
-      }
+        const isGameOver = props.isGameOver && !props.isGameWon;
+        let shouldShowPiece = true;
+        if (gameMode === 'invisible' && !isGameOver) {
+          shouldShowPiece = false;
+        }
 
-      return (
-        <div
-          key={`${y}-${x}`}
-          className={`cell ${
-            (cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
-          } id-${cell !== 0 ? cell && shouldShowPiece : activePieceId}`}
-        ></div>
-      );
-    })
-  );
+        return (
+          <div
+            key={`${y}-${x}`}
+            className={`cell ${(cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
+              } id-${cell !== 0 ? cell && shouldShowPiece : activePieceId}`}
+          ></div>
+        );
+      })
+    );
 
 
 

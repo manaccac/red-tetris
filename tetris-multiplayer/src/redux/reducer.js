@@ -70,13 +70,12 @@ function gameReducer(state = initialState, action) {
 					action.resolve();
 					return state;
 				}
-				socket.emit('updateBoard', state.board);
 				piece = { ...state.piece };
 				newPosition = { ...piece.position };
 				newPosition.y += 1;
 				if (isCollision(piece, newPosition.x, newPosition.y, state.board)) {
 					const updatedBoard = [...state.board];
-					// socket.emit("updateBoard", updatedBoard);
+					socket.emit('updateBoard', state.board);
 					piece.shape.forEach((row, y) => {
 						row.forEach((cell, x) => {
 							if (cell !== 0) {
@@ -148,43 +147,17 @@ function gameReducer(state = initialState, action) {
 				droppedPiece.position = droppedPosition;
 				action.resolve();
 				return { ...state, piece: droppedPiece };
-			case 'GENERATE_PIECE':
-				if (state.isGameOver) {
-					action.resolve();
-					return null;
+			case 'UPDATE_PIECE':
+				console.log('in UPDATE_PIECE');
+				const pieces = action.payload;
+				console.log(action.payload);
+				if (pieces.length == 1) {
+					return { ...state, nextPiece: action.payload[0] };
+				} else if (pieces.length == 2) {
+					return { ...state, piece: action.payload[0], nextPiece: action.payload[1] };
 				}
-				const pieceShapes = [
-					{ shape: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]], id: 1 }, // Carré
-					{ shape: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], id: 2 }, // Ligne
-					{ shape: [[0, 0, 0, 0], [0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]], id: 3 }, // T
-					{ shape: [[0, 0, 0, 0], [0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]], id: 4 }, // S
-					{ shape: [[0, 0, 0, 0], [1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]], id: 5 }, // Z
-					{ shape: [[0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0]], id: 6 }, // L inverse
-					{ shape: [[0, 0, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0]], id: 7 }, // L
-				];
-
-
-
-				let shape = state.nextPiece ? state.nextPiece : pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
-				const position = { x: 4, y: 0 };
-				let generatedPiece = {
-					shape: shape,
-					id: shape.id,
-					position: position,
-				};
-				let nextPiece = pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
-				if (isCollision(generatedPiece, position.x, position.y, state.board)) {
-					console.log('Game Over. Restarting...');
-					socket.emit('gameOver');
-					action.resolve();
-					return {
-						...state,
-						board: Array.from({ length: 20 }, () => Array(10).fill(0)),
-						isGameOver: true,
-					};
-				}
-				action.resolve();
-				return { ...state, nextPiece, piece: generatedPiece };
+				console.log('Error: Receiveid <1 or >2 pieces in update_piece');
+				return { ...state };
 			case 'UPDATE_BOARD':
 				action.resolve();
 				return { ...state, board: action.board };
@@ -193,8 +166,6 @@ function gameReducer(state = initialState, action) {
 				return {
 					...initialState,
 					board: Array.from({ length: 20 }, () => Array(10).fill(0)),
-					nextPiece: generateNewPiece(),
-					piece: generateNewPiece(),
 					gameStart: false,
 					isGameOver: false,
 				};
@@ -225,7 +196,6 @@ function gameReducer(state = initialState, action) {
 					isGameOver: true,
 				}
 			case 'SET_OPPONENT_NAME':
-				action.resolve();
 				return {
 					...state,
 					opponentName: action.payload

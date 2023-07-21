@@ -3,7 +3,7 @@ export const MOVE_RIGHT = 'MOVE_RIGHT';
 export const ROTATE = 'ROTATE';
 export const MOVE_DOWN = 'MOVE_DOWN';
 export const DROP_PIECE = 'DROP_PIECE';
-export const GENERATE_PIECE = 'GENERATE_PIECE';
+export const UPDATE_PIECE = 'UPDATE_PIECE';
 export const UPDATE_BOARD = 'UPDATE_BOARD';
 export const RESET_STATE = 'RESET_STATE';
 export const ADD_INDESTRUCTIBLE_LINE = 'ADD_INDESTRUCTIBLE_LINE';
@@ -38,15 +38,6 @@ export function resetState(resolve) {
 	return { type: RESET_STATE, resolve };
 }
 
-export function generatePiece() {
-	console.log('generatePiece');
-	return (dispatch) => {
-		return new Promise((resolve) => {
-			dispatch({ type: GENERATE_PIECE, resolve });
-		});
-	};
-}
-
 export function updateBoard(board) {
 	return { type: UPDATE_BOARD, board };
 }
@@ -57,6 +48,10 @@ export function addIndestructibleLine(x, resolve) {
 
 export function gameStarted(value) {
 	return { type: GAME_STARTED, payload: value };
+}
+
+export function updatePiece(pieces) {
+	return { type: UPDATE_PIECE, payload: pieces };
 }
 
 export const setAwaitingOpponent = (awaiting) => ({
