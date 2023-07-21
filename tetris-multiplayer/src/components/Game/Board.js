@@ -214,6 +214,7 @@ function Board(props) {
     socket.on('gameStart', (response) => {
       props.gameStarted(true);
       if (response.isFirstPlayer) console.log('im first player'); else console.log('im second player');
+      props.updatePiece([response.piece, response.nextPiece]);
       props.setOpponentName(response.opponentName);
     });
     socket.on('receivedLines', (numberOfLines) => {
@@ -239,6 +240,7 @@ function Board(props) {
       socket.off('receivedLines');
       socket.off('gameStart');
       socket.off('opponentBoardData');
+      socket.off('updateNextPiece');
 
       props.resetState();
       props.gameStarted(false);
@@ -344,7 +346,7 @@ function Board(props) {
         {renderCells()}
       </div>
       <div className="next-piece">
-        {renderNextPiece()}
+        {props.gameStart && renderNextPiece()}
       </div>
       <div className="opponent-board">
         {renderOpponentBoard()}

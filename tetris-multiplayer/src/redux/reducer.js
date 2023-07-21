@@ -8,13 +8,13 @@ import {
 } from './utils';
 
 const initialState = {
-	piece: generateNewPiece(),
+	piece: null,
 	position: { x: 0, y: 0 },
 	rotation: 0,
 	board: createEmptyBoard(),
 	score: 0,
 	isGameOver: false,
-	nextPiece: generateNewPiece(),
+	nextPiece: null,
 	gameStart: false,
 	awaitingOpponent: false,
 	opponentBoard: createEmptyBoard(),
@@ -108,8 +108,6 @@ function gameReducer(state = initialState, action) {
 							return acc;
 						}, updatedBoard);
 						const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
-						const newPiece = state.nextPiece;
-						const nextPiece = generateNewPiece();
 						if (completedLines.length > 1) {
 							socket.emit('sendLines', completedLines.length - 1);
 						}
@@ -117,21 +115,18 @@ function gameReducer(state = initialState, action) {
 						return {
 							...state,
 							board: updatedBoard,
-							piece: newPiece,
-							nextPiece: nextPiece,
+							piece: state.nextPiece,
+							// nextPiece: nextPiece,
 							score: score,
 							//   opponentBoard: updatedBoard,
 						};
 					}
-
-					const newPiece = state.nextPiece;
-					const nextPiece = generateNewPiece();
 					action.resolve();
 					return {
 						...state,
 						board: updatedBoard,
-						piece: newPiece,
-						nextPiece: nextPiece,
+						piece: state.nextPiece,
+						// nextPiece: nextPiece,
 						//   opponentBoard: updatedBoard,
 					};
 				}
