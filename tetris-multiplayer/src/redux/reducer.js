@@ -20,6 +20,7 @@ const initialState = {
 	opponentBoard: createEmptyBoard(),
 	isGameWon: undefined,
 	opponentName: null,
+	opponentScore: 0,
 };
 
 function gameReducer(state = initialState, action) {
@@ -75,7 +76,7 @@ function gameReducer(state = initialState, action) {
 				newPosition.y += 1;
 				if (isCollision(piece, newPosition.x, newPosition.y, state.board)) {
 					const updatedBoard = [...state.board];
-					socket.emit('updateBoard', state.board);
+					socket.emit('updateBoard', { board: state.board, score: state.score });
 					piece.shape.forEach((row, y) => {
 						row.forEach((cell, x) => {
 							if (cell !== 0) {
@@ -203,7 +204,9 @@ function gameReducer(state = initialState, action) {
 			case 'UPDATE_OPPONENT_BOARD':
 				return {
 					...state,
-					opponentBoard: action.payload,
+					opponentBoard: action.payload.board,
+					opponentScore: action.payload.score,
+
 				};
 			default:
 				return state;

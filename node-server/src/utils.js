@@ -18,7 +18,7 @@ const leavingGame = (socket, rooms, io, type) => {
 	}
 };
 
-const sendBoardAndPieceToPlayer = (socket, rooms, updatedBoard) => {
+const sendBoardAndPieceToPlayer = (socket, rooms, dataBoard) => {
 	for (const [roomId, roomData] of rooms.entries()) {
 		const clients = roomData.clients;
 		const index = clients.indexOf(socket);
@@ -36,7 +36,7 @@ const sendBoardAndPieceToPlayer = (socket, rooms, updatedBoard) => {
 			console.log(roomData.pieces);
 			socket.pieceId++;
 			//on envoit le board a l'adversaire
-			socket.broadcast.to(roomId).emit('opponentBoardData', updatedBoard);
+			socket.broadcast.to(roomId).emit('opponentBoardData', dataBoard);
 		}
 	}
 }

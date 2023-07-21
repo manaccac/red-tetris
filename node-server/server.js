@@ -29,9 +29,8 @@ io.on('connection', (socket) => {
         leavingGame(socket, rooms, io, 'leftGame');
     });
 
-    socket.on('updateBoard', (updatedBoard) => {
-        console.log('server received update board');
-        sendBoardAndPieceToPlayer(socket, rooms, updatedBoard);
+    socket.on('updateBoard', (dataBoard) => {
+        sendBoardAndPieceToPlayer(socket, rooms, dataBoard);
     });
 
     socket.on('sendLines', (numberOfLines) => {

@@ -223,8 +223,8 @@ function Board(props) {
     socket.on('Victory', () => {
       props.setIsVictory(true);
     });
-    socket.on('opponentBoardData', (opponentBoardData) => {
-      props.updateOpponentBoard(opponentBoardData);
+    socket.on('opponentBoardData', (dataBoard) => {
+      props.updateOpponentBoard(dataBoard);
     })
     socket.on('updateNextPiece', (nextPiece) => {
       console.log('nextPiece received from server');
