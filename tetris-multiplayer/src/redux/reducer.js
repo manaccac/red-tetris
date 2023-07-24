@@ -172,9 +172,6 @@ function gameReducer(state = initialState, action) {
 					newBoard.shift(); // remove the first line from the top
 					newBoard.push(new Array(10).fill(-1)); // add an indestructible line at the bottom
 				}
-				action.resolve();
-				console.log('board after indestructible line');
-				console.log(newBoard);
 				return {
 					...state,
 					board: newBoard,
@@ -209,7 +206,7 @@ function gameReducer(state = initialState, action) {
 				return state;
 		}
 	} catch (error) {
-		console.error('Erreur lors de la réduction du jeu :', error);
+		console.log('Erreur lors de la réduction du jeu :', error);
 		return state;
 	}
 }
