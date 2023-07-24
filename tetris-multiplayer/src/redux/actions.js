@@ -14,24 +14,24 @@ export const IS_VICTORY = 'IS_VICTORY';
 export const SET_OPPONENT_NAME = 'SET_OPPONENT_NAME';
 
 
-export function moveLeft(resolve) {
-	return { type: MOVE_LEFT, resolve };
+export function moveLeft(resolve = () => {}) {
+    return { type: MOVE_LEFT, resolve };
 }
 
-export function moveRight(resolve) {
-	return { type: MOVE_RIGHT, resolve };
+export function moveRight(resolve = () => {}) {
+    return { type: MOVE_RIGHT, resolve };
 }
 
-export function rotate(resolve) {
-	return { type: ROTATE, resolve };
+export function rotate(resolve = () => {}) {
+    return { type: ROTATE, resolve };
 }
 
-export function moveDown(resolve) {
-	return { type: MOVE_DOWN, resolve };
+export function moveDown(resolve = () => {}) {
+    return { type: MOVE_DOWN, resolve };
 }
 
-export function dropPiece(resolve) {
-	return { type: DROP_PIECE, resolve };
+export function dropPiece(resolve = () => {}) {
+    return { type: DROP_PIECE, resolve };
 }
 
 export function resetState(resolve) {

@@ -5,7 +5,6 @@ import { MemoryRouter } from 'react-router-dom';
 import configureStore from 'redux-mock-store';
 import Board from '../../../src/components/Game/Board';
 import '@testing-library/jest-dom/extend-expect';
-import { moveLeft } from '../../../src/redux/actions';
 
 
 const initialState = {
@@ -35,7 +34,6 @@ describe('Board', () => {
   });
 
   it('should render the game board correctly', () => {
-    // Assert that the game board is rendered correctly
     for (let y = 0; y < 20; y++) {
       for (let x = 0; x < 10; x++) {
         const cellElement = screen.getByTestId(`cell-${y}-${x}`);
