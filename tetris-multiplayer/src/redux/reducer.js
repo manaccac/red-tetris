@@ -140,7 +140,7 @@ function gameReducer(state = initialState, action) {
 					droppedPosition.y += 1;
 				}
 				droppedPiece.position = droppedPosition;
-				action.resolve();
+				// action.resolve();
 				return { ...state, piece: droppedPiece };
 			case 'UPDATE_PIECE':
 				console.log('in UPDATE_PIECE');
