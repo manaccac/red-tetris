@@ -1,8 +1,9 @@
-/* eslint-disable jest/no-conditional-expect */
+
 import configureStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import gameReducer, { initialState } from '../../src/redux/reducer';
 import { generateNewPiece, createEmptyBoard } from '../../src/redux/utils';
+
 
 
 const middlewares = [thunk];
@@ -430,11 +431,14 @@ describe('gameReducer', () => {
     // console.log("newState.piece.position = " ,newState.piece.position)
     // console.log("initialState_moveD.piece.position.y = " , initialState_moveD.piece.position.y)
     if (newState.piece) {
+        // eslint-disable-next-line jest/no-conditional-expect
         expect(newState.piece.position.x).toEqual(initialState_moveD.piece.position.x);
+        // eslint-disable-next-line jest/no-conditional-expect
         expect(newState.piece.position.y).toEqual(initialState_moveD.piece.position.y + 1);  
       }
       expect(newState.board).toEqual(initialState_moveD.board);
   });
+
   
 
   it('should handle IS_VICTORY correctly', () => {
