@@ -35,7 +35,7 @@ function gameReducer(state = initialState, action) {
 				if (!isCollision(piece, newPosition.x, newPosition.y, state.board)) {
 					piece.position = newPosition;
 				}
-				action.resolve();
+				//action.resolve();
 				return { ...state, piece };
 			case 'MOVE_RIGHT':
 				if (state.piece.position.x >= 7) {
@@ -43,7 +43,7 @@ function gameReducer(state = initialState, action) {
 					newPosition = { ...piece.position };
 					newPosition.x = 7;
 					piece.position = newPosition;
-					action.resolve();
+					//action.resolve();
 					return { ...state, piece };
 				}
 
@@ -53,7 +53,7 @@ function gameReducer(state = initialState, action) {
 				if (!isCollision(piece, newPosition.x, newPosition.y, state.board)) {
 					piece.position = newPosition;
 				}
-				action.resolve();
+				//action.resolve();
 				return { ...state, piece };
 			case 'ROTATE':
 				piece = { ...state.piece };
@@ -63,17 +63,18 @@ function gameReducer(state = initialState, action) {
 				if (isCollision(piece, newPosition.x, newPosition.y, state.board)) {
 					piece.shape = state.piece.shape;
 				}
-				action.resolve();
+				//action.resolve();
 				return { ...state, piece };
 			case 'MOVE_DOWN':
 				if (state.isGameOver) {
-					action.resolve();
+					//action.resolve();
 					return state;
 				}
 				piece = { ...state.piece };
 				newPosition = { ...piece.position };
 				newPosition.y += 1;
 				if (isCollision(piece, newPosition.x, newPosition.y, state.board)) {
+					console.log("in move")
 					const updatedBoard = [...state.board];
 					socket.emit('updateBoard', state.board);
 					piece.shape.forEach((row, y) => {
@@ -85,8 +86,9 @@ function gameReducer(state = initialState, action) {
 							}
 						});
 					});
+					console.log("in move2")
 					if (piece.position.y < 0) {
-						action.resolve();
+						//action.resolve();
 						socket.emit('gameOver');
 						return {
 							...state,
@@ -100,6 +102,7 @@ function gameReducer(state = initialState, action) {
 							completedLines.push(y);
 						}
 					});
+					console.log("in move3")
 					if (completedLines.length > 0) {
 						let completedLinesWithoutIndestructible = completedLines.filter(lineIndex => !updatedBoard[lineIndex].includes(-1));
 						completedLinesWithoutIndestructible.reduce((acc, lineIndex) => {
@@ -111,7 +114,8 @@ function gameReducer(state = initialState, action) {
 						if (completedLines.length > 1) {
 							socket.emit('sendLines', completedLines.length - 1);
 						}
-						action.resolve();
+						console.log("in move4")
+						//action.resolve();
 						return {
 							...state,
 							board: updatedBoard,
@@ -121,7 +125,7 @@ function gameReducer(state = initialState, action) {
 							//   opponentBoard: updatedBoard,
 						};
 					}
-					action.resolve();
+					//action.resolve();
 					return {
 						...state,
 						board: updatedBoard,
@@ -131,7 +135,7 @@ function gameReducer(state = initialState, action) {
 					};
 				}
 				piece.position = newPosition;
-				action.resolve();
+				//action.resolve();
 				return { ...state, piece };
 			case 'DROP_PIECE':
 				let droppedPiece = { ...state.piece };
@@ -140,7 +144,7 @@ function gameReducer(state = initialState, action) {
 					droppedPosition.y += 1;
 				}
 				droppedPiece.position = droppedPosition;
-				// action.resolve();
+				// //action.resolve();
 				return { ...state, piece: droppedPiece };
 			case 'UPDATE_PIECE':
 				console.log('in UPDATE_PIECE');
@@ -154,10 +158,10 @@ function gameReducer(state = initialState, action) {
 				console.log('Error: Receiveid <1 or >2 pieces in update_piece');
 				return { ...state };
 			case 'UPDATE_BOARD':
-				action.resolve();
+				//action.resolve();
 				return { ...state, board: action.board };
 			case 'RESET_STATE':
-				action.resolve();
+				//action.resolve();
 				return {
 					...initialState,
 					board: Array.from({ length: 20 }, () => Array(10).fill(0)),

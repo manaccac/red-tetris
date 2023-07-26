@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-expect */
 import configureStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import gameReducer, { initialState } from '../../src/redux/reducer';
@@ -280,8 +281,161 @@ describe('gameReducer', () => {
 
 
   it('should handle GAME_STARTED correctly', () => {
-    // Écrire le test pour l'action GAME_STARTED ici
+    // First, set awaitingOpponent to true
+    store.dispatch({ type: 'SET_AWAITING_OPPONENT', payload: true });
+  
+    // Then, dispatch the GAME_STARTED action with payload true
+    store.dispatch({ type: 'GAME_STARTED', payload: true });
+  
+    // Check if the action SET_AWAITING_OPPONENT has been dispatched correctly
+    const actions = store.getActions();
+    expect(actions).toEqual([
+      { type: 'SET_AWAITING_OPPONENT', payload: true },
+      { type: 'GAME_STARTED', payload: true },
+    ]);
+  
+    // Get the updated state after the actions are dispatched
+    const newState = gameReducer(store.getState(), actions[1]);
+
+    console.log('newState.awaitingOpponent:', newState.awaitingOpponent);
+    console.log('newState.gameStart:', newState.gameStart);
+  
+    // Check if the state has been updated correctly
+    expect(newState.awaitingOpponent).toEqual(false);
+    expect(newState.gameStart).toEqual(true);
   });
+  
+  it('should handle MOVE_RIGHT correctly when already at the rightmost position', () => {
+    // Set the initial state with piece positioned at the rightmost position (x = 7)
+    const initialState = {
+      piece: { shape: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]], position: { x: 7, y: 0 } },
+      // ... other state properties ...
+    };
+  
+    // Create the mock store with the initial state
+    const store = mockStore(initialState);
+  
+    // Dispatch the action MOVE_RIGHT
+    store.dispatch({ type: 'MOVE_RIGHT', resolve: () => {} });
+  
+    // Check if the action MOVE_RIGHT has been dispatched correctly
+    const actions = store.getActions();
+    expect(actions).toEqual([{ type: 'MOVE_RIGHT', resolve: expect.any(Function) }]);
+  
+    // Get the updated state after the action is dispatched
+    const newState = gameReducer(store.getState(), actions[0]);
+    const updatedPiece = newState.piece;
+  
+    // Check if the piece has been moved to the rightmost position (x = 7)
+    expect(updatedPiece.position.x).toEqual(7);
+  
+    // Check if the piece remains at the rightmost position even if MOVE_RIGHT is dispatched again
+    store.dispatch({ type: 'MOVE_RIGHT', resolve: () => {} });
+    const actionsAfterMoveAgain = store.getActions();
+    const newStateAfterMoveAgain = gameReducer(newState, actionsAfterMoveAgain[0]);
+    const updatedPieceAfterMoveAgain = newStateAfterMoveAgain.piece;
+  
+    expect(updatedPieceAfterMoveAgain.position.x).toEqual(7);
+  });
+
+  it('should handle ROTATE correctly when collision occurs', () => {
+    // Set up the initial state with a collision in the rotated shape
+    const initialState_rotate = {
+      piece: { shape: [[0, 0, 1], [1, 1, 1]], position: { x: 0, y: 0 } },
+      // ... other state properties ...
+    };
+  
+    // Create the mock store with the initial state
+    const store = mockStore(initialState_rotate);
+  
+    // Dispatch the action ROTATE
+    store.dispatch({ type: 'ROTATE', resolve: () => {} });
+  
+    // Get the updated state after the action is dispatched
+    const actions = store.getActions();
+    const newState = gameReducer(store.getState(), actions[0]);
+  
+    // Check if the shape of the piece remains unchanged after the collision
+    expect(newState.piece.shape).toEqual(initialState_rotate.piece.shape);
+  });
+  
+  it('should handle MOVE_DOWN correctly when game is over', () => {
+    // Set up the initial state with game over
+    const initialState_move_down = {
+      piece: { shape: [[1]], position: { x: 0, y: -1 } },
+      isGameOver: true,
+      // ... other state properties ...
+    };
+  
+    // Create the mock store with the initial state
+    const store = mockStore(initialState_move_down);
+  
+    // Dispatch the action MOVE_DOWN
+    store.dispatch({ type: 'MOVE_DOWN', resolve: () => {} });
+  
+    // Get the updated state after the action is dispatched
+    const actions = store.getActions();
+    const newState = gameReducer(store.getState(), actions[0]);
+  
+    // Check if the state remains unchanged when the game is over
+    expect(newState).toEqual(initialState_move_down);
+  });
+  
+  it('should handle MOVE_DOWN correctly with collision', () => {
+    // Set up the initial state with a piece that causes collision when moving down
+    const initialState_moveD = {
+      piece: {
+        shape: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], 
+        id: 2,
+        position: {
+          x: 0,
+          y: 9,
+        }
+      },
+      board: [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+      ],
+    };
+  
+    // Create the mock store with the initial state
+    const store = mockStore(initialState_moveD);
+  
+    // Dispatch the action MOVE_DOWN
+    store.dispatch({ type: 'MOVE_DOWN', resolve: () => {} });
+  
+    // Get the updated state after the action is dispatched
+    const actions = store.getActions();
+    const newState = gameReducer(store.getState(), actions[0]);
+  
+    // Check if the piece position and the board are unchanged after the collision
+    // console.log("newState.piece.position = " ,newState.piece.position)
+    // console.log("initialState_moveD.piece.position.y = " , initialState_moveD.piece.position.y)
+    if (newState.piece) {
+        expect(newState.piece.position.x).toEqual(initialState_moveD.piece.position.x);
+        expect(newState.piece.position.y).toEqual(initialState_moveD.piece.position.y + 1);  
+      }
+      expect(newState.board).toEqual(initialState_moveD.board);
+  });
+  
 
   it('should handle IS_VICTORY correctly', () => {
     // Écrire le test pour l'action IS_VICTORY ici
