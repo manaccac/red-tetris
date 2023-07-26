@@ -11,7 +11,7 @@ export function calculateScore(completedLines) {
 		}
 		return 0;
 	} catch (error) {
-		console.error('Erreur lors du calcul du score :', error);
+		console.log('Erreur lors du calcul du score :', error);
 		return 0;
 	}
 }
@@ -37,7 +37,7 @@ export const generateNewPiece = () => {
 			position: position,
 		};
 	} catch (error) {
-		console.error('Erreur lors de la génération d\'une nouvelle pièce :', error);
+		console.log('Erreur lors de la génération d\'une nouvelle pièce :', error);
 		return null;
 	}
 };
@@ -56,7 +56,7 @@ export function rotateMatrix(matrix) {
 		}
 		return rotatedMatrix;
 	} catch (error) {
-		console.error('Erreur lors de la rotation de la matrice :', error);
+		console.log('Erreur lors de la rotation de la matrice :', error);
 		return matrix;
 	}
 };
@@ -87,7 +87,7 @@ export function isCollision(piece, x, y, board) {
 		}
 		return false;
 	} catch (error) {
-		console.error('Erreur lors de la vérification de la collision :', error);
+		console.log('Erreur lors de la vérification de la collision :', error);
 		return true;
 	}
 }
@@ -100,7 +100,7 @@ export function createEmptyBoard() {
 		}
 		return board;
 	} catch (error) {
-		console.error('Erreur lors de la création du plateau vide :', error);
+		console.log('Erreur lors de la création du plateau vide :', error);
 		return [];
 	}
 };

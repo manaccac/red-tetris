@@ -74,7 +74,6 @@ function gameReducer(state = initialState, action) {
 				newPosition = { ...piece.position };
 				newPosition.y += 1;
 				if (isCollision(piece, newPosition.x, newPosition.y, state.board)) {
-					console.log("in move")
 					const updatedBoard = [...state.board];
 					socket.emit('updateBoard', state.board);
 					piece.shape.forEach((row, y) => {
@@ -86,7 +85,6 @@ function gameReducer(state = initialState, action) {
 							}
 						});
 					});
-					console.log("in move2")
 					if (piece.position.y < 0) {
 						//action.resolve();
 						socket.emit('gameOver');
@@ -102,7 +100,6 @@ function gameReducer(state = initialState, action) {
 							completedLines.push(y);
 						}
 					});
-					console.log("in move3")
 					if (completedLines.length > 0) {
 						let completedLinesWithoutIndestructible = completedLines.filter(lineIndex => !updatedBoard[lineIndex].includes(-1));
 						completedLinesWithoutIndestructible.reduce((acc, lineIndex) => {
@@ -114,7 +111,6 @@ function gameReducer(state = initialState, action) {
 						if (completedLines.length > 1) {
 							socket.emit('sendLines', completedLines.length - 1);
 						}
-						console.log("in move4")
 						//action.resolve();
 						return {
 							...state,

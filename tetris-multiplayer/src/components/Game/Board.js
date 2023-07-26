@@ -141,6 +141,7 @@ function Board(props) {
       if (props.isGameOver || Date.now() - lastMove[event.key] < delay) {
         return;
       }
+
       lastMove[event.key] = Date.now();
 
       switch (event.key) {
@@ -164,7 +165,7 @@ function Board(props) {
           break;
       }
     } catch (error) {
-      console.error('Erreur lors de la gestion de la touche enfoncée :', error);
+      console.log('Erreur lors de la gestion de la touche enfoncée :', error);
     }
   };
 
@@ -173,6 +174,7 @@ function Board(props) {
 
     if (props.gameStart) {
       countdownInterval = setInterval(() => {
+        console.log("hello count :",countdownInterval);
         setCountdown((prevCountdown) => {
           if (prevCountdown <= 1) {
             clearInterval(countdownInterval);
@@ -200,7 +202,7 @@ function Board(props) {
           await props.moveDown();
         }
       } catch (error) {
-        console.error('Error while automatically moving down:', error);
+        console.log('Error while automatically moving down:', error);
       }
     }, getRandomDelay());
 
@@ -305,7 +307,7 @@ function Board(props) {
         });
       }
     } catch (error) {
-      console.error('Erreur lors du rendu de la pièce suivante :', error);
+      console.log('Erreur lors du rendu de la pièce suivante :', error);
     }
 
     return boardw.map((row, y) => (
