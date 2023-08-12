@@ -3,7 +3,7 @@ import {
 	isCollision,
 	rotateMatrix,
 	calculateScore,
-	generateNewPiece,
+	// generateNewPiece,
 	createEmptyBoard,
 } from './utils';
 
@@ -146,9 +146,9 @@ function gameReducer(state = initialState, action) {
 				console.log('in UPDATE_PIECE');
 				const pieces = action.payload;
 				console.log(action.payload);
-				if (pieces.length == 1) {
+				if (pieces.length === 1) {
 					return { ...state, nextPiece: action.payload[0] };
-				} else if (pieces.length == 2) {
+				} else if (pieces.length === 2) {
 					return { ...state, piece: action.payload[0], nextPiece: action.payload[1] };
 				}
 				console.log('Error: Receiveid <1 or >2 pieces in update_piece');

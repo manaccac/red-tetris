@@ -7,6 +7,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
 import Cookies from 'js-cookie';
+import OpponentBoard from './OpponentBoard';
+import RenderNextPiece from './NextPiece';
 
 function WaitingScreen() {
   return (
@@ -226,6 +228,7 @@ function Board(props) {
       props.setIsVictory(true);
     });
     socket.on('opponentBoardData', (opponentBoardData) => {
+	  console.log('opponentBoardData received from server');
       props.updateOpponentBoard(opponentBoardData);
     })
     socket.on('updateNextPiece', (nextPiece) => {
@@ -287,60 +290,6 @@ function Board(props) {
     })
   );
 
-
-
-
-  const renderNextPiece = () => {
-    const boardw = Array.from({ length: 4 }, () => Array(4).fill(0));
-
-    try {
-      if (props.nextPiece.shape && Array.isArray(props.nextPiece.shape) && props.nextPiece.shape.length > 0) {
-        const offsetX = Math.floor((boardw[0].length - props.nextPiece.shape[0].length) / 2);
-        const offsetY = Math.floor((boardw.length - props.nextPiece.shape.length) / 2);
-
-        props.nextPiece.shape.forEach((row, rowIndex) => {
-          row.forEach((value, colIndex) => {
-            if (value !== 0) {
-              boardw[rowIndex + offsetY][colIndex + offsetX] = value;
-            }
-          });
-        });
-      }
-    } catch (error) {
-      console.log('Erreur lors du rendu de la pièce suivante :', error);
-    }
-
-    return boardw.map((row, y) => (
-      <div key={`row-${y}`} className="next-piece-row">
-        {row.map((cell, x) => (
-			<div
-				key={`cell-${y}-${x}`}
-				className={`next-piece-cell ${cell !== 0 ? 'filled' : ''}`}
-				data-testid={`next-cell-${y}-${x}`}
-			></div>
-        ))}
-      </div>
-    ));
-  };
-
-  const renderOpponentBoard = () => {
-    // console.log(props.opponentBoard);
-    if (props.opponentBoard && Array.isArray(props.opponentBoard) && props.opponentBoard.length > 0) {
-      //   console.log('opponentBOard:');
-      //   console.log(props.opponentBoard);
-      return props.opponentBoard.flatMap((row, y) =>
-        row.map((cell, x) => (
-          <div
-            key={`cell-${y}-${x}`}
-            className={`opponent-board-cell ${cell !== 0 ? 'filled' : ''}`}
-          ></div>
-        ))
-      );
-    } else {
-      return null;
-    }
-  };
-
   return (
     <div
       className="game-container"
@@ -351,12 +300,8 @@ function Board(props) {
 	  	{renderCells()}
 	  </div>
 
-      <div className="next-piece">
-        {props.gameStart && renderNextPiece()}
-      </div>
-      <div className="opponent-board">
-        {renderOpponentBoard()}
-      </div>
+	  <RenderNextPiece />
+	  <OpponentBoard />
       <div className="opponent-name">
         {props.opponentName}
       </div>
@@ -367,8 +312,6 @@ function Board(props) {
       {!props.isGameOver && props.gameStart && !gameRunning && (
         <CountdownScreen countdown={countdown} />)}
     </div>
-
-
   );
 }
 
