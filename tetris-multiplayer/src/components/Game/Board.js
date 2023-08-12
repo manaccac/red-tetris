@@ -9,54 +9,7 @@ import { socket } from '../../socket';
 import Cookies from 'js-cookie';
 import OpponentBoard from './OpponentBoard';
 import RenderNextPiece from './NextPiece';
-
-function WaitingScreen() {
-  return (
-    <div className="overlay">
-      <div className="message">
-        <h1>En attente d'un adversaire...</h1>
-        <div className="loading-animation"></div>
-      </div>
-    </div>
-  );
-}
-
-function CountdownScreen({ countdown }) {
-  return (
-    <div className="overlay">
-      <div className="message">
-        <h1>Le jeu commence dans...</h1>
-        <div className="countdown">{countdown}</div>
-      </div>
-    </div>
-  );
-}
-
-function GameOverScreen({ onGoHome, onRestart }) {
-  return (
-    <div className="overlay">
-      <div className="message">
-        <h1>Partie terminée</h1>
-        <button onClick={onGoHome}>Retour à la page d'accueil.</button>
-        <button onClick={onRestart}>Recommencer</button>
-      </div>
-    </div>
-  );
-}
-
-function VictoryScreen({ onGoHome, onRestart }) {
-  return (
-    <div className="overlay">
-      <div className="message">
-        <h1>Victoire !</h1>
-        <button onClick={onGoHome}>Retour à la page d'accueil.</button>
-        <button onClick={onRestart}>Recommencer</button>
-      </div>
-    </div>
-  );
-}
-
-
+import { WaitingScreen, CountdownScreen, GameOverScreen, VictoryScreen } from './Screens';
 
 const lastMove = {
   ArrowLeft: 0,
@@ -306,11 +259,10 @@ function Board(props) {
         {props.opponentName}
       </div>
 
-      {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={goHome} onRestart={restartGame} />}
+	  {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={goHome} onRestart={restartGame} />}
       {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={goHome} onRestart={restartGame} />}
       {!props.isGameOver && !props.gameStart && <WaitingScreen />}
-      {!props.isGameOver && props.gameStart && !gameRunning && (
-        <CountdownScreen countdown={countdown} />)}
+      {!props.isGameOver && props.gameStart && !gameRunning && <CountdownScreen countdown={countdown} />}
     </div>
   );
 }
