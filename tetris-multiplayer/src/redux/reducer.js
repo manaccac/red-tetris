@@ -20,6 +20,7 @@ const initialState = {
 	opponentBoard: createEmptyBoard(),
 	isGameWon: undefined,
 	opponentName: null,
+	leader: null,
 };
 
 function gameReducer(state = initialState, action) {
@@ -201,6 +202,11 @@ function gameReducer(state = initialState, action) {
 				return {
 					...state,
 					opponentBoard: action.payload,
+				};
+			case 'SET_LEADER':
+				return {
+					...state,
+					leader: action.payload
 				};
 			default:
 				return state;

@@ -170,8 +170,14 @@ function Board(props) {
   useEffect(() => {
     socket.on('gameStart', (response) => {
       props.gameStarted(true);
-      if (response.isFirstPlayer) console.log('im first player'); else console.log('im second player');
-      props.updatePiece([response.piece, response.nextPiece]);
+	  if (response.isFirstPlayer) {
+		console.log('im first player');
+		props.setLeader(true);
+	  } else {
+		console.log('im second player');
+		props.setLeader(false);
+	  }
+	  props.updatePiece([response.piece, response.nextPiece]);
       props.setOpponentName(response.opponentName);
     });
     socket.on('receivedLines', (numberOfLines) => {
