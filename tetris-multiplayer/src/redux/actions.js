@@ -12,25 +12,25 @@ export const SET_AWAITING_OPPONENT = 'SET_AWAITING_OPPONENT';
 export const UPDATE_OPPONENT_BOARD = 'UPDATE_OPPONENT_BOARD';
 export const IS_VICTORY = 'IS_VICTORY';
 export const SET_OPPONENT_NAME = 'SET_OPPONENT_NAME';
+export const SET_LEADER = 'SET_LEADER';
 
-
-export function moveLeft(resolve) {
+export function moveLeft(resolve = () => { }) {
 	return { type: MOVE_LEFT, resolve };
 }
 
-export function moveRight(resolve) {
+export function moveRight(resolve = () => { }) {
 	return { type: MOVE_RIGHT, resolve };
 }
 
-export function rotate(resolve) {
+export function rotate(resolve = () => { }) {
 	return { type: ROTATE, resolve };
 }
 
-export function moveDown(resolve) {
+export function moveDown(resolve = () => { }) {
 	return { type: MOVE_DOWN, resolve };
 }
 
-export function dropPiece(resolve) {
+export function dropPiece(resolve = () => { }) {
 	return { type: DROP_PIECE, resolve };
 }
 
@@ -73,3 +73,10 @@ export const setOpponentName = (opponentName) => ({
 	type: SET_OPPONENT_NAME,
 	payload: opponentName
 });
+
+export function setLeader(isLeader) {
+	return {
+		type: SET_LEADER,
+		payload: isLeader
+	};
+}

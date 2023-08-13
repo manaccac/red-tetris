@@ -1,8 +1,26 @@
-import { render, screen } from '@testing-library/react';
+/** @jsxRuntime classic */
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
+import React from 'react';
 import App from './App';
+import UsernamePrompt from './components/UsernamePrompt';
 
-test('renders learn react link', () => {
+jest.mock('./App.css', () => ({}));
+
+test('Renders App component', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
 });
+
+jest.mock('js-cookie', () => ({
+  get: jest.fn(),
+}));
+
+test('Renders UsernamePrompt when username is empty', () => {
+  const { getByTestId } = render(<UsernamePrompt />);
+  const usernamePrompt = getByTestId('usernamePrompt');
+  expect(usernamePrompt).toBeInTheDocument();
+});
+
+jest.mock('js-cookie', () => ({
+  get: jest.fn().mockReturnValue('TestUser'),
+}));

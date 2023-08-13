@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import {
   moveLeft, moveRight, rotate, moveDown, dropPiece, updatePiece,
-  resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard, setIsVictory, setOpponentName
+  resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard, setIsVictory, setOpponentName, setLeader
 } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
@@ -92,6 +92,7 @@ const mapDispatchToProps = (dispatch) => ({
   setAwaitingOpponent: (awaiting) => dispatch(setAwaitingOpponent(awaiting)),
   updateOpponentBoard: (board) => dispatch(updateOpponentBoard(board)),
   setOpponentName: (oppName) => dispatch(setOpponentName(oppName)),
+  setLeader: (leader) => dispatch(setLeader(leader)),
 });
 
 function Board(props) {
@@ -135,6 +136,7 @@ function Board(props) {
       if (props.isGameOver || Date.now() - lastMove[event.key] < delay) {
         return;
       }
+
       lastMove[event.key] = Date.now();
 
       switch (event.key) {
@@ -158,7 +160,7 @@ function Board(props) {
           break;
       }
     } catch (error) {
-      console.error('Erreur lors de la gestion de la touche enfoncée :', error);
+      console.log('Erreur lors de la gestion de la touche enfoncée :', error);
     }
   };
 
@@ -168,6 +170,7 @@ function Board(props) {
     console.log('value of gameSTart after restart' + props.gameStart);
     if (props.gameStart) {
       countdownInterval = setInterval(() => {
+        console.log("hello count :", countdownInterval);
         setCountdown((prevCountdown) => {
           if (prevCountdown <= 1) {
             clearInterval(countdownInterval);
@@ -195,7 +198,7 @@ function Board(props) {
           await props.moveDown();
         }
       } catch (error) {
-        console.error('Error while automatically moving down:', error);
+        console.log('Error while automatically moving down:', error);
       }
     }, getRandomDelay());
 
@@ -290,80 +293,25 @@ function Board(props) {
           <div
             key={`${y}-${x}`}
             className={`cell ${(cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
-              } id-${cell !== 0 ? cell && shouldShowPiece : activePieceId}`}
+              } id-${cell !== 0 && shouldShowPiece ? cell : activePieceId}`}
+            data-testid={`cell-${y}-${x}`}
           ></div>
         );
       })
     );
 
-
-
-
-  const renderNextPiece = () => {
-    const boardw = Array.from({ length: 4 }, () => Array(4).fill(0));
-
-    try {
-      if (props.nextPiece.shape && Array.isArray(props.nextPiece.shape) && props.nextPiece.shape.length > 0) {
-        const offsetX = Math.floor((boardw[0].length - props.nextPiece.shape[0].length) / 2);
-        const offsetY = Math.floor((boardw.length - props.nextPiece.shape.length) / 2);
-
-        props.nextPiece.shape.forEach((row, rowIndex) => {
-          row.forEach((value, colIndex) => {
-            if (value !== 0) {
-              boardw[rowIndex + offsetY][colIndex + offsetX] = value;
-            }
-          });
-        });
-      }
-    } catch (error) {
-      console.error('Erreur lors du rendu de la pièce suivante :', error);
-    }
-
-    return boardw.map((row, y) => (
-      <div key={`row-${y}`} className="next-piece-row">
-        {row.map((cell, x) => (
-          <div
-            key={`cell-${y}-${x}`}
-            className={`next-piece-cell ${cell !== 0 ? 'filled' : ''}`}
-          ></div>
-        ))}
-      </div>
-    ));
-  };
-
-  const renderOpponentBoard = () => {
-    // console.log(props.opponentBoard);
-    if (props.opponentBoard && Array.isArray(props.opponentBoard) && props.opponentBoard.length > 0) {
-      //   console.log('opponentBOard:');
-      //   console.log(props.opponentBoard);
-      return props.opponentBoard.flatMap((row, y) =>
-        row.map((cell, x) => (
-          <div
-            key={`cell-${y}-${x}`}
-            className={`opponent-board-cell ${cell !== 0 ? 'filled' : ''}`}
-          ></div>
-        ))
-      );
-    } else {
-      return null;
-    }
-  };
-
   return (
     <div
       className="game-container"
       onKeyDown={handleKeyDown}
-        tabIndex="0"
+      tabIndex="0"
     >
-      <div className="board">
+      <div className="board" data-testid="board-container">
         {renderCells()}
       </div>
-      <div className="next-piece">
-        {props.gameStart && props.nextPiece && renderNextPiece()}
-      </div>
-      <div className="opponent-board">
-        {renderOpponentBoard()}
-      </div>
+
+      <RenderNextPiece />
+      <OpponentBoard />
       <div className="opponent-name">
         {props.opponentName}
       </div>
@@ -371,11 +319,8 @@ function Board(props) {
       {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={goHome} onRestart={restartGame} isFirstPlayer={isFirstPlayer} />}
       {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={goHome} onRestart={restartGame} isFirstPlayer={isFirstPlayer} />}
       {!props.isGameOver && !props.gameStart && <WaitingScreen />}
-      {!props.isGameOver && props.gameStart && !gameRunning && (
-        <CountdownScreen countdown={countdown} />)}
+      {!props.isGameOver && props.gameStart && !gameRunning && <CountdownScreen countdown={countdown} />}
     </div>
-
-
   );
 }
 

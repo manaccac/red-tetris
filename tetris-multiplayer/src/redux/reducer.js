@@ -3,6 +3,7 @@ import {
 	isCollision,
 	rotateMatrix,
 	calculateScore,
+	// generateNewPiece,
 	createEmptyBoard,
 } from './utils';
 
@@ -21,6 +22,7 @@ const initialState = {
 	isGameWon: undefined,
 	opponentName: null,
 	opponentScore: 0,
+	leader: null,
 };
 
 function gameReducer(state = initialState, action) {
@@ -36,7 +38,7 @@ function gameReducer(state = initialState, action) {
 				if (!isCollision(piece, newPosition.x, newPosition.y, state.board)) {
 					piece.position = newPosition;
 				}
-				action.resolve();
+				//action.resolve();
 				return { ...state, piece };
 			case 'MOVE_RIGHT':
 				if (state.piece.position.x >= 7) {
@@ -44,7 +46,7 @@ function gameReducer(state = initialState, action) {
 					newPosition = { ...piece.position };
 					newPosition.x = 7;
 					piece.position = newPosition;
-					action.resolve();
+					//action.resolve();
 					return { ...state, piece };
 				}
 
@@ -54,7 +56,7 @@ function gameReducer(state = initialState, action) {
 				if (!isCollision(piece, newPosition.x, newPosition.y, state.board)) {
 					piece.position = newPosition;
 				}
-				action.resolve();
+				//action.resolve();
 				return { ...state, piece };
 			case 'ROTATE':
 				piece = { ...state.piece };
@@ -64,11 +66,11 @@ function gameReducer(state = initialState, action) {
 				if (isCollision(piece, newPosition.x, newPosition.y, state.board)) {
 					piece.shape = state.piece.shape;
 				}
-				action.resolve();
+				//action.resolve();
 				return { ...state, piece };
 			case 'MOVE_DOWN':
 				if (state.isGameOver) {
-					action.resolve();
+					//action.resolve();
 					return state;
 				}
 				piece = { ...state.piece };
@@ -87,7 +89,7 @@ function gameReducer(state = initialState, action) {
 						});
 					});
 					if (piece.position.y < 0) {
-						action.resolve();
+						//action.resolve();
 						socket.emit('gameOver');
 						return {
 							...state,
@@ -112,7 +114,7 @@ function gameReducer(state = initialState, action) {
 						if (completedLines.length > 1) {
 							socket.emit('sendLines', completedLines.length - 1);
 						}
-						action.resolve();
+						//action.resolve();
 						return {
 							...state,
 							board: updatedBoard,
@@ -122,7 +124,7 @@ function gameReducer(state = initialState, action) {
 							//   opponentBoard: updatedBoard,
 						};
 					}
-					action.resolve();
+					//action.resolve();
 					return {
 						...state,
 						board: updatedBoard,
@@ -132,7 +134,7 @@ function gameReducer(state = initialState, action) {
 					};
 				}
 				piece.position = newPosition;
-				action.resolve();
+				//action.resolve();
 				return { ...state, piece };
 			case 'DROP_PIECE':
 				let droppedPiece = { ...state.piece };
@@ -141,22 +143,23 @@ function gameReducer(state = initialState, action) {
 					droppedPosition.y += 1;
 				}
 				droppedPiece.position = droppedPosition;
-				action.resolve();
+				// //action.resolve();
 				return { ...state, piece: droppedPiece };
 			case 'UPDATE_PIECE':
 				const pieces = action.payload;
-				if (pieces.length == 1) {
+				console.log(action.payload);
+				if (pieces.length === 1) {
 					return { ...state, nextPiece: action.payload[0] };
-				} else if (pieces.length == 2) {
+				} else if (pieces.length === 2) {
 					return { ...state, piece: action.payload[0], nextPiece: action.payload[1] };
 				}
 				console.log('Error: Receiveid <1 or >2 pieces in update_piece');
 				return { ...state };
 			case 'UPDATE_BOARD':
-				action.resolve();
+				//action.resolve();
 				return { ...state, board: action.board };
 			case 'RESET_STATE':
-				action.resolve();
+				//action.resolve();
 				return {
 					...initialState,
 					board: Array.from({ length: 20 }, () => Array(10).fill(0)),
@@ -171,9 +174,6 @@ function gameReducer(state = initialState, action) {
 					newBoard.shift(); // remove the first line from the top
 					newBoard.push(new Array(10).fill(-1)); // add an indestructible line at the bottom
 				}
-				action.resolve();
-				console.log('board after indestructible line');
-				console.log(newBoard);
 				return {
 					...state,
 					board: newBoard,
@@ -206,11 +206,16 @@ function gameReducer(state = initialState, action) {
 					opponentScore: action.payload.score,
 
 				};
+			case 'SET_LEADER':
+				return {
+					...state,
+					leader: action.payload
+				};
 			default:
 				return state;
 		}
 	} catch (error) {
-		console.error('Erreur lors de la réduction du jeu :', error);
+		console.log('Erreur lors de la réduction du jeu :', error);
 		return state;
 	}
 }

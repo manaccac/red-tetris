@@ -46,7 +46,7 @@
   }
   
   .board {
-	width: 70%;
+	width: 35%;
 	height: 90%;
 	background-color: #f0f0f0;
 	display: grid;
@@ -132,18 +132,40 @@
   .countdown {
 	font-size: 48px;
   }
-  
 
-  .opponent-board {
-	width: 30%;
-	height: 45%;
+  .container {
+	flex: 1; /* This will make the container take up the remaining space in the game-container */
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px;
+	margin-bottom: 20px;
+}
+
+.ghost-board {
+	flex: 1; /* This will make the ghost-board take up the remaining space */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+
+.opponent-name {
+	font-size: 18px;
+	margin-left: 18px;
+	text-align: center;
+}
+
+.opponent-board {
+	width: 35%;
+	height: 100%;
 	background-color: #d0d0d0;
 	display: grid;
 	grid-template-columns: repeat(10, 1fr);
 	grid-template-rows: repeat(20, 1fr);
 	border: 1px solid #bbb;
 	margin-left: 10px;
-  }
+}
+
   
   .opponent-board-cell {
 	width: 100%;
