@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import {
   moveLeft, moveRight, rotate, moveDown, dropPiece, updatePiece,
-  resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard, setIsVictory, setOpponentName
+  resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard, setIsVictory, setOpponentName, setLeader
 } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
@@ -47,6 +47,7 @@ const mapDispatchToProps = (dispatch) => ({
   setAwaitingOpponent: (awaiting) => dispatch(setAwaitingOpponent(awaiting)),
   updateOpponentBoard: (board) => dispatch(updateOpponentBoard(board)),
   setOpponentName: (oppName) => dispatch(setOpponentName(oppName)),
+  setLeader: (leader) => dispatch(setLeader(leader)),
 });
 
 function Board(props) {

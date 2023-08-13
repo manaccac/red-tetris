@@ -74,7 +74,9 @@ export const setOpponentName = (oppName) => ({
 	payload: oppName
 });
 
-export const setLeader = (isLeader) ({
-	type: SET_LEADER,
-	payload: isLeader
-})
+export function setLeader(isLeader) {
+	return {
+	  type: SET_LEADER,
+	  payload: isLeader
+	};
+}
