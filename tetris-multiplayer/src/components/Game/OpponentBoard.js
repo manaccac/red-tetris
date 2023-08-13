@@ -19,11 +19,32 @@ function OpponentBoard({ opponentBoard, opponentName }) {
 		}
 	};
 
+	// return (
+	// 	<div className='ghost-board'>
+	// 		<div className="opponent-name">
+	// 			{opponentName}
+	// 		</div>
+	// 		<div className="opponent-board">
+	// 			{renderOpponentBoard()}
+	// 		</div>
+	// 	</div>
+	// );
 	return (
-		<div className="opponent-board">
-			{renderOpponentBoard()}
+		<div className="container">
+		  {[...Array(8)].map((_, index) => (
+			<div key={index} className='ghost-board'>
+			  <div className="opponent-name">
+				{opponentName}
+			  </div>
+			  <div className="opponent-board">
+				{renderOpponentBoard()}
+			  </div>
+			</div>
+		  ))}
 		</div>
-	);
+	  );
+	  
+	  
 }
 const mapStateToProps = (state) => ({
 	opponentBoard: state.opponentBoard,
