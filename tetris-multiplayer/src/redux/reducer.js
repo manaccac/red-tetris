@@ -22,7 +22,7 @@ const initialState = {
 	opponentName: null,
 	opponentBoards: [],
     opponentNames: [],
-	leader: null,
+	leader: true,
 };
 
 function gameReducer(state = initialState, action) {

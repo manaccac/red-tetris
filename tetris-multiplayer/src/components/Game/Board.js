@@ -29,7 +29,11 @@ const mapStateToProps = (state) => ({
   isGameOver: state.isGameOver,
   isGameWon: state.isGameWon,
   gameStart: state.gameStart,
-  opponentBoard: state.opponentBoard
+  opponentBoard: state.opponentBoard,
+  opponentBoards: state.opponentBoards,
+  opponentNames: state.opponentNames,
+  leader: state.leader,
+
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -253,6 +257,11 @@ function Board(props) {
     })
   );
 
+  const startGameHandler = () => {
+	socket.emit('startGame'); // Envoyez un signal au serveur pour démarrer la partie
+	props.gameStarted(true); // Mettez à jour l'état gameStart à true
+};
+
   return (
     <div
       className="game-container"
@@ -271,7 +280,13 @@ function Board(props) {
 
 	  {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={goHome} onRestart={restartGame} />}
       {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={goHome} onRestart={restartGame} />}
-      {!props.isGameOver && !props.gameStart && <WaitingScreen />}
+	  {!props.gameStart && (
+				<WaitingScreen
+					opponentNames={props.opponentNames}
+					isLeader={props.leader}
+					onStartGame={startGameHandler}
+				/>
+            )}
       {!props.isGameOver && props.gameStart && !gameRunning && <CountdownScreen countdown={countdown} />}
     </div>
   );
