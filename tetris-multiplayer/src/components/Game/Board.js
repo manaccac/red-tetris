@@ -45,7 +45,7 @@ const mapDispatchToProps = (dispatch) => ({
   resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
   setIsVictory: (status) => dispatch(setIsVictory(status)),
   setAwaitingOpponent: (awaiting) => dispatch(setAwaitingOpponent(awaiting)),
-  updateOpponentBoard: (board) => dispatch(updateOpponentBoard(board)),
+  updateOpponentBoard: (index, board) => dispatch(updateOpponentBoard(index, board)),
   setOpponentName: (oppName) => dispatch(setOpponentName(oppName)),
   setLeader: (leader) => dispatch(setLeader(leader)),
 });
@@ -189,7 +189,10 @@ function Board(props) {
     });
     socket.on('opponentBoardData', (opponentBoardData) => {
 	  console.log('opponentBoardData received from server');
-      props.updateOpponentBoard(opponentBoardData);
+    //   props.updateOpponentBoard(opponentBoardData);
+		console.log(opponentBoardData);
+	  props.updateOpponentBoard(0, opponentBoardData);
+
     })
     socket.on('updateNextPiece', (nextPiece) => {
       console.log('nextPiece received from server');

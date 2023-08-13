@@ -59,10 +59,12 @@ export const setAwaitingOpponent = (awaiting) => ({
 	payload: awaiting,
 });
 
-export const updateOpponentBoard = (board) => ({
-	type: UPDATE_OPPONENT_BOARD,
-	payload: board,
+export const updateOpponentBoard = (index, board) => ({
+    type: 'UPDATE_OPPONENT_BOARD',
+    index: index,
+    board: board
 });
+
 
 export const setIsVictory = (status) => ({
 	type: IS_VICTORY,
