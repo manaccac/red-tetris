@@ -34,6 +34,7 @@ const mapStateToProps = (state) => ({
   opponentNames: state.opponentNames,
   leader: state.leader,
   opponents: state.opponents,
+  gameMode: state.gameMode,
 
 });
 
@@ -58,7 +59,7 @@ const mapDispatchToProps = (dispatch) => ({
 function Board(props) {
   const [gravity, setGravity] = useState(500); // Valeur par défaut pour la gravité
 
-  const gameMode = props.gameMode;
+//   const gameMode = props.gameMode;
 
   const username = Cookies.get('username');
 
@@ -68,7 +69,7 @@ function Board(props) {
 
 
   function getRandomDelay() {
-    if (gameMode === 'graviter') {
+    if (props.gameMode === 'graviter') {
       let grav = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
       console.log('graviter mode = ' + grav);
       setGravity(grav); // Met à jour la valeur de gravité à chaque descente de pièce
@@ -204,7 +205,7 @@ function Board(props) {
       props.updatePiece(nextPiece);
     });
 
-    socket.emit('lookingForAGame', { userName: username, gameMode: gameMode });
+    socket.emit('lookingForAGame', { userName: username, gameMode: props.gameMode });
     props.setAwaitingOpponent(true);
     return () => {
       socket.emit('leftGame');
@@ -241,7 +242,7 @@ function Board(props) {
 
         const isGameOver = props.isGameOver && !props.isGameWon;
         let shouldShowPiece = true;
-        if (gameMode === 'invisible' && !isGameOver) {
+        if (props.gameMode === 'invisible' && !isGameOver) {
           shouldShowPiece = false;
         }
 

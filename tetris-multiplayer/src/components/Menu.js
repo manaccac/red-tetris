@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'; // Ajoutez useEffect
-import { useDispatch } from 'react-redux'; // Importez useDispatch
+import { useDispatch,useSelector } from 'react-redux'; // Importez useDispatch
 import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { socket } from '../socket';
@@ -9,20 +9,23 @@ const Menu = () => {
   const username = Cookies.get('username');
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const gameNameFromReducer = useSelector(state => state.gameName); // Obtenez gameName du reducer
+
 
   useEffect(() => {
 	console.log('useEffect Menu');
 	const gameInfo = {
 		leader: true,
-		players: ['player1', 'player2'],
-		gameMode: 'Normal',
+		// players: ['player1', 'player2'],
+		players: [],
+		gameMode: 'invisible',
 		gameName: 'Nostra',
 		role: 'player',
 	  };
   
 	dispatch({ type: 'SET_GAME_INFO', payload: gameInfo });
-	// console.log
-    // socket.on('gameInfo', (data) => {
+
+	// socket.on('gameInfo', (data) => {
     //   dispatch({ type: 'SET_GAME_INFO', payload: data });
     // });
 
@@ -33,24 +36,27 @@ const Menu = () => {
 
   const handleLaunchGame = (mode) => {
     socket.emit('lookingForAGame', { userName: username, gameMode: mode, gameName: null });
+    navigate(`${gameNameFromReducer}[${username}]`);
   };
 
   const handleSearchGame = () => {
     socket.emit('lookingForAGame', { userName: username, gameMode: null, gameName: gameName });
+    navigate(`${gameName}[${username}]`);
   };
+
 
 
   return (
     <div>
       <div className="menu">
         <li>
-          <Link className="button" onClick={() => handleLaunchGame('NORMAL')}>Normal</Link>
+          <button className="button" onClick={() => handleLaunchGame('NORMAL')}>Normal</button>
         </li>
         <li>
-          <Link className="button" onClick={() => handleLaunchGame('INVISIBLE')}>Invisible</Link>
+          <button className="button" onClick={() => handleLaunchGame('INVISIBLE')}>Invisible</button>
         </li>
         <li>
-          <Link className="button" onClick={() => handleLaunchGame('RANDOMGRAVITY')}>Graviter Aléatoire</Link>
+          <button className="button" onClick={() => handleLaunchGame('RANDOMGRAVITY')}>Graviter Aléatoire</button>
         </li> 
       </div>
       <div>
@@ -67,30 +73,3 @@ const Menu = () => {
 };
 
 export default Menu;
-
-
-// import React from 'react';
-// import { Link } from 'react-router-dom';
-// import Cookies from 'js-cookie';
-
-// const Menu = () => {
-//   const username = Cookies.get('username');
-
-//   return (
-//     <div>
-//       <div className="menu">
-//         <li>
-//           <Link className="button" to={`normal[${username}]`}>Normal</Link>
-//         </li>
-//         <li>
-//           <Link className="button" to={`invisible[${username}]`}>Invisible</Link>
-//         </li>
-//         <li>
-//           <Link className="button" to={`graviter[${username}]`}>Graviter Aléatoire</Link>
-//         </li>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Menu;
