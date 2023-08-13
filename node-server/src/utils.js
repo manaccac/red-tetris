@@ -19,95 +19,105 @@ const leavingGame = (socket, rooms, io, type) => {
 };
 
 const sendBoardAndPieceToPlayer = (socket, rooms, updatedBoard) => {
-	for (const [roomId, roomData] of rooms.entries()) {
-		const clients = roomData.clients;
-		const index = clients.indexOf(socket);
-		if (index !== -1) {
-			// si besoin on créé la nouvelle pièce dans la room
-			if (roomData.pieces.length <= socket.pieceId) {
-				roomData.pieces.push(generateNewPiece());
-			}
-			//on envoit la pièce suivante au joueur qui vient de poser
-			socket.emit('updateNextPiece', [roomData.pieces[socket.pieceId]]);
-			console.log('socket.pieceId: ' + socket.pieceId);
-			console.log('nextPiece generated');
-			console.log(roomData.pieces[socket.pieceId]);
-			console.log('pieces list:');
-			console.log(roomData.pieces);
-			socket.pieceId++;
-			//on envoit le board a l'adversaire
-			socket.broadcast.to(roomId).emit('opponentBoardData', updatedBoard);
-		}
-	}
+    for (const [roomId, roomData] of rooms.entries()) {
+        const clients = roomData.clients;
+        const index = clients.indexOf(socket);
+        if (index !== -1) {
+            // si besoin on créé la nouvelle pièce dans la room
+            if (roomData.pieces.length <= socket.pieceId) {
+                roomData.pieces.push(generateNewPiece());
+            }
+            //on envoit la pièce suivante au joueur qui vient de poser
+            socket.emit('updateNextPiece', [roomData.pieces[socket.pieceId]]);
+            console.log('socket.pieceId: ' + socket.pieceId);
+            console.log('nextPiece generated');
+            console.log(roomData.pieces[socket.pieceId]);
+            console.log('pieces list:');
+            console.log(roomData.pieces);
+            socket.pieceId++;
+            
+            //on envoit le board et les données du joueur à tous les autres joueurs de la salle
+            socket.broadcast.to(roomId).emit('updateOpponentData', {
+                board: updatedBoard,
+                name: socket.username,
+                id: socket.id
+            });
+        }
+    }
 }
+
 
 const sendLinesToPlayer = (socket, rooms, numberOfLines) => {
-	for (const [roomId, roomData] of rooms.entries()) {
-		const clients = roomData.clients;
-		const index = clients.indexOf(socket);
-		if (index !== -1) {
-			socket.broadcast.to(roomId).emit('receivedLines', numberOfLines);
-		}
-	}
+    for (const [roomId, roomData] of rooms.entries()) {
+        const clients = roomData.clients;
+        const index = clients.indexOf(socket);
+        if (index !== -1) {
+            const otherPlayers = clients.filter(player => player !== socket);
+            const randomOpponent = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
+            if (randomOpponent) {
+                randomOpponent.emit('receivedLines', numberOfLines);
+            }
+        }
+    }
 }
+
 
 const gameOver = (socket, rooms) => {
-	for (const [roomId, roomData] of rooms.entries()) {
-		const clients = roomData.clients;
-		const index = clients.indexOf(socket);
-		if (index !== -1) {
-			// on prévient l'autre joueur de sa victoire
-			socket.broadcast.to(roomId).emit('Victory');
-			rooms.delete(roomId);
-			console.log('after deleting, roomsleft : ' + rooms.size);
-		}
-	}
+    for (const [roomId, roomData] of rooms.entries()) {
+        const clients = roomData.clients;
+        const index = clients.indexOf(socket);
+        if (index !== -1) {
+            clients.splice(index, 1);
+            if (clients.length === 1) {
+                clients[0].emit('Victory');
+                rooms.delete(roomId);
+            }
+        }
+    }
 }
+
 
 const handleMatchMaking = (socket, rooms, dataStartGame, io) => {
-	if (!socket.username) {
-		socket.username = dataStartGame.userName;
-	}
-	let room = null;
-	for (const [roomId, roomData] of rooms.entries()) {
-		const clients = roomData.clients;
-		console.log('clients in room:' + clients);
-		if (clients.length < 2 && roomId.includes(dataStartGame.gameMode)) {
-			room = roomId;
-			break;
-		}
-	}
-	if (room === null) {
-		room = socket.id + dataStartGame.gameMode;
-		rooms.set(room, { clients: [], pieces: [] });
-	}
-	const clients = rooms.get(room).clients;
-	clients.push(socket);
-	//reset le pieceId pour l'attribution équitable de pièces
-	socket.pieceId = 0;
-	rooms.set(room, { clients: clients, pieces: [] });
-	socket.join(room);
+    if (!socket.username) {
+        socket.username = dataStartGame.userName;
+    }
+    let room = null;
+    for (const [roomId, roomData] of rooms.entries()) {
+        const clients = roomData.clients;
+        if (clients.length < 4 && roomId.includes(dataStartGame.gameMode)) {
+            room = roomId;
+            break;
+        }
+    }
+    if (room === null) {
+        room = socket.id + dataStartGame.gameMode;
+        rooms.set(room, { clients: [], pieces: [] });
+    }
+    const clients = rooms.get(room).clients;
+    clients.push(socket);
+    //reset le pieceId pour l'attribution équitable de pièces
+    socket.pieceId = 0;
+    rooms.set(room, { clients: clients, pieces: [] });
+    socket.join(room);
 
-	if (rooms.get(room).clients.length === 2) {
-		const players = rooms.get(room).clients;
-		console.log('gonna emit gameStart');
-		let piece = generateNewPiece();
-		let nextPiece = generateNewPiece();
-		// pas besoin de stocker les deux premères pieces dans la room, elles sont envoyées direct
-		players[0].emit('gameStart', {
-			isFirstPlayer: true,
-			opponentName: players[1].username,
-			piece: piece,
-			nextPiece: nextPiece
-		})
-		players[1].emit('gameStart', {
-			isFirstPlayer: false,
-			opponentName: players[0].username,
-			piece: piece,
-			nextPiece: nextPiece
-		})
-	}
+    if (rooms.get(room).clients.length === 3) {
+        const players = rooms.get(room).clients;
+        console.log('gonna emit gameStart');
+        let piece = generateNewPiece();
+        let nextPiece = generateNewPiece();
+
+		players.forEach((playerSocket, index) => {
+			let opponents = players.filter(p => p.id !== playerSocket.id).map(p => p.username);
+			playerSocket.emit('gameStart', {
+				isFirstPlayer: index === 0,
+				opponentNames: opponents, // Note: This is now an array of opponent names
+				piece: piece,
+				nextPiece: nextPiece
+			});
+		});		
+    }
 }
+
 
 const generateNewPiece = () => {
 	try {

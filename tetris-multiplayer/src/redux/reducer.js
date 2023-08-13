@@ -20,6 +20,8 @@ const initialState = {
 	opponentBoard: createEmptyBoard(),
 	isGameWon: undefined,
 	opponentName: null,
+	opponentBoards: [],
+    opponentNames: [],
 	leader: null,
 };
 
@@ -191,6 +193,7 @@ function gameReducer(state = initialState, action) {
 			case 'SET_OPPONENT_NAME':
 				return {
 					...state,
+					opponentNames: [...state.opponentNames, action.payload],
 					opponentName: action.payload
 				}
 			case 'SET_AWAITING_OPPONENT':
@@ -201,6 +204,7 @@ function gameReducer(state = initialState, action) {
 			case 'UPDATE_OPPONENT_BOARD':
 				return {
 					...state,
+					opponentBoards: [...state.opponentBoards, action.payload],
 					opponentBoard: action.payload,
 				};
 			case 'SET_LEADER':

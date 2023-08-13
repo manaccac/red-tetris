@@ -29,7 +29,9 @@ const mapStateToProps = (state) => ({
   isGameOver: state.isGameOver,
   isGameWon: state.isGameWon,
   gameStart: state.gameStart,
-  opponentBoard: state.opponentBoard
+  opponentBoard: state.opponentBoard,
+  opponentBoards: state.opponentBoards,
+  opponentNames: state.opponentNames
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -197,6 +199,20 @@ function Board(props) {
       props.updatePiece(nextPiece);
     });
 
+	socket.on('updateOpponentData', (data) => {
+		console.log('updateOpponentData received from server');
+		const { board, name, id } = data;
+		const index = props.opponentNames.findIndex(opponentName => opponentName === name);
+		if (index !== -1) {
+			props.opponentBoards[index] = board;
+		} else {
+			// Add new opponent data
+			props.opponentBoards.push(board);
+			props.opponentNames.push(name);
+		}
+	});
+	
+
     socket.emit('lookingForAGame', { userName: username, gameMode: gameMode });
     props.setAwaitingOpponent(true);
     return () => {
@@ -249,6 +265,9 @@ function Board(props) {
 		);		
     })
   );
+
+	console.log('names', props.opponentNames);
+
 
   return (
     <div
