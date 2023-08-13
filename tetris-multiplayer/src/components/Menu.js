@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'; // Ajoutez useEffect
-import { useDispatch,useSelector } from 'react-redux'; // Importez useDispatch
+import React, { useState, useEffect } from 'react';
+import { useDispatch,useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { socket } from '../socket';
@@ -9,7 +9,7 @@ const Menu = () => {
   const username = Cookies.get('username');
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const gameNameFromReducer = useSelector(state => state.gameName); // Obtenez gameName du reducer
+  const gameNameFromReducer = useSelector(state => state.gameName);
 
 
   useEffect(() => {
@@ -18,7 +18,7 @@ const Menu = () => {
 		leader: true,
 		// players: ['player1', 'player2'],
 		players: [],
-		gameMode: 'invisible',
+		gameMode: 'normal',
 		gameName: 'Nostra',
 		role: 'player',
 	  };
