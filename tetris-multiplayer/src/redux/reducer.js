@@ -78,7 +78,6 @@ function gameReducer(state = initialState, action) {
 				newPosition.y += 1;
 				if (isCollision(piece, newPosition.x, newPosition.y, state.board)) {
 					const updatedBoard = [...state.board];
-					socket.emit('updateBoard', state.board);
 					piece.shape.forEach((row, y) => {
 						row.forEach((cell, x) => {
 							if (cell !== 0) {
@@ -88,6 +87,7 @@ function gameReducer(state = initialState, action) {
 							}
 						});
 					});
+					socket.emit('updateBoard', updatedBoard );
 					if (piece.position.y < 0) {
 						//action.resolve();
 						socket.emit('gameOver');
