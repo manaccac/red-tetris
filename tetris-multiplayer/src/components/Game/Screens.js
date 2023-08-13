@@ -24,9 +24,10 @@ function WaitingScreen({ opponentNames, isLeader, onStartGame }) {
 }
 
 
-const mapStateToProps = (props) => ({
-    opponentNames: props.opponentNames // Assuming the state has an array of opponent names
+const mapStateToProps = (state) => ({
+    opponentNames: Object.keys(state.opponents),
 });
+
 
 export default connect(mapStateToProps)(WaitingScreen);
 

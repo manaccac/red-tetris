@@ -1,9 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-function OpponentBoard({ opponentBoards, opponentNames }) {
-	console.log("oopppppo ====", opponentBoards);
-	console.log("oopppppo names ====", opponentNames);
+function OpponentBoard({ opponents }) {
+	console.log("opponents length ====", opponents.length);
+	console.log("opponents ====", opponents);
+	// console.log("oopppppo names ====", opponentNames);
 	
 	const renderOpponentBoard = (board) => {
 		if (board && Array.isArray(board) && board.length > 0) {
@@ -20,25 +21,24 @@ function OpponentBoard({ opponentBoards, opponentNames }) {
 		}
 	};
 
-	return (
-		<div className="container">
-		  {opponentBoards.map((board, index) => (
-			<div key={index} className='ghost-board'>
-			  <div className="opponent-name">
-				{opponentNames[index]}
-			  </div>
-			  <div className="opponent-board">
-				{renderOpponentBoard(board)}
-			  </div>
-			</div>
-		  ))}
-		</div>
-	);
+    return (
+        <div className="container">
+            {Object.entries(opponents).map(([name, opponentData], index) => (
+                <div key={index} className='ghost-board'>
+                    <div className="opponent-name">
+                        {name}
+                    </div>
+                    <div className="opponent-board">
+                        {renderOpponentBoard(opponentData.board)}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 }
 
-const mapStateToProps = (props) => ({
-	opponentBoards: props.opponentBoards, // Assuming the state has an array of opponent boards
-	opponentNames: props.opponentNames // Assuming the state has an array of opponent names
+const mapStateToProps = (state) => ({
+    opponents: state.opponents
 });
 
 export default connect(mapStateToProps)(OpponentBoard);

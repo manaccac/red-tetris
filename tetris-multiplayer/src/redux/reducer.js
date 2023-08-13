@@ -20,6 +20,7 @@ const initialState = {
 	opponentBoard: createEmptyBoard(),
 	isGameWon: undefined,
 	opponentName: null,
+	opponents: {},
 	opponentBoards: [],
     opponentNames: [],
 	leader: true,
@@ -191,31 +192,42 @@ function gameReducer(state = initialState, action) {
 					isGameOver: true,
 				}
 			case 'SET_OPPONENT_NAME':
+				const opponentName = action.payload;
 				return {
-					...state,
-					opponentNames: [...state.opponentNames, action.payload],
-					opponentName: action.payload
-				}
+				  ...state,
+				  opponents: {
+					...state.opponents,
+					[opponentName]: {
+					  ...state.opponents[opponentName],
+					  name: opponentName,
+					  board: [] // Initialiser le tableau du board de l'adversaire
+					}
+				  }
+				};		
 			case 'SET_AWAITING_OPPONENT':
 				return {
 					...state,
 					awaitingOpponent: action.payload,
 				};
 			case 'UPDATE_OPPONENT_BOARD':
-				const { index } = action;
-				if (index !== -1) {
-					console.log('Updating opponent board...');
-					console.log(action.board);
-					return {
-						...state,
-						opponentBoards: [
-							...state.opponentBoards.slice(0, index),
-							action.board,
-							...state.opponentBoards.slice(index + 1)
-						]
-					};
+				const board_received = action.board;
+				const name_received = action.name;
+				if (state.opponents[name_received]) {
+				  return {
+					...state,
+					opponents: {
+					  ...state.opponents,
+					  [name_received]: {
+						...state.opponents[name_received],
+						board: board_received
+					  }
+					}
+				  };
+				} else {
+				  console.warn(`Trying to update non-existing opponent: ${name_received}`);
+				  return state;
 				}
-				return state;
+				  
 			case 'SET_LEADER':
 				return {
 					...state,

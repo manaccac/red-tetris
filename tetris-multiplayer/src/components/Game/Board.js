@@ -33,6 +33,7 @@ const mapStateToProps = (state) => ({
   opponentBoards: state.opponentBoards,
   opponentNames: state.opponentNames,
   leader: state.leader,
+  opponents: state.opponents,
 
 });
 
@@ -49,7 +50,7 @@ const mapDispatchToProps = (dispatch) => ({
   resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
   setIsVictory: (status) => dispatch(setIsVictory(status)),
   setAwaitingOpponent: (awaiting) => dispatch(setAwaitingOpponent(awaiting)),
-  updateOpponentBoard: (index, board) => dispatch(updateOpponentBoard(index, board)),
+  updateOpponentBoard: (name, board) => dispatch(updateOpponentBoard(name, board)),
   setOpponentName: (oppName) => dispatch(setOpponentName(oppName)),
   setLeader: (leader) => dispatch(setLeader(leader)),
 });
@@ -194,8 +195,7 @@ function Board(props) {
     socket.on('opponentBoardData', (opponentBoardData) => {
 	  console.log('opponentBoardData received from server');
     //   props.updateOpponentBoard(opponentBoardData);
-		console.log(opponentBoardData);
-	  props.updateOpponentBoard(0, opponentBoardData);
+	  props.updateOpponentBoard("mana",opponentBoardData);
 
     })
     socket.on('updateNextPiece', (nextPiece) => {
