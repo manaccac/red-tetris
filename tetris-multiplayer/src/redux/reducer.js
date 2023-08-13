@@ -17,13 +17,12 @@ const initialState = {
 	nextPiece: null,
 	gameStart: false,
 	awaitingOpponent: false,
-	opponentBoard: createEmptyBoard(),
 	isGameWon: undefined,
-	opponentName: null,
 	opponents: {},
-	opponentBoards: [],
-    opponentNames: [],
-	leader: true,
+	leader: null,//chef de partie
+	role: null, //spectator, player
+	gameName: null, // le hash
+	gameMode: null, // normal, gravity, invisible
 };
 
 function gameReducer(state = initialState, action) {
@@ -233,6 +232,34 @@ function gameReducer(state = initialState, action) {
 					...state,
 					leader: action.payload
 				};
+			case 'SET_GAME_INFO':
+				// console.log("leader: " + state.leader)
+				// Object.values(state.opponents).forEach(opponent => {
+				// 	console.log("Opponent Name:", opponent.name);
+				// 	console.log("Opponent Board:", opponent.board);
+				// });
+				// console.log("gameMode: " + state.gameMode)
+				// console.log("gameName: " + state.gameName)
+				// console.log("role: " + state.role)
+
+				// console.log('Setting game info...');
+				// console.log(action.payload);
+				const { leader, players, gameMode, gameName, role } = action.payload;
+				return {
+				  ...state,
+				  leader,
+				  opponents: players.reduce((opponentsObj, playerName) => {
+					opponentsObj[playerName] = {
+					  name: playerName,
+					  board: [],
+					};
+					return opponentsObj;
+				  }, {}),
+				  gameMode,
+				  gameName,
+				  role,
+				};
+				  
 			default:
 				return state;
 		}

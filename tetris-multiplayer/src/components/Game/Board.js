@@ -258,8 +258,8 @@ function Board(props) {
   );
 
   const startGameHandler = () => {
-	socket.emit('startGame'); // Envoyez un signal au serveur pour démarrer la partie
-	props.gameStarted(true); // Mettez à jour l'état gameStart à true
+	socket.emit('startGame');
+	props.gameStarted(true);
 };
 
   return (

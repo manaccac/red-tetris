@@ -82,3 +82,9 @@ export function setLeader(isLeader) {
 	  payload: isLeader
 	};
 }
+
+export const setGameInfo = (gameInfo) => ({
+	type: 'SET_GAME_INFO',
+	payload: gameInfo,
+  });
+  
