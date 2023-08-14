@@ -35,7 +35,7 @@ const Menu = () => {
   }, [dispatch]);
 
   const handleLaunchGame = (mode) => {
-    socket.emit('lookingForAGame', { userName: username, gameMode: mode, gameName: null });
+    // socket.emit('lookingForAGame', { userName: username, gameMode: mode, gameName: null });
     navigate(`${gameNameFromReducer}[${username}]`);
   };
 
@@ -50,7 +50,7 @@ const Menu = () => {
     <div>
       <div className="menu">
         <li>
-          <button className="button" onClick={() => handleLaunchGame('NORMAL')}>Normal</button>
+          <button className="button" onClick={() => handleLaunchGame('normal')}>Normal</button>
         </li>
         <li>
           <button className="button" onClick={() => handleLaunchGame('INVISIBLE')}>Invisible</button>

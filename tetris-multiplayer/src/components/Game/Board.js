@@ -200,12 +200,12 @@ function Board(props) {
 
     })
     socket.on('updateNextPiece', (nextPiece) => {
-      console.log('nextPiece received from server');
+      console.log('nextPiece received from server : ', nextPiece);
       console.log(nextPiece);
       props.updatePiece(nextPiece);
     });
 
-    socket.emit('lookingForAGame', { userName: username, gameMode: props.gameMode });
+	socket.emit('lookingForAGame', { userName: username, gameMode: props.gameMode, gameName: props.gameName });
     props.setAwaitingOpponent(true);
     return () => {
       socket.emit('leftGame');
