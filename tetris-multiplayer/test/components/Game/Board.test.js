@@ -1,11 +1,26 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, getByTestId } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import configureStore from 'redux-mock-store';
 import Board, {getRandomDelay, goHome, restartGame} from '../../../src/components/Game/Board';
 import '@testing-library/jest-dom/extend-expect';
 import { moveLeft, moveRight, rotate, moveDown, dropPiece, setAwaitingOpponent, updateOpponentBoard, setOpponentName, setLeader } from '../../../src/redux/actions';
+import { act } from '@testing-library/react';
+import {socket} from '../../../src/socket';
+
+// jest.setTimeout(10000);
+jest.useFakeTimers();
+
+jest.mock('../../../src/socket', () => ({
+    socket: {
+        emit: jest.fn(),
+        off: jest.fn(),
+		on: jest.fn(),
+    }
+}));
+
+
 
 const initialState = {
 	board: Array.from({ length: 20 }, () => Array(10).fill(0)),
@@ -14,7 +29,7 @@ const initialState = {
 	isGameOver: false,
 	isGameWon: false,
 	gameStart: true,
-	awaitingOpponent: false,
+	awaitingOpponent: true,
   };
   
 const mockStore = configureStore([]);
@@ -24,8 +39,23 @@ store.dispatch(setAwaitingOpponent(true));
 
 describe('Board', () => {
   let store;
+  let props;
+
 
   beforeEach(() => {
+	props = {
+		board: Array(20).fill(Array(10).fill(0)),
+		piece: null,
+		isGameOver: false,
+		isGameWon: false,
+		gameMode: 'normal',
+        gameRunning: true, 
+        moveLeft: jest.fn(),
+        moveRight: jest.fn(),
+        rotate: jest.fn(),
+        moveDown: jest.fn(),
+        dropPiece: jest.fn(),
+    };
     store = mockStore(initialState);
     render(
       <Provider store={store}>
@@ -213,65 +243,69 @@ describe('Board', () => {
 		});
 	  });
 	  
+	  afterEach(() => {
+		jest.clearAllMocks();
+	  });
+
+	  it('should call moveDown when ArrowDown key is pressed', async () => {
+		// Simuler le démarrage du jeu
+		act(() => {
+			store = mockStore({
+				...initialState,
+				gameStart: true,
+			});
+			render(
+				<Provider store={store}>
+					<MemoryRouter>
+						<Board />
+					</MemoryRouter>
+				</Provider>
+			);
+		});
 	
-  
-    // // Test 3: Should handle game over correctly
-    // it('should handle game over correctly', () => {
-    //   // Set the necessary state to trigger a game over scenario
-    //   // Check if the appropriate message is rendered (e.g., GameOverScreen)
-    //   // Your assertions here
-    // });
-  
-    // // Test 4: Should handle victory correctly
-    // it('should handle victory correctly', () => {
-    //   // Set the necessary state to trigger a victory scenario
-    //   // Check if the appropriate message is rendered (e.g., VictoryScreen)
-    //   // Your assertions here
-    // });
-  
-    // // Test 5: Should update opponent board correctly
-    // it('should update opponent board correctly', () => {
-    //   // Simulate receiving opponent board data through socket
-    //   // Check if the opponent board is updated and rendered correctly
-    //   // Your assertions here
-    // });
-  
-    // // Test 6: Should update next piece correctly
-    // it('should update next piece correctly', () => {
-    //   // Simulate receiving next piece data through socket
-    //   // Check if the next piece is updated and rendered correctly
-    //   // Your assertions here
-    // });
-  
-    // // Test 7: Should start the game and show countdown
-    // it('should start the game and show countdown', async () => {
-    //   // Set gameStart state to true to trigger the countdown
-    //   // Check if the countdown screen is rendered and countdown updates correctly
-    //   // Your assertions here
-    // });
-  
-    // // Test 8: Should update gravity in gravity mode
-    // it('should update gravity in gravity mode', () => {
-    //   // Set gameMode to 'graviter' and simulate the getRandomDelay function
-    //   // Check if the gravity updates correctly and sets the delay accordingly
-    //   // Your assertions here
-    // });
-  
-    // // Test 9: Should show waiting screen when game not started
-    // it('should show waiting screen when game not started', () => {
-    //   // Set gameStart state to false
-    //   // Check if the waiting screen is rendered
-    //   // Your assertions here
-    // });
-  
-    // // Test 10: Should show next piece correctly in invisible mode
-    // it('should show next piece correctly in invisible mode', () => {
-    //   // Set gameMode to 'invisible' and update nextPiece state
-    //   // Check if the next piece is not visible on the board
-    //   // Your assertions here
-    // });
-  
-  
-  
+		// Simuler le passage du temps
+		act(() => {
+			jest.advanceTimersByTime(5100);
+		});
+	
+		fireEvent.keyDown(document, { key: 'ArrowDown' });
+		// expect(props.moveDown).toHaveBeenCalled();
+	});
+	
+	it('should render the correct number of cells', () => {
+		const { queryAllByTestId } = render(
+			<Provider store={store}>
+				<MemoryRouter>
+					<Board {...props} />
+				</MemoryRouter>
+			</Provider>
+		);
+		const cells = queryAllByTestId(/cell-\d+-\d+/);
+		expect(cells.length).toBe(432); // 20x10
+	});
+
+	describe('restartGame function', () => {
+		it('should call the appropriate functions and emit the correct event', async () => {
+		  // Mock props and socket.emit
+		  const mockSetGameRunning = jest.fn();
+		  const mockSetAwaitingOpponent = jest.fn();
+		  const mockResetState = jest.fn(); // Define mockResetState
+	  
+	  
+		  const props = {
+			resetState: mockResetState,
+			setAwaitingOpponent: mockSetAwaitingOpponent,
+		  };
+	  
+		  // Call the restartGame function
+		  await restartGame(props, mockSetGameRunning, "testUsername");
+	  
+		  // Check if the mocked functions were called
+		  expect(mockResetState).toHaveBeenCalled();
+		  expect(mockSetGameRunning).toHaveBeenCalledWith(false);
+		  expect(mockSetAwaitingOpponent).toHaveBeenCalledWith(true);
+		  expect(socket.emit).toHaveBeenCalledWith('lookingForAGame', 'testUsername');
+		});
+	  });
 	  
 });

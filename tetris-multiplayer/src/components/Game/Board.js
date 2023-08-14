@@ -52,6 +52,18 @@ const mapStateToProps = (state) => ({
 		props.setAwaitingOpponent(false);
 		navigate('/');
 	  };
+	
+	export const restartGame = async (props, setGameRunning, username) => {
+		console.log('restart game function called');
+		setGameRunning(false);
+		await props.resetState();
+		// await props.generatePiece();
+		await props.setAwaitingOpponent(true);
+	
+		console.log('going to emit soon');
+		socket.emit('lookingForAGame', username);
+	};
+	
 
 const mapDispatchToProps = (dispatch) => ({
   moveLeft: () => new Promise((resolve) => dispatch(moveLeft(resolve))),
@@ -81,24 +93,25 @@ function Board(props) {
   const [gameRunning, setGameRunning] = useState(false);
 
 
+  const handleRestartGame = () => {
+	restartGame(props, setGameRunning, username);
+	};
 
-  const restartGame = async () => {
-    console.log('restart game function called');
-    setGameRunning(false);
-    await props.resetState();
-    // await props.generatePiece();
-    await props.setAwaitingOpponent(true);
+//   const restartGame = async () => {
+//     console.log('restart game function called');
+//     setGameRunning(false);
+//     await props.resetState();
+//     // await props.generatePiece();
+//     await props.setAwaitingOpponent(true);
 
-    console.log('going to emit soon');
-    socket.emit('lookingForAGame', username);
-  };
+//     console.log('going to emit soon');
+//     socket.emit('lookingForAGame', username);
+//   };
 
 
   const handleKeyDown = async (event) => {
     try {
-	  console.log("beforngame running : ");
       if (!gameRunning) return;
-	  console.log("aftergame running : ");
 
       if (props.isGameOver || Date.now() - lastMove[event.key] < delay) {
         return;
@@ -279,8 +292,8 @@ function Board(props) {
         {props.opponentName}
       </div>
 
-	  {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={() => goHome(props, navigate)} onRestart={restartGame} />}
-      {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={() => goHome(props, navigate)} onRestart={restartGame} />}
+	  {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} />}
+      {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} />}
 	  {!props.gameStart && (
 				<WaitingScreen
 					opponentNames={props.opponentNames}
