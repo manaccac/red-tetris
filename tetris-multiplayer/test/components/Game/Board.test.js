@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import { render, screen, fireEvent, waitFor, getByTestId } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import configureStore from 'redux-mock-store';
-import Board, {getRandomDelay, goHome, restartGame} from '../../../src/components/Game/Board';
+import Board, {getRandomDelay, goHome, restartGame, mapDispatchToProps} from '../../../src/components/Game/Board';
 import '@testing-library/jest-dom/extend-expect';
 import { moveLeft, moveRight, rotate, moveDown, dropPiece, setAwaitingOpponent, updateOpponentBoard, setOpponentName, setLeader } from '../../../src/redux/actions';
 import { act } from '@testing-library/react';
@@ -17,6 +17,7 @@ jest.mock('../../../src/socket', () => ({
         emit: jest.fn(),
         off: jest.fn(),
 		on: jest.fn(),
+		connected: false,
     }
 }));
 
@@ -38,6 +39,9 @@ const store = mockStore(initialState);
 store.dispatch(setAwaitingOpponent(true));
 
 describe('Board', () => {
+	afterEach(() => {
+		jest.clearAllMocks();
+	  });
   let store;
   let props;
 
@@ -307,5 +311,121 @@ describe('Board', () => {
 		  expect(socket.emit).toHaveBeenCalledWith('lookingForAGame', 'testUsername');
 		});
 	  });
-	  
+
+
+	test('socket listeners are attached and handlers are called', () => {
+		const mockGameStarted = jest.fn();
+		const mockSetLeader = jest.fn();
+		const mockUpdatePiece = jest.fn();
+		const mockSetOpponentName = jest.fn();
+		const mockAddIndestructibleLine = jest.fn();
+		const mockSetIsVictory = jest.fn();
+		const mockUpdateOpponentBoard = jest.fn();
+		const mockSetAwaitingOpponent = jest.fn();
+		const mockResetState = jest.fn();
+
+		const props = {
+		gameStarted: mockGameStarted,
+		setLeader: mockSetLeader,
+		updatePiece: mockUpdatePiece,
+		setOpponentName: mockSetOpponentName,
+		addIndestructibleLine: mockAddIndestructibleLine,
+		setIsVictory: mockSetIsVictory,
+		updateOpponentBoard: mockUpdateOpponentBoard,
+		setAwaitingOpponent: mockSetAwaitingOpponent,
+		resetState: mockResetState,
+		gameMode: 'someGameMode',
+		gameName: 'someGameName',
+		};
+
+		render(
+		<Provider store={store}>
+			<MemoryRouter>
+			<Board {...props} />
+			</MemoryRouter>
+		</Provider>
+		);
+
+		act(() => {
+			socket.on.mock.calls[0][1]({
+				isFirstPlayer: true,
+				piece: 'somePiece',
+				nextPiece: 'someNextPiece',
+				opponentName: 'someOpponentName',
+			});
+		});
+
+		act(() => {
+		render(null);
+		});
+
+		expect(socket.off).toHaveBeenCalledWith('Victory');
+		expect(socket.off).toHaveBeenCalledWith('receivedLines');
+		expect(socket.off).toHaveBeenCalledWith('gameStart');
+		expect(socket.off).toHaveBeenCalledWith('opponentBoardData');
+		expect(socket.off).toHaveBeenCalledWith('updateNextPiece');
+	});
+
+	const dispatch = jest.fn();
+
+	afterEach(() => {
+	  dispatch.mockClear();
+	});
+
+	it('should dispatch moveLeft action', () => {
+		mapDispatchToProps(dispatch).moveLeft();
+	  });
+	
+	  it('should dispatch moveRight action', () => {
+		mapDispatchToProps(dispatch).moveRight();
+	  });
+	
+	  it('should dispatch rotate action', () => {
+		mapDispatchToProps(dispatch).rotate();
+	  });
+	
+	  it('should dispatch moveDown action', () => {
+		mapDispatchToProps(dispatch).moveDown();
+	  });
+	
+	  it('should dispatch dropPiece action', () => {
+		mapDispatchToProps(dispatch).dropPiece();
+	  });
+	
+	  it('should dispatch updatePiece action', () => {
+		mapDispatchToProps(dispatch).updatePiece([]);
+	  });
+	
+	  it('should dispatch gameStarted action', () => {
+		mapDispatchToProps(dispatch).gameStarted(true);
+	  });
+	
+	  it('should dispatch addIndestructibleLine action', () => {
+		mapDispatchToProps(dispatch).addIndestructibleLine(1);
+	  });
+	
+	  it('should dispatch resetState action', () => {
+		mapDispatchToProps(dispatch).resetState();
+	  });
+	
+	  it('should dispatch setIsVictory action', () => {
+		mapDispatchToProps(dispatch).setIsVictory(true);
+	  });
+	
+	  it('should dispatch setAwaitingOpponent action', () => {
+		mapDispatchToProps(dispatch).setAwaitingOpponent(true);
+	  });
+	
+	  it('should dispatch updateOpponentBoard action', () => {
+		mapDispatchToProps(dispatch).updateOpponentBoard('name', []);
+	  });
+	
+	  it('should dispatch setOpponentName action', () => {
+		mapDispatchToProps(dispatch).setOpponentName('name');
+	  });
+	
+	  it('should dispatch setLeader action', () => {
+		mapDispatchToProps(dispatch).setLeader(true);
+	  });
 });
+

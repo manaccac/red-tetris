@@ -48,6 +48,30 @@ describe('App Component', () => {
 	expect(getByText('RED-TETRIS')).toBeInTheDocument();
   });
   
-
-  // Add more tests as needed
+  test('Calls onConnect when socket connects', () => {
+	Cookies.get.mockReturnValue('TestUser');
+	render(
+	  <Provider store={store}>
+		<App />
+	  </Provider>
+	);
+  
+	const connectCallback = socket.on.mock.calls.find(call => call[0] === 'connect')[1];
+	connectCallback();
+  });
+  
+  test('Calls onDisconnect when socket disconnects', () => {
+	Cookies.get.mockReturnValue('TestUser');
+	render(
+	  <Provider store={store}>
+		<App />
+	  </Provider>
+	);
+  
+	const disconnectCallback = socket.on.mock.calls.find(call => call[0] === 'disconnect')[1];
+	disconnectCallback();
+  
+	expect(socket.connected).toBe(false);
+  });
+  
 });

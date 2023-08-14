@@ -65,7 +65,7 @@ const mapStateToProps = (state) => ({
 	};
 	
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch) => ({
   moveLeft: () => new Promise((resolve) => dispatch(moveLeft(resolve))),
   moveRight: () => new Promise((resolve) => dispatch(moveRight(resolve))),
   rotate: () => new Promise((resolve) => dispatch(rotate(resolve))),
@@ -96,18 +96,6 @@ function Board(props) {
   const handleRestartGame = () => {
 	restartGame(props, setGameRunning, username);
 	};
-
-//   const restartGame = async () => {
-//     console.log('restart game function called');
-//     setGameRunning(false);
-//     await props.resetState();
-//     // await props.generatePiece();
-//     await props.setAwaitingOpponent(true);
-
-//     console.log('going to emit soon');
-//     socket.emit('lookingForAGame', username);
-//   };
-
 
   const handleKeyDown = async (event) => {
     try {

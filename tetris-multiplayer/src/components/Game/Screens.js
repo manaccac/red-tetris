@@ -15,7 +15,7 @@ function WaitingScreen({ opponentNames, isLeader, onStartGame }) {
                 </ul>
                 <p>Nombre d'adversaires : {opponentNames ? opponentNames.length : 0}</p>
                 {isLeader && (
-                    <button onClick={onStartGame}>Démarrer la partie</button>
+                    <button onClick={onStartGame} data-testid="start-game-btn">Démarrer la partie</button>
                 )}
                 <div className="loading-animation"></div>
             </div>
