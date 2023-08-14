@@ -53,10 +53,10 @@ const Menu = () => {
           <button className="button" onClick={() => handleLaunchGame('normal')}>Normal</button>
         </li>
         <li>
-          <button className="button" onClick={() => handleLaunchGame('INVISIBLE')}>Invisible</button>
+          <button className="button" onClick={() => handleLaunchGame('invisible')}>Invisible</button>
         </li>
         <li>
-          <button className="button" onClick={() => handleLaunchGame('RANDOMGRAVITY')}>Graviter Aléatoire</button>
+          <button className="button" onClick={() => handleLaunchGame('graviter')}>Graviter Aléatoire</button>
         </li> 
       </div>
       <div>
