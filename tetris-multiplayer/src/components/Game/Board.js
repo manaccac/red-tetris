@@ -98,7 +98,9 @@ function Board(props) {
 
   const handleKeyDown = async (event) => {
     try {
+	  console.log("beforngame running : ");
       if (!gameRunning) return;
+	  console.log("aftergame running : ");
 
       if (props.isGameOver || Date.now() - lastMove[event.key] < delay) {
         return;

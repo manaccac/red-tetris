@@ -105,6 +105,8 @@ describe('gameReducer', () => {
 
     const newState = gameReducer(store.getState(), actions[0]);
     const updatedPiece = newState.piece;
+	// console.log("piece update:",updatedPiece);
+	// console.log("piece initial:",initialPiece);
 
     // Vérifier que la pièce a été tournée en modifiant sa forme
     expect(updatedPiece.shape).not.toEqual(initialPiece.shape);
@@ -220,6 +222,8 @@ describe('gameReducer', () => {
     const newState = gameReducer(store.getState(), actions[0]);
     const updatedPiece = newState.piece;
     const updatedNextPiece = newState.nextPiece;
+	// console.log("old piece =",oldPiece);
+	// console.log("new piece =",newPiece);
 
     // Vérifier que la pièce a été mise à jour correctement
     expect(updatedPiece).not.toEqual(oldPiece);
@@ -252,18 +256,21 @@ describe('gameReducer', () => {
       isGameOver: true,
     };
 	const customInitial = {
-      awaitingOpponent: false,
-      board: Array.from({ length: 20 }, () => Array(10).fill(0)), // Remplir le tableau de 0
-      gameStart: false,
-      isGameOver: false,
-      isGameWon: undefined,
-      nextPiece: null,
-      opponentBoard: Array.from({ length: 20 }, () => Array(10).fill(0)), // Remplir le tableau de 0
-      opponentName: null,
-      piece: null,
-      position: { x: 0, y: 0 },
-      rotation: 0,
-      score: 0,
+		piece: null,
+		position: { x: 0, y: 0 },
+		rotation: 0,
+		board: createEmptyBoard(),
+		score: 0,
+		isGameOver: false,
+		nextPiece: null,
+		gameStart: false,
+		awaitingOpponent: false,
+		isGameWon: undefined,
+		opponents: {},
+		leader: null,//chef de partie
+		role: null, //spectator, player
+		gameName: null, // le hash
+		gameMode: null, // normal, gravity, invisible
     };
 
     store = mockStore(customInitialState);
