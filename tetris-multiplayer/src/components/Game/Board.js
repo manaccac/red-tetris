@@ -21,22 +21,37 @@ const lastMove = {
 
 const delay = 40; // Délai entre chaque déplacement
 
-
 const mapStateToProps = (state) => ({
-  board: state.board,
-  piece: state.piece,
-  nextPiece: state.nextPiece,
-  isGameOver: state.isGameOver,
-  isGameWon: state.isGameWon,
-  gameStart: state.gameStart,
-  opponentBoard: state.opponentBoard,
-  opponentBoards: state.opponentBoards,
-  opponentNames: state.opponentNames,
-  leader: state.leader,
-  opponents: state.opponents,
-  gameMode: state.gameMode,
+	board: state.board,
+	piece: state.piece,
+	nextPiece: state.nextPiece,
+	isGameOver: state.isGameOver,
+	isGameWon: state.isGameWon,
+	gameStart: state.gameStart,
+	opponentBoard: state.opponentBoard,
+	opponentBoards: state.opponentBoards,
+	opponentNames: state.opponentNames,
+	leader: state.leader,
+	opponents: state.opponents,
+	gameMode: state.gameMode,
+  
+  });
 
-});
+	export function getRandomDelay(props) {
+		if (props.gameMode === 'graviter') {
+			let grav = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
+			console.log('graviter mode = ' + grav);
+			return grav;
+		}
+		else
+			return 500;
+	}
+
+	export const goHome = (props, navigate) => {
+		props.resetState();
+		props.setAwaitingOpponent(false);
+		navigate('/');
+	  };
 
 const mapDispatchToProps = (dispatch) => ({
   moveLeft: () => new Promise((resolve) => dispatch(moveLeft(resolve))),
@@ -44,7 +59,6 @@ const mapDispatchToProps = (dispatch) => ({
   rotate: () => new Promise((resolve) => dispatch(rotate(resolve))),
   moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
   dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
-  //pieces est un array, si size 2, alors init les deux pieces, si size 1 alors init nextPiece
   updatePiece: (pieces) => dispatch(updatePiece(pieces)),
   gameStarted: (status) => dispatch(gameStarted(status)),
   addIndestructibleLine: (x) => new Promise((resolve) => dispatch(addIndestructibleLine(x, resolve))),
@@ -57,7 +71,6 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 function Board(props) {
-  const [gravity, setGravity] = useState(500); // Valeur par défaut pour la gravité
 
 //   const gameMode = props.gameMode;
 
@@ -68,22 +81,7 @@ function Board(props) {
   const [gameRunning, setGameRunning] = useState(false);
 
 
-  function getRandomDelay() {
-    if (props.gameMode === 'graviter') {
-      let grav = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
-      console.log('graviter mode = ' + grav);
-      setGravity(grav); // Met à jour la valeur de gravité à chaque descente de pièce
-      return grav;
-    }
-    else
-      return 500;
-  }
 
-  const goHome = () => {
-    props.resetState();
-    props.setAwaitingOpponent(false);
-    navigate('/');
-  };
   const restartGame = async () => {
     console.log('restart game function called');
     setGameRunning(false);
@@ -168,7 +166,7 @@ function Board(props) {
       } catch (error) {
         console.log('Error while automatically moving down:', error);
       }
-    }, getRandomDelay());
+    }, getRandomDelay(props));
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
@@ -281,8 +279,8 @@ function Board(props) {
         {props.opponentName}
       </div>
 
-	  {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={goHome} onRestart={restartGame} />}
-      {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={goHome} onRestart={restartGame} />}
+	  {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={() => goHome(props, navigate)} onRestart={restartGame} />}
+      {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={() => goHome(props, navigate)} onRestart={restartGame} />}
 	  {!props.gameStart && (
 				<WaitingScreen
 					opponentNames={props.opponentNames}

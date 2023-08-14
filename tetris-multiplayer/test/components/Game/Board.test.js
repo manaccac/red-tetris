@@ -3,10 +3,9 @@ import { Provider } from 'react-redux';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import configureStore from 'redux-mock-store';
-import Board from '../../../src/components/Game/Board';
+import Board, {getRandomDelay, goHome, restartGame} from '../../../src/components/Game/Board';
 import '@testing-library/jest-dom/extend-expect';
-import { moveLeft, moveRight, rotate, moveDown, dropPiece, setAwaitingOpponent } from '../../../src/redux/actions';
-
+import { moveLeft, moveRight, rotate, moveDown, dropPiece, setAwaitingOpponent, updateOpponentBoard, setOpponentName, setLeader } from '../../../src/redux/actions';
 
 const initialState = {
 	board: Array.from({ length: 20 }, () => Array(10).fill(0)),
@@ -53,7 +52,8 @@ describe('Board', () => {
       nextPiece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
       isGameOver: false,
       isGameWon: false,
-      gameStart: false,
+      gameStart: true,
+	  awaitingOpponent: true,
     };
   
     const mockStore = configureStore([]);
@@ -79,7 +79,141 @@ describe('Board', () => {
 	  }
 	});
 
-  
+	it('should dispatch moveLeft action when moveLeft is called', async () => {
+		const initialState = {
+			board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+			piece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			nextPiece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			isGameOver: false,
+			isGameWon: false,
+			gameStart: true,
+			awaitingOpponent: true,
+		};
+		store = mockStore(initialState);
+		// Appeler la fonction moveLeft
+		const result = store.dispatch(moveLeft());
+		await result;  // Si c'est une promesse, attendez qu'elle soit résolue
+	
+		// Vérifier que l'action moveLeft a été dispatchée
+		const actions = store.getActions();
+		expect(actions[0].type).toEqual(moveLeft().type);
+	});
+
+	it('should dispatch moveLeft action when moveLeft is called', async () => {
+		const initialState = {
+			board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+			piece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			nextPiece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			isGameOver: false,
+			isGameWon: false,
+			gameStart: true,
+			awaitingOpponent: true,
+		};
+		store = mockStore(initialState);
+		// Appeler la fonction moveLeft
+		const result = store.dispatch(moveLeft());
+		await result;  // Si c'est une promesse, attendez qu'elle soit résolue
+	
+		// Vérifier que l'action moveLeft a été dispatchée
+		const actions = store.getActions();
+		expect(actions[0].type).toEqual(moveLeft().type);
+	});
+
+	it('should dispatch updateOpponentBoard action when updateOpponentBoard is called', async () => {
+		const initialState = {
+			board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+			piece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			nextPiece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			isGameOver: false,
+			isGameWon: false,
+			gameStart: true,
+			awaitingOpponent: true,
+		};
+		store = mockStore(initialState);
+	
+		const testName = "opponent1";
+		const testBoard = Array.from({ length: 20 }, () => Array(10).fill(0));
+	
+		const result = store.dispatch(updateOpponentBoard(testName, testBoard));
+		await result;
+	
+		const actions = store.getActions();
+		expect(actions[0].type).toEqual(updateOpponentBoard(testName, testBoard).type);
+	});
+
+	it('should dispatch setOpponentName action when setOpponentName is called', async () => {
+		const initialState = {
+			board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+			piece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			nextPiece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			isGameOver: false,
+			isGameWon: false,
+			gameStart: true,
+			awaitingOpponent: true,
+		};
+		store = mockStore(initialState);
+	
+		const testName = "opponent1";
+	
+		const result = store.dispatch(setOpponentName(testName));
+		await result;
+	
+		const actions = store.getActions();
+		expect(actions[0].type).toEqual(setOpponentName(testName).type);
+	});
+
+	it('should dispatch setLeader action when setLeader is called', async () => {
+		const initialState = {
+			board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+			piece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			nextPiece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			isGameOver: false,
+			isGameWon: false,
+			gameStart: true,
+			awaitingOpponent: true,
+		};
+		store = mockStore(initialState);
+	
+		const testLeader = "leader1";
+	
+		const result = store.dispatch(setLeader(testLeader));
+		await result;
+	
+		const actions = store.getActions();
+		expect(actions[0].type).toEqual(setLeader(testLeader).type);
+	});
+	
+	describe('getRandomDelay function', () => {
+		it('should return a random value between 200 and 800 when gameMode is graviter', () => {
+		  const props = { gameMode: 'graviter' };
+		  const result = getRandomDelay(props);
+		  expect(result).toBeGreaterThanOrEqual(200);
+		  expect(result).toBeLessThanOrEqual(800);
+		});
+	  
+		it('should return 500 when gameMode is not graviter', () => {
+		  const props = { gameMode: 'otherMode' };
+		  const result = getRandomDelay(props);
+		  expect(result).toEqual(500);
+		});
+	  });
+	  
+	
+	  describe('goHome function', () => {
+		it('should call resetState, setAwaitingOpponent and navigate to home', () => {
+		  const props = {
+			resetState: jest.fn(),
+			setAwaitingOpponent: jest.fn(),
+		  };
+		  const navigate = jest.fn();
+		  goHome(props, navigate);
+		  expect(props.resetState).toHaveBeenCalled();
+		  expect(props.setAwaitingOpponent).toHaveBeenCalledWith(false);
+		  expect(navigate).toHaveBeenCalledWith('/');
+		});
+	  });
+	  
+	
   
     // // Test 3: Should handle game over correctly
     // it('should handle game over correctly', () => {
