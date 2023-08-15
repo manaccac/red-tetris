@@ -20,7 +20,7 @@ function NextPiece({ gameStart, nextPiece }) {
 			});
 		  }
 		} catch (error) {
-		  console.log('Erreur lors du rendu de la pièce suivante :', error);
+		//   console.log('Erreur lors du rendu de la pièce suivante :', error);
 		}
 	
 		return boardw.map((row, y) => (

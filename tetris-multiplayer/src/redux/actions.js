@@ -13,25 +13,27 @@ export const UPDATE_OPPONENT_BOARD = 'UPDATE_OPPONENT_BOARD';
 export const IS_VICTORY = 'IS_VICTORY';
 export const SET_OPPONENT_NAME = 'SET_OPPONENT_NAME';
 export const SET_LEADER = 'SET_LEADER';
+export const SET_MY_NAME = 'SET_MY_NAME';
+export const SET_SPECTATOR = 'SET_SPECTATOR';
 
-export function moveLeft(resolve = () => { }) {
-	return { type: MOVE_LEFT, resolve };
+export function moveLeft(resolve = () => {}) {
+    return { type: MOVE_LEFT, resolve };
 }
 
-export function moveRight(resolve = () => { }) {
-	return { type: MOVE_RIGHT, resolve };
+export function moveRight(resolve = () => {}) {
+    return { type: MOVE_RIGHT, resolve };
 }
 
-export function rotate(resolve = () => { }) {
-	return { type: ROTATE, resolve };
+export function rotate(resolve = () => {}) {
+    return { type: ROTATE, resolve };
 }
 
-export function moveDown(resolve = () => { }) {
-	return { type: MOVE_DOWN, resolve };
+export function moveDown(resolve = () => {}) {
+    return { type: MOVE_DOWN, resolve };
 }
 
-export function dropPiece(resolve = () => { }) {
-	return { type: DROP_PIECE, resolve };
+export function dropPiece(resolve = () => {}) {
+    return { type: DROP_PIECE, resolve };
 }
 
 export function resetState(resolve) {
@@ -59,24 +61,41 @@ export const setAwaitingOpponent = (awaiting) => ({
 	payload: awaiting,
 });
 
-export const updateOpponentBoard = (board) => ({
-	type: UPDATE_OPPONENT_BOARD,
-	payload: board,
+export const updateOpponentBoard = (name, board) => ({
+    type: 'UPDATE_OPPONENT_BOARD',
+    name: name,
+    board: board
 });
+
 
 export const setIsVictory = (status) => ({
 	type: IS_VICTORY,
 	payload: status
 });
 
-export const setOpponentName = (opponentName) => ({
+export const setOpponentName = (oppName) => ({
 	type: SET_OPPONENT_NAME,
-	payload: opponentName
+	payload: oppName
 });
 
 export function setLeader(isLeader) {
 	return {
-		type: SET_LEADER,
-		payload: isLeader
+	  type: SET_LEADER,
+	  payload: isLeader
 	};
 }
+
+export const setGameInfo = (gameInfo) => ({
+	type: 'SET_GAME_INFO',
+	payload: gameInfo,
+  });
+
+export const setMyName = (myName) => ({
+	type: SET_MY_NAME,
+	payload: myName
+});
+
+export const setSpectator = (isSpectator) => ({
+	type: SET_SPECTATOR,
+	payload: isSpectator
+});

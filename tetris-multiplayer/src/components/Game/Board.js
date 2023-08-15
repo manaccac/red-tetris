@@ -2,59 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import {
   moveLeft, moveRight, rotate, moveDown, dropPiece, updatePiece,
-  resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard, setIsVictory, setOpponentName, setLeader
+  resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard,
+  setIsVictory, setOpponentName, setLeader, setMyName, setSpectator
 } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
 import Cookies from 'js-cookie';
-
-function WaitingScreen() {
-  return (
-    <div className="overlay">
-      <div className="message">
-        <h1>En attente d'un adversaire...</h1>
-        <div className="loading-animation"></div>
-      </div>
-    </div>
-  );
-}
-
-function CountdownScreen({ countdown }) {
-  return (
-    <div className="overlay">
-      <div className="message">
-        <h1>Le jeu commence dans...</h1>
-        <div className="countdown">{countdown}</div>
-      </div>
-    </div>
-  );
-}
-
-function GameOverScreen({ onGoHome, onRestart, isFirstPlayer }) {
-  return (
-    <div className="overlay">
-      <div className="message">
-        <h1>Partie terminée</h1>
-        <button onClick={onGoHome}>Retour à la page d'accueil.</button>
-        {isFirstPlayer && <button onClick={onRestart}>Recommencer</button>}
-      </div>
-    </div >
-  );
-}
-
-function VictoryScreen({ onGoHome, onRestart, isFirstPlayer }) {
-  return (
-    <div className="overlay">
-      <div className="message">
-        <h1>Victoire !</h1>
-        <button onClick={onGoHome}>Retour à la page d'accueil.</button>
-        {isFirstPlayer && <button onClick={onRestart}>Recommencer</button>}
-      </div>
-    </div>
-  );
-}
-
-
+import OpponentBoard from './OpponentBoard';
+import RenderNextPiece from './NextPiece';
+import { WaitingScreen, CountdownScreen, GameOverScreen, VictoryScreen } from './Screens';
 
 const lastMove = {
   ArrowLeft: 0,
@@ -66,68 +22,88 @@ const lastMove = {
 
 const delay = 40; // Délai entre chaque déplacement
 
-
 const mapStateToProps = (state) => ({
-  board: state.board,
-  piece: state.piece,
-  nextPiece: state.nextPiece,
-  isGameOver: state.isGameOver,
-  isGameWon: state.isGameWon,
-  gameStart: state.gameStart,
-  opponentBoard: state.opponentBoard
-});
+	board: state.board,
+	piece: state.piece,
+	nextPiece: state.nextPiece,
+	isGameOver: state.isGameOver,
+	isGameWon: state.isGameWon,
+	gameStart: state.gameStart,
+	opponentBoard: state.opponentBoard,
+	opponentBoards: state.opponentBoards,
+	opponentNames: state.opponentNames,
+	leader: state.leader,
+	opponents: state.opponents,
+	gameMode: state.gameMode,
+	myName: state.myName,
+	isSpectator: state.isSpectator,
+  
+  });
 
-const mapDispatchToProps = (dispatch) => ({
+	export function getRandomDelay(props) {
+		if (props.gameMode === 'graviter') {
+			let grav = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
+			console.log('graviter mode = ' + grav);
+			return grav;
+		}
+		else
+			return 500;
+	}
+
+	export const goHome = (props, navigate) => {
+		props.resetState();
+		props.setAwaitingOpponent(false);
+		navigate('/');
+	  };
+	
+	export const restartGame = async (props, setGameRunning, username) => {
+		console.log('restart game function called');
+		setGameRunning(false);
+		await props.resetState();
+		// await props.generatePiece();
+		await props.setAwaitingOpponent(true);
+	
+		console.log('going to emit soon');
+		socket.emit('lookingForAGame', username);
+	};
+	
+
+export const mapDispatchToProps = (dispatch) => ({
   moveLeft: () => new Promise((resolve) => dispatch(moveLeft(resolve))),
   moveRight: () => new Promise((resolve) => dispatch(moveRight(resolve))),
   rotate: () => new Promise((resolve) => dispatch(rotate(resolve))),
   moveDown: () => new Promise((resolve) => dispatch(moveDown(resolve))),
   dropPiece: () => new Promise((resolve) => dispatch(dropPiece(resolve))),
-  //pieces est un array, si size 2, alors init les deux pieces, si size 1 alors init nextPiece
   updatePiece: (pieces) => dispatch(updatePiece(pieces)),
   gameStarted: (status) => dispatch(gameStarted(status)),
   addIndestructibleLine: (x) => new Promise((resolve) => dispatch(addIndestructibleLine(x, resolve))),
   resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
   setIsVictory: (status) => dispatch(setIsVictory(status)),
   setAwaitingOpponent: (awaiting) => dispatch(setAwaitingOpponent(awaiting)),
-  updateOpponentBoard: (board) => dispatch(updateOpponentBoard(board)),
+  updateOpponentBoard: (name, board) => dispatch(updateOpponentBoard(name, board)),
   setOpponentName: (oppName) => dispatch(setOpponentName(oppName)),
   setLeader: (leader) => dispatch(setLeader(leader)),
+  setMyName: (myname) => dispatch(setMyName(myname)),
+  setSpectator: (spectator) => dispatch(setSpectator(spectator)),
 });
 
 function Board(props) {
-  const [gravity, setGravity] = useState(500); // Valeur par défaut pour la gravité
 
-  const gameMode = props.gameMode;
+//   const gameMode = props.gameMode;
 
   const username = Cookies.get('username');
+  props.setMyName(username);
+  console.log('username = set ' + props.myName);
+
 
   let navigate = useNavigate();
   const [countdown, setCountdown] = useState(1);
   const [gameRunning, setGameRunning] = useState(false);
-  const [isFirstPlayer, setIsFirstPlayer] = useState(false);
 
-  function getRandomDelay() {
-    if (gameMode === 'graviter') {
-      let grav = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
-      console.log('graviter mode = ' + grav);
-      setGravity(grav); // Met à jour la valeur de gravité à chaque descente de pièce
-      return grav;
-    }
-    else
-      return 500;
-  }
 
-  const goHome = () => {
-    props.resetState();
-    props.setAwaitingOpponent(false);
-    navigate('/');
-  };
-
-  const restartGame = () => {
-    socket.emit('restartGame', { userName: username, gameMode: gameMode });
-  };
-
+  const handleRestartGame = () => {
+	restartGame(props, setGameRunning, username);
+	};
 
   const handleKeyDown = async (event) => {
     try {
@@ -167,10 +143,9 @@ function Board(props) {
   useEffect(() => {
     let countdownInterval;
 
-    console.log('value of gameSTart after restart' + props.gameStart);
     if (props.gameStart) {
       countdownInterval = setInterval(() => {
-        console.log("hello count :", countdownInterval);
+        console.log("hello count :",countdownInterval);
         setCountdown((prevCountdown) => {
           if (prevCountdown <= 1) {
             clearInterval(countdownInterval);
@@ -200,7 +175,7 @@ function Board(props) {
       } catch (error) {
         console.log('Error while automatically moving down:', error);
       }
-    }, getRandomDelay());
+    }, getRandomDelay(props));
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
@@ -209,46 +184,40 @@ function Board(props) {
   }, [props.isGameOver, gameRunning, props.board]);
 
   useEffect(() => {
-    const resetState = async () => {
-      await props.resetState();
-      // await props.generatePiece();
-      await props.setAwaitingOpponent(true);
-      await props.gameStarted(true);
-      setGameRunning(false);
-      setCountdown(1);
-    }
-
     socket.on('gameStart', (response) => {
-      resetState();
-      // !props.isGameOver && props.gameStart && !gameRunning && (
-
-      console.log('isGameOver: ' + props.isGameOver);
-      console.log('gameStart: ' + props.gameStart);
-      console.log('gameRunning: ' + gameRunning);
-      if (response.isFirstPlayer) {
-        console.log('i am first player');
-        setIsFirstPlayer(true);
-      } else {
-        console.log('i am second player');
-        setIsFirstPlayer(false);
-      }
-      props.updatePiece([response.piece, response.nextPiece]);
+      props.gameStarted(true);
+	  if (response.isFirstPlayer) {
+		console.log('im first player');
+		props.setLeader(true);
+	  } else {
+		console.log('im second player');
+		props.setLeader(false);
+	  }
+	  props.updatePiece([response.piece, response.nextPiece]);
       props.setOpponentName(response.opponentName);
     });
+	socket.on('spectator', () => {
+		console.log('spectator mode');
+		props.setLeader(false);
+		props.setSpectator(true);
+	});
     socket.on('receivedLines', (numberOfLines) => {
       props.addIndestructibleLine(numberOfLines);
     });
     socket.on('Victory', () => {
       props.setIsVictory(true);
     });
-    socket.on('opponentBoardData', (dataBoard) => {
-      props.updateOpponentBoard(dataBoard);
+    socket.on('opponentBoardData', (opponentBoardData, userName) => {
+	  console.log('opponentBoardData received from server');
+	  props.updateOpponentBoard(userName ,opponentBoardData);
     })
     socket.on('updateNextPiece', (nextPiece) => {
+      console.log('nextPiece received from server : ', nextPiece);
+      console.log(nextPiece);
       props.updatePiece(nextPiece);
     });
 
-    socket.emit('lookingForAGame', { userName: username, gameMode: gameMode });
+	socket.emit('lookingForAGame', { userName: username, gameMode: props.gameMode, gameName: props.gameName });
     props.setAwaitingOpponent(true);
     return () => {
       socket.emit('leftGame');
@@ -285,40 +254,59 @@ function Board(props) {
 
         const isGameOver = props.isGameOver && !props.isGameWon;
         let shouldShowPiece = true;
-        if (gameMode === 'invisible' && !isGameOver) {
+        if (props.gameMode === 'invisible' && !isGameOver) {
           shouldShowPiece = false;
         }
 
-        return (
-          <div
-            key={`${y}-${x}`}
-            className={`cell ${(cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
-              } id-${cell !== 0 && shouldShowPiece ? cell : activePieceId}`}
-            data-testid={`cell-${y}-${x}`}
-          ></div>
-        );
-      })
-    );
+		return (
+			<div
+				key={`${y}-${x}`}
+				className={`cell ${
+					(cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
+				} id-${cell !== 0 && shouldShowPiece ? cell : activePieceId}`}
+				data-testid={`cell-${y}-${x}`}
+			></div>
+		);		
+    })
+  );
+
+  const startGameHandler = () => {
+	socket.emit('startGame');
+	props.gameStarted(true);
+};
 
   return (
+
     <div
       className="game-container"
       onKeyDown={handleKeyDown}
       tabIndex="0"
     >
-      <div className="board" data-testid="board-container">
-        {renderCells()}
-      </div>
+	{!props.isSpectator && (
+	<div className="board" data-testid="board-container">
+		{renderCells()}
+	</div>
+	)}
+	{(props.isSpectator) && (<h1>Spectateur</h1>)}
 
-      <RenderNextPiece />
-      <OpponentBoard />
+
+	{!props.isSpectator && (
+		<RenderNextPiece />
+	)}
+	  <OpponentBoard />
       <div className="opponent-name">
         {props.opponentName}
       </div>
 
-      {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={goHome} onRestart={restartGame} isFirstPlayer={isFirstPlayer} />}
-      {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={goHome} onRestart={restartGame} isFirstPlayer={isFirstPlayer} />}
-      {!props.isGameOver && !props.gameStart && <WaitingScreen />}
+	  {props.isGameOver && (!props.isGameWon || props.isSpectator) && <GameOverScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} />}
+      {props.isGameOver && props.isGameWon && !props.isSpectator && <VictoryScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} />}
+	  {(!props.gameStart && !props.isSpectator) && (
+		<WaitingScreen
+			opponentNames={props.opponentNames}
+			isLeader={props.leader}
+			onStartGame={startGameHandler}
+		/>
+		)}
       {!props.isGameOver && props.gameStart && !gameRunning && <CountdownScreen countdown={countdown} />}
     </div>
   );

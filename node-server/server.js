@@ -34,8 +34,11 @@ io.on('connection', (socket) => {
         leavingGame(socket, io, 'leftGame');
     });
 
-    socket.on('updateBoard', (dataBoard) => {
-        sendBoardAndPieceToPlayer(socket, dataBoard);
+    // socket.on('updateBoard', (dataBoard) => {
+    //     sendBoardAndPieceToPlayer(socket, dataBoard);
+    socket.on('updateBoard', (updatedBoard, userName) => {
+        console.log('server received update board');
+        sendBoardAndPieceToPlayer(socket, rooms, updatedBoard, userName);
     });
 
     socket.on('sendLines', (numberOfLines) => {

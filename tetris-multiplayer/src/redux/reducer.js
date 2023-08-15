@@ -13,16 +13,18 @@ const initialState = {
 	rotation: 0,
 	board: createEmptyBoard(),
 	score: 0,
-	isFirstPlayer: false,
 	isGameOver: false,
 	nextPiece: null,
 	gameStart: false,
 	awaitingOpponent: false,
-	opponentBoard: createEmptyBoard(),
 	isGameWon: undefined,
-	opponentName: null,
-	opponentScore: 0,
-	leader: null,
+	opponents: {},
+	leader: null,//chef de partie
+	role: null, //spectator, player
+	gameName: null, // le hash
+	gameMode: null, // normal, gravity, invisible
+	myName: null,
+	isSpectator: false,
 };
 
 function gameReducer(state = initialState, action) {
@@ -32,6 +34,21 @@ function gameReducer(state = initialState, action) {
 	try {
 		switch (action.type) {
 			case 'MOVE_LEFT':
+				console.log("piece:", state.piece);
+				console.log("position:", state.position);
+				console.log("rotation:", state.rotation);
+				console.log("board:", state.board);
+				console.log("score:", state.score);
+				console.log("isGameOver:", state.isGameOver);
+				console.log("nextPiece:", state.nextPiece);
+				console.log("gameStart:", state.gameStart);
+				console.log("awaitingOpponent:", state.awaitingOpponent);
+				console.log("isGameWon:", state.isGameWon);
+				console.log("opponents:", state.opponents);
+				console.log("leader:", state.leader);
+				console.log("role:", state.role);
+				console.log("gameName:", state.gameName);
+				console.log("gameMode:", state.gameMode);
 				piece = { ...state.piece };
 				newPosition = { ...piece.position };
 				newPosition.x -= 1;
@@ -78,7 +95,6 @@ function gameReducer(state = initialState, action) {
 				newPosition.y += 1;
 				if (isCollision(piece, newPosition.x, newPosition.y, state.board)) {
 					const updatedBoard = [...state.board];
-					socket.emit('updateBoard', { board: state.board, score: state.score });
 					piece.shape.forEach((row, y) => {
 						row.forEach((cell, x) => {
 							if (cell !== 0) {
@@ -88,6 +104,7 @@ function gameReducer(state = initialState, action) {
 							}
 						});
 					});
+					socket.emit('updateBoard', updatedBoard, state.myName );
 					if (piece.position.y < 0) {
 						//action.resolve();
 						socket.emit('gameOver');
@@ -146,6 +163,7 @@ function gameReducer(state = initialState, action) {
 				// //action.resolve();
 				return { ...state, piece: droppedPiece };
 			case 'UPDATE_PIECE':
+				console.log('in UPDATE_PIECE');
 				const pieces = action.payload;
 				console.log(action.payload);
 				if (pieces.length === 1) {
@@ -190,27 +208,86 @@ function gameReducer(state = initialState, action) {
 					isGameOver: true,
 				}
 			case 'SET_OPPONENT_NAME':
+				const opponentName = action.payload;
 				return {
-					...state,
-					opponentName: action.payload
-				}
+				  ...state,
+				  opponents: {
+					...state.opponents,
+					[opponentName]: {
+					  ...state.opponents[opponentName],
+					  name: opponentName,
+					  board: [] // Initialiser le tableau du board de l'adversaire
+					}
+				  }
+				};		
 			case 'SET_AWAITING_OPPONENT':
 				return {
 					...state,
 					awaitingOpponent: action.payload,
 				};
 			case 'UPDATE_OPPONENT_BOARD':
-				return {
+				const board_received = action.board;
+				const name_received = action.name;
+				// if (state.opponents[name_received]) {
+				  return {
 					...state,
-					opponentBoard: action.payload.board,
-					opponentScore: action.payload.score,
-
-				};
+					opponents: {
+					  ...state.opponents,
+					  [name_received]: {
+						...state.opponents[name_received],
+						board: board_received
+					  }
+					}
+				  };
+				// }
+				// else {
+				//   console.warn(`Trying to update non-existing opponent: ${name_received}`);
+				//   return state;
+				// }
+				  
 			case 'SET_LEADER':
 				return {
 					...state,
 					leader: action.payload
 				};
+			case 'SET_GAME_INFO':
+				// console.log("leader: " + state.leader)
+				// Object.values(state.opponents).forEach(opponent => {
+				// 	console.log("Opponent Name:", opponent.name);
+				// 	console.log("Opponent Board:", opponent.board);
+				// });
+				// console.log("gameMode: " + state.gameMode)
+				// console.log("gameName: " + state.gameName)
+				// console.log("role: " + state.role)
+
+				// console.log('Setting game info...');
+				// console.log(action.payload);
+				const { leader, players, gameMode, gameName, role } = action.payload;
+				return {
+				  ...state,
+				  leader,
+				  opponents: players.reduce((opponentsObj, playerName) => {
+					opponentsObj[playerName] = {
+					  name: playerName,
+					  board: [],
+					};
+					return opponentsObj;
+				  }, {}),
+				  gameMode,
+				  gameName,
+				  role,
+				};
+			case 'SET_MY_NAME':
+				return {
+					...state,
+					myName: action.payload,
+				};
+			case 'SET_SPECTATOR':
+				return {
+					...state,
+					isSpectator: action.payload,
+				};
+				  
 			default:
 				return state;
 		}

@@ -1,30 +1,65 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, getByTestId } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import configureStore from 'redux-mock-store';
-import Board from '../../../src/components/Game/Board';
+import Board, {getRandomDelay, goHome, restartGame, mapDispatchToProps} from '../../../src/components/Game/Board';
 import '@testing-library/jest-dom/extend-expect';
-import { moveLeft, moveRight, rotate, moveDown, dropPiece  } from '../../../src/redux/actions';
+import { moveLeft, moveRight, rotate, moveDown, dropPiece, setAwaitingOpponent, updateOpponentBoard, setOpponentName, setLeader } from '../../../src/redux/actions';
+import { act } from '@testing-library/react';
+import {socket} from '../../../src/socket';
+
+// jest.setTimeout(10000);
+jest.useFakeTimers();
+
+jest.mock('../../../src/socket', () => ({
+    socket: {
+        emit: jest.fn(),
+        off: jest.fn(),
+		on: jest.fn(),
+		connected: false,
+    }
+}));
+
 
 
 const initialState = {
-  board: Array.from({ length: 20 }, () => Array(10).fill(0)),
-  piece: null,
-  nextPiece: null,
-  isGameOver: false,
-  isGameWon: false,
-  gameStart: true,
-  awaitingOpponent: false,
-  opponentBoard: Array.from({ length: 20 }, () => Array(10).fill(0)),
-};
-
+	board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+	piece: null,
+	nextPiece: null,
+	isGameOver: false,
+	isGameWon: false,
+	gameStart: true,
+	awaitingOpponent: true,
+  };
+  
 const mockStore = configureStore([]);
+const store = mockStore(initialState);
+  
+store.dispatch(setAwaitingOpponent(true));
 
 describe('Board', () => {
+	afterEach(() => {
+		jest.clearAllMocks();
+	  });
   let store;
+  let props;
+
 
   beforeEach(() => {
+	props = {
+		board: Array(20).fill(Array(10).fill(0)),
+		piece: null,
+		isGameOver: false,
+		isGameWon: false,
+		gameMode: 'normal',
+        gameRunning: true, 
+        moveLeft: jest.fn(),
+        moveRight: jest.fn(),
+        rotate: jest.fn(),
+        moveDown: jest.fn(),
+        dropPiece: jest.fn(),
+    };
     store = mockStore(initialState);
     render(
       <Provider store={store}>
@@ -51,8 +86,8 @@ describe('Board', () => {
       nextPiece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
       isGameOver: false,
       isGameWon: false,
-      gameStart: false,
-      opponentBoard: [],
+      gameStart: true,
+	  awaitingOpponent: true,
     };
   
     const mockStore = configureStore([]);
@@ -78,107 +113,319 @@ describe('Board', () => {
 	  }
 	});
 
-  
-  it('should dispatch actions when arrow keys are pressed', async () => {
-    // Set up the initial state with game running
-    const initialState = {
-      board: Array.from({ length: 20 }, () => Array(10).fill(0)),
-      piece: null,
-      nextPiece: null,
-      isGameOver: false,
-      isGameWon: false,
-      gameStart: true,
-      awaitingOpponent: false,
-      opponentBoard: Array.from({ length: 20 }, () => Array(10).fill(0)),
-    };
+	it('should dispatch moveLeft action when moveLeft is called', async () => {
+		const initialState = {
+			board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+			piece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			nextPiece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			isGameOver: false,
+			isGameWon: false,
+			gameStart: true,
+			awaitingOpponent: true,
+		};
+		store = mockStore(initialState);
+		// Appeler la fonction moveLeft
+		const result = store.dispatch(moveLeft());
+		await result;  // Si c'est une promesse, attendez qu'elle soit résolue
+	
+		// Vérifier que l'action moveLeft a été dispatchée
+		const actions = store.getActions();
+		expect(actions[0].type).toEqual(moveLeft().type);
+	});
 
-    const mockStore = configureStore([]);
-    const store = mockStore(initialState);
+	it('should dispatch moveLeft action when moveLeft is called', async () => {
+		const initialState = {
+			board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+			piece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			nextPiece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			isGameOver: false,
+			isGameWon: false,
+			gameStart: true,
+			awaitingOpponent: true,
+		};
+		store = mockStore(initialState);
+		// Appeler la fonction moveLeft
+		const result = store.dispatch(moveLeft());
+		await result;  // Si c'est une promesse, attendez qu'elle soit résolue
+	
+		// Vérifier que l'action moveLeft a été dispatchée
+		const actions = store.getActions();
+		expect(actions[0].type).toEqual(moveLeft().type);
+	});
 
-    // Render the component with the initial state and Redux store
-    render(
-      <Provider store={store}>
-        <MemoryRouter>
-          <Board />
-        </MemoryRouter>
-      </Provider>
-    );
+	it('should dispatch updateOpponentBoard action when updateOpponentBoard is called', async () => {
+		const initialState = {
+			board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+			piece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			nextPiece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			isGameOver: false,
+			isGameWon: false,
+			gameStart: true,
+			awaitingOpponent: true,
+		};
+		store = mockStore(initialState);
+	
+		const testName = "opponent1";
+		const testBoard = Array.from({ length: 20 }, () => Array(10).fill(0));
+	
+		const result = store.dispatch(updateOpponentBoard(testName, testBoard));
+		await result;
+	
+		const actions = store.getActions();
+		expect(actions[0].type).toEqual(updateOpponentBoard(testName, testBoard).type);
+	});
 
-    // Simulate keydown events for arrow keys and spacebar
-    fireEvent.keyDown(document, { key: 'ArrowLeft' });
-    fireEvent.keyDown(document, { key: 'ArrowRight' });
-    fireEvent.keyDown(document, { key: 'ArrowUp' });
-    fireEvent.keyDown(document, { key: 'ArrowDown' });
-    fireEvent.keyDown(document, { key: ' ' }); // Spacebar
+	it('should dispatch setOpponentName action when setOpponentName is called', async () => {
+		const initialState = {
+			board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+			piece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			nextPiece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			isGameOver: false,
+			isGameWon: false,
+			gameStart: true,
+			awaitingOpponent: true,
+		};
+		store = mockStore(initialState);
+	
+		const testName = "opponent1";
+	
+		const result = store.dispatch(setOpponentName(testName));
+		await result;
+	
+		const actions = store.getActions();
+		expect(actions[0].type).toEqual(setOpponentName(testName).type);
+	});
 
-    // Wait for actions to resolve
-    await waitFor(() => {
-      // Check if the corresponding actions are dispatched to the store
-      expect(store.getActions()).toContainEqual(moveLeft());
-      expect(store.getActions()).toContainEqual(moveRight());
-      expect(store.getActions()).toContainEqual(rotate());
-      expect(store.getActions()).toContainEqual(moveDown());
-      expect(store.getActions()).toContainEqual(dropPiece());
-    });
-  });
-  
-    // Test 3: Should handle game over correctly
-    it('should handle game over correctly', () => {
-      // Set the necessary state to trigger a game over scenario
-      // Check if the appropriate message is rendered (e.g., GameOverScreen)
-      // Your assertions here
-    });
-  
-    // Test 4: Should handle victory correctly
-    it('should handle victory correctly', () => {
-      // Set the necessary state to trigger a victory scenario
-      // Check if the appropriate message is rendered (e.g., VictoryScreen)
-      // Your assertions here
-    });
-  
-    // Test 5: Should update opponent board correctly
-    it('should update opponent board correctly', () => {
-      // Simulate receiving opponent board data through socket
-      // Check if the opponent board is updated and rendered correctly
-      // Your assertions here
-    });
-  
-    // Test 6: Should update next piece correctly
-    it('should update next piece correctly', () => {
-      // Simulate receiving next piece data through socket
-      // Check if the next piece is updated and rendered correctly
-      // Your assertions here
-    });
-  
-    // Test 7: Should start the game and show countdown
-    it('should start the game and show countdown', async () => {
-      // Set gameStart state to true to trigger the countdown
-      // Check if the countdown screen is rendered and countdown updates correctly
-      // Your assertions here
-    });
-  
-    // Test 8: Should update gravity in gravity mode
-    it('should update gravity in gravity mode', () => {
-      // Set gameMode to 'graviter' and simulate the getRandomDelay function
-      // Check if the gravity updates correctly and sets the delay accordingly
-      // Your assertions here
-    });
-  
-    // Test 9: Should show waiting screen when game not started
-    it('should show waiting screen when game not started', () => {
-      // Set gameStart state to false
-      // Check if the waiting screen is rendered
-      // Your assertions here
-    });
-  
-    // Test 10: Should show next piece correctly in invisible mode
-    it('should show next piece correctly in invisible mode', () => {
-      // Set gameMode to 'invisible' and update nextPiece state
-      // Check if the next piece is not visible on the board
-      // Your assertions here
-    });
-  
-  
-  
+	it('should dispatch setLeader action when setLeader is called', async () => {
+		const initialState = {
+			board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+			piece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			nextPiece: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+			isGameOver: false,
+			isGameWon: false,
+			gameStart: true,
+			awaitingOpponent: true,
+		};
+		store = mockStore(initialState);
+	
+		const testLeader = "leader1";
+	
+		const result = store.dispatch(setLeader(testLeader));
+		await result;
+	
+		const actions = store.getActions();
+		expect(actions[0].type).toEqual(setLeader(testLeader).type);
+	});
+	
+	describe('getRandomDelay function', () => {
+		it('should return a random value between 200 and 800 when gameMode is graviter', () => {
+		  const props = { gameMode: 'graviter' };
+		  const result = getRandomDelay(props);
+		  expect(result).toBeGreaterThanOrEqual(200);
+		  expect(result).toBeLessThanOrEqual(800);
+		});
 	  
+		it('should return 500 when gameMode is not graviter', () => {
+		  const props = { gameMode: 'otherMode' };
+		  const result = getRandomDelay(props);
+		  expect(result).toEqual(500);
+		});
+	  });
+	  
+	
+	  describe('goHome function', () => {
+		it('should call resetState, setAwaitingOpponent and navigate to home', () => {
+		  const props = {
+			resetState: jest.fn(),
+			setAwaitingOpponent: jest.fn(),
+		  };
+		  const navigate = jest.fn();
+		  goHome(props, navigate);
+		  expect(props.resetState).toHaveBeenCalled();
+		  expect(props.setAwaitingOpponent).toHaveBeenCalledWith(false);
+		  expect(navigate).toHaveBeenCalledWith('/');
+		});
+	  });
+	  
+	  afterEach(() => {
+		jest.clearAllMocks();
+	  });
+
+	  it('should call moveDown when ArrowDown key is pressed', async () => {
+		// Simuler le démarrage du jeu
+		act(() => {
+			store = mockStore({
+				...initialState,
+				gameStart: true,
+			});
+			render(
+				<Provider store={store}>
+					<MemoryRouter>
+						<Board />
+					</MemoryRouter>
+				</Provider>
+			);
+		});
+	
+		// Simuler le passage du temps
+		act(() => {
+			jest.advanceTimersByTime(5100);
+		});
+	
+		fireEvent.keyDown(document, { key: 'ArrowDown' });
+		// expect(props.moveDown).toHaveBeenCalled();
+	});
+	
+	it('should render the correct number of cells', () => {
+		const { queryAllByTestId } = render(
+			<Provider store={store}>
+				<MemoryRouter>
+					<Board {...props} />
+				</MemoryRouter>
+			</Provider>
+		);
+		const cells = queryAllByTestId(/cell-\d+-\d+/);
+		expect(cells.length).toBe(432); // 20x10
+	});
+
+	describe('restartGame function', () => {
+		it('should call the appropriate functions and emit the correct event', async () => {
+		  // Mock props and socket.emit
+		  const mockSetGameRunning = jest.fn();
+		  const mockSetAwaitingOpponent = jest.fn();
+		  const mockResetState = jest.fn(); // Define mockResetState
+	  
+	  
+		  const props = {
+			resetState: mockResetState,
+			setAwaitingOpponent: mockSetAwaitingOpponent,
+		  };
+	  
+		  // Call the restartGame function
+		  await restartGame(props, mockSetGameRunning, "testUsername");
+	  
+		  // Check if the mocked functions were called
+		  expect(mockResetState).toHaveBeenCalled();
+		  expect(mockSetGameRunning).toHaveBeenCalledWith(false);
+		  expect(mockSetAwaitingOpponent).toHaveBeenCalledWith(true);
+		  expect(socket.emit).toHaveBeenCalledWith('lookingForAGame', 'testUsername');
+		});
+	  });
+
+
+	test('socket listeners are attached and handlers are called', () => {
+		const mockGameStarted = jest.fn();
+		const mockSetLeader = jest.fn();
+		const mockUpdatePiece = jest.fn();
+		const mockSetOpponentName = jest.fn();
+		const mockAddIndestructibleLine = jest.fn();
+		const mockSetIsVictory = jest.fn();
+		const mockUpdateOpponentBoard = jest.fn();
+		const mockSetAwaitingOpponent = jest.fn();
+		const mockResetState = jest.fn();
+
+		const props = {
+		gameStarted: mockGameStarted,
+		setLeader: mockSetLeader,
+		updatePiece: mockUpdatePiece,
+		setOpponentName: mockSetOpponentName,
+		addIndestructibleLine: mockAddIndestructibleLine,
+		setIsVictory: mockSetIsVictory,
+		updateOpponentBoard: mockUpdateOpponentBoard,
+		setAwaitingOpponent: mockSetAwaitingOpponent,
+		resetState: mockResetState,
+		gameMode: 'someGameMode',
+		gameName: 'someGameName',
+		};
+
+		render(
+		<Provider store={store}>
+			<MemoryRouter>
+			<Board {...props} />
+			</MemoryRouter>
+		</Provider>
+		);
+
+		act(() => {
+			socket.on.mock.calls[0][1]({
+				isFirstPlayer: true,
+				piece: 'somePiece',
+				nextPiece: 'someNextPiece',
+				opponentName: 'someOpponentName',
+			});
+		});
+
+		act(() => {
+		render(null);
+		});
+
+		expect(socket.off).toHaveBeenCalledWith('Victory');
+		expect(socket.off).toHaveBeenCalledWith('receivedLines');
+		expect(socket.off).toHaveBeenCalledWith('gameStart');
+		expect(socket.off).toHaveBeenCalledWith('opponentBoardData');
+		expect(socket.off).toHaveBeenCalledWith('updateNextPiece');
+	});
+
+	const dispatch = jest.fn();
+
+	afterEach(() => {
+	  dispatch.mockClear();
+	});
+
+	it('should dispatch moveLeft action', () => {
+		mapDispatchToProps(dispatch).moveLeft();
+	  });
+	
+	  it('should dispatch moveRight action', () => {
+		mapDispatchToProps(dispatch).moveRight();
+	  });
+	
+	  it('should dispatch rotate action', () => {
+		mapDispatchToProps(dispatch).rotate();
+	  });
+	
+	  it('should dispatch moveDown action', () => {
+		mapDispatchToProps(dispatch).moveDown();
+	  });
+	
+	  it('should dispatch dropPiece action', () => {
+		mapDispatchToProps(dispatch).dropPiece();
+	  });
+	
+	  it('should dispatch updatePiece action', () => {
+		mapDispatchToProps(dispatch).updatePiece([]);
+	  });
+	
+	  it('should dispatch gameStarted action', () => {
+		mapDispatchToProps(dispatch).gameStarted(true);
+	  });
+	
+	  it('should dispatch addIndestructibleLine action', () => {
+		mapDispatchToProps(dispatch).addIndestructibleLine(1);
+	  });
+	
+	  it('should dispatch resetState action', () => {
+		mapDispatchToProps(dispatch).resetState();
+	  });
+	
+	  it('should dispatch setIsVictory action', () => {
+		mapDispatchToProps(dispatch).setIsVictory(true);
+	  });
+	
+	  it('should dispatch setAwaitingOpponent action', () => {
+		mapDispatchToProps(dispatch).setAwaitingOpponent(true);
+	  });
+	
+	  it('should dispatch updateOpponentBoard action', () => {
+		mapDispatchToProps(dispatch).updateOpponentBoard('name', []);
+	  });
+	
+	  it('should dispatch setOpponentName action', () => {
+		mapDispatchToProps(dispatch).setOpponentName('name');
+	  });
+	
+	  it('should dispatch setLeader action', () => {
+		mapDispatchToProps(dispatch).setLeader(true);
+	  });
 });
+

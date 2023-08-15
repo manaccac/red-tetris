@@ -1,15 +1,36 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
-function WaitingScreen() {
+function WaitingScreen({ opponentNames, isLeader, onStartGame }) {
+	console.log("opponentNames =", opponentNames);
+	console.log("isLeader =", isLeader);
     return (
         <div className="overlay">
             <div className="message">
-                <h1>En attente d'un adversaire...</h1>
+                <h1>En attente d'adversaires...</h1>
+                <ul>
+                    {opponentNames && opponentNames.map((name, index) => (
+                        <li key={index}>{name}</li>
+                    ))}
+                </ul>
+                <p>Nombre d'adversaires : {opponentNames ? opponentNames.length : 0}</p>
+                {isLeader && (
+                    <button onClick={onStartGame} data-testid="start-game-btn">Démarrer la partie</button>
+                )}
                 <div className="loading-animation"></div>
             </div>
         </div>
     );
 }
+
+
+const mapStateToProps = (state) => ({
+    opponentNames: Object.keys(state.opponents),
+});
+
+
+export default connect(mapStateToProps)(WaitingScreen);
+
 
 function CountdownScreen({ countdown }) {
     return (
