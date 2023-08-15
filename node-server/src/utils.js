@@ -1,81 +1,96 @@
-const leavingGame = (socket, rooms, io, type) => {
+const { games, players, maxPlayerPerGame } = require('./gameState');
+const Player = require('./player');
+const Game = require('./game');
+
+const leaveAllRooms = (socket) => {
+	const rooms = Object.keys(socket.rooms);
+
+	rooms.forEach(room => {
+		if (room !== socket.id) { // Ne quittez pas la room correspondant à l'ID de socket lui-même
+			socket.leave(room);
+		}
+	});
+};
+
+const leavingGame = (socket, io, type) => {
 	console.log('leavingGame called');
-	for (const [roomId, roomData] of rooms.entries()) {
-		const clients = roomData.clients;
+	leaveAllRooms(socket);
+	for (const [gameId, gameData] of games.entries()) {
+		const clients = gameData.clients;
 		if (!clients) return;
 		const index = clients.indexOf(socket);
 		if (index !== -1) {
 			clients.splice(index, 1);
-			rooms.set(roomId, { clients: clients, pieces: roomData.pieces });
+			games.set(gameId, { clients: clients, pieces: gameData.pieces });
 			if (clients.length === 0) {
-				rooms.delete(roomId);
-				console.log('room is empty, deleting it');
+				games.delete(gameId);
+				console.log('game is empty, deleting it');
 			} else {
 				//On previent le client restant qu'il a gagné
-				io.to(roomId).emit("Victory");
+				io.to(gameId).emit("Victory");
 			}
 			console.log('socketId: ' + socket.id + ' left the game\n');
 		}
 	}
 };
 
-const sendBoardAndPieceToPlayer = (socket, rooms, dataBoard) => {
+const sendBoardAndPieceToPlayer = (socket, dataBoard) => {
 	console.log('client emetteur: ' + client.username)
-	for (const [roomId, roomData] of rooms.entries()) {
-		const clients = roomData.clients;
+	for (const [gameId, gameData] of games.entries()) {
+		const clients = gameData.clients;
 		const index = clients.indexOf(socket);
 		if (index !== -1) {
-			// si besoin on créé la nouvelle pièce dans la room
-			if (roomData.pieces.length <= socket.pieceId) {
-				roomData.pieces.push(generateNewPiece());
+			// si besoin on créé la nouvelle pièce dans la game
+			if (gameData.pieces.length <= socket.pieceId) {
+				gameData.pieces.push(generateNewPiece());
 			}
 			//on envoit la pièce suivante au joueur qui vient de poser
-			socket.emit('updateNextPiece', [roomData.pieces[socket.pieceId]]);
+			socket.emit('updateNextPiece', [gameData.pieces[socket.pieceId]]);
 			socket.pieceId++;
 			//on envoit le board a l'adversaire
-			socket.broadcast.to(roomId).emit('opponentBoardData', dataBoard);
+			socket.broadcast.to(gameId).emit('opponentBoardData', dataBoard);
 		}
 	}
 }
 
-const sendLinesToPlayer = (socket, rooms, numberOfLines) => {
-	for (const [roomId, roomData] of rooms.entries()) {
-		const clients = roomData.clients;
+const sendLinesToPlayer = (socket, numberOfLines) => {
+	for (const [gameId, gameData] of games.entries()) {
+		const clients = gameData.clients;
 		const index = clients.indexOf(socket);
 		if (index !== -1) {
-			socket.broadcast.to(roomId).emit('receivedLines', numberOfLines);
+			socket.broadcast.to(gameId).emit('receivedLines', numberOfLines);
 		}
 	}
 }
 
-const gameOver = (socket, rooms) => {
-	for (const [roomId, roomData] of rooms.entries()) {
-		const clients = roomData.clients;
+const gameOver = (socket) => {
+	for (const [gameId, gameData] of games.entries()) {
+		const clients = gameData.clients;
 		const index = clients.indexOf(socket);
 		if (index !== -1) {
 			// on prévient l'autre joueur de sa victoire
-			socket.broadcast.to(roomId).emit('Victory');
-			console.log('after deleting, roomsleft : ' + rooms.size);
+			socket.broadcast.to(gameId).emit('Victory');
+			console.log('after deleting, gamesleft : ' + games.size);
 		}
 	}
 }
 
-const restartGame = (socket, rooms, dataStartGame) => {
+const restartGame = (socket, dataStartGame) => {
 	if (!socket.username) { socket.username = dataStartGame.userName; }
-	for (const [roomId, roomData] of rooms.entries()) {
-		const clients = roomData.clients;
+	for (const [gameId, gameData] of games.entries()) {
+		const clients = gameData.clients;
 		const index = clients.indexOf(socket);
 		if (index !== -1) {
 			if (clients.length == 2) {
 				for (const client of clients) {
 					client.pieceId = 0;
 				}
-				room = roomId;
-				rooms.get(room).pieces = [];
-				const players = rooms.get(room).clients;
+				game = gameId;
+				games.get(game).pieces = [];
+				const players = games.get(game).clients;
 				let piece = generateNewPiece();
 				let nextPiece = generateNewPiece();
-				// pas besoin de stocker les deux premères pieces dans la room, elles sont envoyées direct
+				// pas besoin de stocker les deux premères pieces dans la game, elles sont envoyées direct
 				players[0].emit('gameStart', {
 					isFirstPlayer: true,
 					opponentName: players[1].username,
@@ -91,56 +106,62 @@ const restartGame = (socket, rooms, dataStartGame) => {
 				break;
 			} else { //l'autre a quitté, on repart en matchmaking
 				console.log('opponent left ?');
-				rooms.delete(roomId);
-				handleMatchMaking(socket, rooms, dataStartGame);
+				games.delete(gameId);
+				handleMatchMaking(socket, games, dataStartGame);
 			}
 		}
 	}
 }
 
-const handleMatchMaking = (socket, rooms, dataStartGame) => {
-	if (!socket.username) {
-		socket.username = dataStartGame.userName;
+const handleMatchMaking = (socket, dataStartGame) => {
+	if (!players.has(socket.id)) { // si le joueur n'existe pas, création
+		player = new Player(dataStartGame.userName, socket);
+		players.set(socket.id, player);
 	}
-	let room = null;
-	for (const [roomId, roomData] of rooms.entries()) {
-		const clients = roomData.clients;
-		console.log('clients in room:' + clients);
-		if (clients.length < 2 && roomId.includes(dataStartGame.gameMode)) {
-			room = roomId;
-			break;
+
+	if (!dataStartGame.gameName) { // pas de game renseignée, c'est donc une création de game{
+		currentGame = new Game(socket, dataStartGame.gameMode);
+		games.set(currentGame.gameName, currentGame);
+		socket.join(currentGame.gameName);
+		socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'player' });
+	} else { // nom renseigné, le joueur cherche une partie avec un nom spécifique
+		currentGame = games.get(dataStartGame.gameName);
+		if (currentGame) { // la partie existe
+			if (currentGame.isRunning) {// game en cours, prevenir le client qu'il sera spectateur
+				socket.join(currentGame.gameName);
+				currentGame.addPlayer(socket);
+				socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'spectator' });
+			} else if (currentGame.players.length == maxPlayerPerGame) {// game pleine, on prévient
+				socket.emit('GameFull');
+			} else { // partie trouvée et places dispos, ajout à la salle d'attente
+				socket.join(currentGame.gameName);
+				currentGame.addPlayer(socket);
+				socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'player' });
+			}
+		} else { // la partie n'existe pas, prévenir l'user et retour menu
+			socket.emit('NoGameFound');
 		}
 	}
-	if (room === null) {
-		room = socket.id + dataStartGame.gameMode;
-		rooms.set(room, { clients: [], pieces: [] });
-	}
-	const clients = rooms.get(room).clients;
-	clients.push(socket);
-	//reset le pieceId pour l'attribution équitable de pièces
-	socket.pieceId = 0;
-	rooms.set(room, { clients: clients, pieces: [] });
-	socket.join(room);
+}
 
-	if (rooms.get(room).clients.length === 2) {
-		const players = rooms.get(room).clients;
-		console.log('gonna emit gameStart');
-		let piece = generateNewPiece();
-		let nextPiece = generateNewPiece();
-		// pas besoin de stocker les deux premères pieces dans la room, elles sont envoyées direct
-		players[0].emit('gameStart', {
-			isFirstPlayer: true,
-			opponentName: players[1].username,
-			piece: piece,
-			nextPiece: nextPiece
-		})
-		players[1].emit('gameStart', {
-			isFirstPlayer: false,
-			opponentName: players[0].username,
-			piece: piece,
-			nextPiece: nextPiece
-		})
-	}
+const startGame = (socket, gameName) => {
+	currentGame = games.get(gameName);
+	currentGame.players.forEach((player) => player.pieceId = 0);
+	currentGame.isRunning = true
+	players[0].emit('gameStart', {
+		isFirstPlayer: true,
+		opponentName: players[1].username,
+		piece: piece,
+		nextPiece: nextPiece,
+		gameMode: game.gameMode
+	})
+	players[1].emit('gameStart', {
+		isFirstPlayer: false,
+		opponentName: players[0].username,
+		piece: piece,
+		nextPiece: nextPiece,
+		gameMode: game.gameMode
+	})
 }
 
 const generateNewPiece = () => {
@@ -168,6 +189,6 @@ const generateNewPiece = () => {
 		return null;
 	}
 };
-// sending to all clients in 'game' room(channel) except sender
+// sending to all clients in 'game' game(channel) except sender
 //socket.broadcast.to('game').emit('message', 'nice game');
-module.exports = { restartGame, leavingGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking, generateNewPiece }
+module.exports = { startGame, restartGame, leavingGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking, generateNewPiece }

@@ -12,37 +12,38 @@ http.listen(3001, () => {
     console.log('Server is running on port 3001');
 });
 
-const rooms = new Map();
-
 io.on('connection', (socket) => {
-    console.log('socket Id connected :' + socket.id);
     socket.on('lookingForAGame', (dataStartGame) => {
-        handleMatchMaking(socket, rooms, dataStartGame);
+        handleMatchMaking(socket, dataStartGame);
     });
 
     socket.on('restartGame', (dataStartGame) => {
-        restartGame(socket, rooms, dataStartGame);
+        restartGame(socket, dataStartGame);
+    });
+
+    socket.on('startGame', () => {
+        startGame(socket, gameName);
     });
 
     socket.on('disconnect', () => {
         console.log('socket Id disconnected :' + socket.id);
-        leavingGame(socket, rooms, io, 'disconnect');
+        leavingGame(socket, io, 'disconnect');
     });
 
     socket.on('leftGame', () => {
-        leavingGame(socket, rooms, io, 'leftGame');
+        leavingGame(socket, io, 'leftGame');
     });
 
     socket.on('updateBoard', (dataBoard) => {
-        sendBoardAndPieceToPlayer(socket, rooms, dataBoard);
+        sendBoardAndPieceToPlayer(socket, dataBoard);
     });
 
     socket.on('sendLines', (numberOfLines) => {
         console.log('reiceived sendLines, sending:' + numberOfLines);
-        sendLinesToPlayer(socket, rooms, numberOfLines);
+        sendLinesToPlayer(socket, numberOfLines);
     });
 
     socket.on('gameOver', () => {
-        gameOver(socket, rooms);
+        gameOver(socket);
     });
 });
