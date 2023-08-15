@@ -1,5 +1,5 @@
-const { leavingGame, restartGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking } = require('./src/utils');
-const { http, io } = require('./src/gameState');
+const { leavingGame, restartGame, startGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking } = require('./src/utils');
+const { http, io, players } = require('./src/gameState');
 
 http.listen(3001, () => {
     console.log('Server is running on port 3001');
@@ -14,7 +14,9 @@ io.on('connection', (socket) => {
         restartGame(socket, dataStartGame);
     });
 
-    socket.on('startGame', () => {
+    socket.on('startGame', (gameName) => {
+        console.log('gameName called');
+        console.log(gameName);
         startGame(socket, gameName);
     });
 
@@ -27,11 +29,8 @@ io.on('connection', (socket) => {
         leavingGame(socket, io, 'leftGame');
     });
 
-    // socket.on('updateBoard', (dataBoard) => {
-    //     sendBoardAndPieceToPlayer(socket, dataBoard);
-    socket.on('updateBoard', (updatedBoard, userName) => {
-        console.log('server received update board');
-        sendBoardAndPieceToPlayer(socket, rooms, updatedBoard, userName);
+    socket.on('updateBoard', (updatedBoard) => {
+        sendBoardAndPieceToPlayer(socket, updatedBoard, players.get(socket.id).name);
     });
 
     socket.on('sendLines', (numberOfLines) => {

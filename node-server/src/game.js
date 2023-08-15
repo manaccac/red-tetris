@@ -8,7 +8,7 @@ class Game {
     isRunning = false;
     leader; // nom du chef de la room
     mode; //Random Gravity, Normal, Invisible,
-    generatedPieces = []; // array de Pieces
+    pieces = []; // array de Pieces
     constructor(socket, gameMode) {
         const randomAnimalName = require('random-animal-name');
         do {
@@ -17,8 +17,8 @@ class Game {
         this.leader = players.get(socket.id).name;
         this.players.push(players.get(socket.id));
         this.gameMode = gameMode
-        this.generatedPieces.push(new Piece());
-        this.generatedPieces.push(new Piece());
+        this.pieces.push(new Piece());
+        this.pieces.push(new Piece());
     }
 
     getPlayerNames() {
@@ -47,6 +47,20 @@ class Game {
     removePlayer(socket) {
         this.players = this.players.filter(player => player.getName() !== players.get(socket.id).name);
     }
+
+    doesPlayerBelongToGame(playerName) {
+        return this.players.some(player => player.getName() === playerName);
+    }
+
+    getWinner() {
+        const playersWithGameOverFalse = this.players.filter(player => !player.gameOver);
+        if (playersWithGameOverFalse.length === 1) {
+            return playersWithGameOverFalse[0];
+        } else {
+            return null;
+        }
+    }
+
 }
 
 module.exports = Game; 

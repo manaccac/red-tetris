@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-function WaitingScreen({ opponentNames, isLeader, onStartGame }) {
+function WaitingScreen({ opponentNames, isLeader, onStartGame, myName, leader }) {
     console.log("opponentNames =", opponentNames);
     console.log("isLeader =", isLeader);
     console.log(opponentNames);
@@ -10,12 +10,14 @@ function WaitingScreen({ opponentNames, isLeader, onStartGame }) {
         <div className="overlay">
             <div className="message">
                 <h1>En attente d'adversaires...</h1>
+                <h2>Chef de salle {isLeader} </h2>
                 <ul>
+                    <li>{myName}</li>
                     {opponentNames && Object.keys(opponentNames).map((name, index) => (
                         <li key={index}>{name}</li>
                     ))}
                 </ul>
-                <p>Nombre de joueurs : {opponentNames ? Object.keys(opponentNames).length : 0}</p>
+                <p>Nombre de joueurs : {opponentNames ? Object.keys(opponentNames).length + 1 : 0}</p>
                 {isLeader && (
                     <button onClick={onStartGame} data-testid="start-game-btn">Démarrer la partie</button>
                 )}

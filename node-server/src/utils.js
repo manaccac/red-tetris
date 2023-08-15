@@ -12,65 +12,64 @@ const leaveAllRooms = (socket) => {
 	});
 };
 
-const leavingGame = (socket, type) => {
-	console.log('leavingGame called');
+const leavingGame = (socket) => {
 	leaveAllRooms(socket);
 	for (const [gameId, gameData] of games.entries()) {
-		const clients = gameData.clients;
-		if (!clients) return;
-		const index = clients.indexOf(socket);
-		if (index !== -1) {
-			clients.splice(index, 1);
-			games.set(gameId, { clients: clients, pieces: gameData.pieces });
-			if (clients.length === 0) {
+		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
+			gameData.removePlayer(socket);
+			if (gameData.players.length === 0) {
 				games.delete(gameId);
 				console.log('game is empty, deleting it');
-			} else {
+			} else if (gameData.players.length === 1 && gameData.isRunning) {
 				//On previent le client restant qu'il a gagné
 				io.to(gameId).emit("Victory");
+			} else {
+				io.to(currentGame.gameName).emit('playerLost', players.get(socket.id).name);
 			}
-			console.log('socketId: ' + socket.id + ' left the game\n');
 		}
 	}
 };
 
 const sendBoardAndPieceToPlayer = (socket, dataBoard) => {
-	console.log('client emetteur: ' + client.username)
 	for (const [gameId, gameData] of games.entries()) {
-		const clients = gameData.clients;
-		const index = clients.indexOf(socket);
-		if (index !== -1) {
+		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
 			// si besoin on créé la nouvelle pièce dans la game
-			if (gameData.pieces.length <= socket.pieceId) {
+			if (gameData.pieces.length <= players.get(socket.id).pieceId) {
 				gameData.pieces.push(generateNewPiece());
 			}
 			//on envoit la pièce suivante au joueur qui vient de poser
-			socket.emit('updateNextPiece', [gameData.pieces[socket.pieceId]]);
-			socket.pieceId++;
+			socket.emit('updateNextPiece', [gameData.pieces[players.get(socket.id).pieceId]]);
+			players.get(socket.id).pieceId++;
 			//on envoit le board a l'adversaire
 			socket.broadcast.to(gameId).emit('opponentBoardData', dataBoard);
+			return;
 		}
 	}
 }
 
 const sendLinesToPlayer = (socket, numberOfLines) => {
 	for (const [gameId, gameData] of games.entries()) {
-		const clients = gameData.clients;
-		const index = clients.indexOf(socket);
-		if (index !== -1) {
+		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
 			socket.broadcast.to(gameId).emit('receivedLines', numberOfLines);
+			return
 		}
 	}
 }
 
 const gameOver = (socket) => {
 	for (const [gameId, gameData] of games.entries()) {
-		const clients = gameData.clients;
-		const index = clients.indexOf(socket);
-		if (index !== -1) {
+		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
+			players.get(socket.id).gameOver = true;
 			// on prévient l'autre joueur de sa victoire
-			socket.broadcast.to(gameId).emit('Victory');
-			console.log('after deleting, gamesleft : ' + games.size);
+			socket.broadcast.to(gameId).emit('playerLost', players.get(socket.id).name);
+			// si tous les joueurs ont perdus sauf un, il a gagné
+			winner = gameData.getWinner(); // rempli si gagnant sinon null
+			console.log('winnerName ?:' + winner.name);
+			if (winner) {
+				winner.socket.emit('Victory');
+				io.to(gameId).emit('playerWon', winner.name);
+			}
+			return;
 		}
 	}
 }
@@ -131,8 +130,8 @@ const handleMatchMaking = (socket, dataStartGame) => {
 			if (currentGame.isRunning) {// game en cours, prevenir le client qu'il sera spectateur
 				socket.join(currentGame.gameName);
 				currentGame.addPlayer(socket);
+				//tell everyone new comer but tell him he's spectator
 				io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
-				// socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'spectator' });
 				socket.emit('spectator');
 			} else if (currentGame.players.length == maxPlayerPerGame) {// game pleine, on prévient
 				socket.emit('GameFull');
@@ -140,10 +139,7 @@ const handleMatchMaking = (socket, dataStartGame) => {
 				socket.join(currentGame.gameName);
 				currentGame.addPlayer(socket);
 				// tell everyone new player
-				console.log('gonna emit to everyooooone');
-				console.log(io.sockets.adapter.rooms.get(currentGame.gameName));
 				io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
-				// socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'player' });
 			}
 		} else { // la partie n'existe pas, prévenir l'user et retour menu
 			socket.emit('NoGameFound');
@@ -155,19 +151,10 @@ const startGame = (socket, gameName) => {
 	currentGame = games.get(gameName);
 	currentGame.players.forEach((player) => player.pieceId = 0);
 	currentGame.isRunning = true
-	players[0].emit('gameStart', {
-		isFirstPlayer: true,
-		opponentName: players[1].username,
-		piece: piece,
-		nextPiece: nextPiece,
-		gameMode: game.gameMode
-	})
-	players[1].emit('gameStart', {
-		isFirstPlayer: false,
-		opponentName: players[0].username,
-		piece: piece,
-		nextPiece: nextPiece,
-		gameMode: game.gameMode
+	io.to(currentGame.gameName).emit('gameStart', {
+		piece: currentGame.pieces[0],
+		nextPiece: currentGame.pieces[1],
+		gameMode: currentGame.gameMode
 	})
 }
 

@@ -35,9 +35,9 @@ const mapStateToProps = (state) => ({
   leader: state.leader,
   opponents: state.opponents,
   gameMode: state.gameMode,
+  gameName: state.gameName,
   myName: state.myName,
   isSpectator: state.isSpectator,
-
 });
 
 export function getRandomDelay(props) {
@@ -93,7 +93,7 @@ function Board(props) {
   //   const gameMode = props.gameMode;
 
   const username = Cookies.get('username');
-//   props.setMyName(username);
+  //   props.setMyName(username);
   console.log('username = set ' + props.myName);
 
 
@@ -187,18 +187,10 @@ function Board(props) {
   useEffect(() => {
     socket.on('gameStart', (response) => {
       props.gameStarted(true);
-      if (response.isFirstPlayer) {
-        console.log('im first player');
-        props.setLeader(true);
-      } else {
-        console.log('im second player');
-        props.setLeader(false);
-      }
       props.updatePiece([response.piece, response.nextPiece]);
       props.setOpponentName(response.opponentName);
     });
     socket.on('spectator', () => {
-      console.log('spectator mode');
       props.setLeader(false);
       props.setSpectator(true);
     });
@@ -209,18 +201,16 @@ function Board(props) {
       props.setIsVictory(true);
     });
     socket.on('opponentBoardData', (opponentBoardData, userName) => {
-      console.log('opponentBoardData received from server');
       props.updateOpponentBoard(userName, opponentBoardData);
     })
     socket.on('updateNextPiece', (nextPiece) => {
-      console.log('nextPiece received from server : ', nextPiece);
-      console.log(nextPiece);
       props.updatePiece(nextPiece);
     });
     socket.on('gameInfos', (data) => {
-      console.log('gameInfos in board cmp');
-      console.log(data);
       props.setGameInfo(data);
+    });
+    socket.on('playerWon', (playerWhoWon) => {
+      console.log(playerWhoWon + ' won the game !');
     });
     // socket.emit('lookingForAGame', { userName: username, gameMode: props.gameMode, gameName: props.gameName });
     props.setAwaitingOpponent(true);
@@ -232,6 +222,9 @@ function Board(props) {
       socket.off('opponentBoardData');
       socket.off('updateNextPiece');
       socket.off('gameInfos');
+      socket.off('spectator');
+      socket.off('playerWon');
+
       props.resetState();
       props.gameStarted(false);
     };
@@ -275,7 +268,7 @@ function Board(props) {
     );
 
   const startGameHandler = () => {
-    socket.emit('startGame');
+    socket.emit('startGame', props.gameName);
     props.gameStarted(true);
   };
 
@@ -307,6 +300,7 @@ function Board(props) {
       {(!props.gameStart && !props.isSpectator) && (
         <WaitingScreen
           opponentNames={props.opponents}
+          myName={props.myName}
           isLeader={props.leader}
           onStartGame={startGameHandler}
         />

@@ -104,7 +104,7 @@ function gameReducer(state = initialState, action) {
 							}
 						});
 					});
-					socket.emit('updateBoard', updatedBoard, state.myName);
+					socket.emit('updateBoard', updatedBoard);
 					if (piece.position.y < 0) {
 						//action.resolve();
 						socket.emit('gameOver');
@@ -212,44 +212,44 @@ function gameReducer(state = initialState, action) {
 					...state,
 					awaitingOpponent: action.payload,
 				};
-				case 'SET_OPPONENT_NAME':
-					const opponentName = action.payload;
-					console.log('opponentName', opponentName);
-					console.log('state.myName', state.myName);
-					if (opponentName !== state.myName) {
-						return {
-							...state,
-							opponents: {
-								...state.opponents,
-								[opponentName]: {
-									...state.opponents[opponentName],
-									name: opponentName,
-									board: [] // Initialiser le tableau du board de l'adversaire
-								}
+			case 'SET_OPPONENT_NAME':
+				const opponentName = action.payload;
+				console.log('opponentName', opponentName);
+				console.log('state.myName', state.myName);
+				if (opponentName !== state.myName) {
+					return {
+						...state,
+						opponents: {
+							...state.opponents,
+							[opponentName]: {
+								...state.opponents[opponentName],
+								name: opponentName,
+								board: [] // Initialiser le tableau du board de l'adversaire
 							}
-						};
-					}
-					return state;
-				
-				case 'UPDATE_OPPONENT_BOARD':
-					const board_received = action.board;
-					const name_received = action.name;
-					console.log('opponentName', name_received);
-					console.log('state.myName', state.myName);
-					if (name_received !== state.myName) {
-						return {
-							...state,
-							opponents: {
-								...state.opponents,
-								[name_received]: {
-									...state.opponents[name_received],
-									board: board_received
-								}
+						}
+					};
+				}
+				return state;
+
+			case 'UPDATE_OPPONENT_BOARD':
+				const board_received = action.board;
+				const name_received = action.name;
+				console.log('opponentName', name_received);
+				console.log('state.myName', state.myName);
+				if (name_received !== state.myName) {
+					return {
+						...state,
+						opponents: {
+							...state.opponents,
+							[name_received]: {
+								...state.opponents[name_received],
+								board: board_received
 							}
-						};
-					}
-					return state;
-				
+						}
+					};
+				}
+				return state;
+
 			// }
 			// else {
 			//   console.warn(`Trying to update non-existing opponent: ${name_received}`);

@@ -4,6 +4,7 @@ class Player {
     isInGame = false;
     score = 0;
     pieceId = 0;
+    gameOver = false;
     status; //Statut: [player/spectator]
     constructor(name, socket) {
         this.name = name;
