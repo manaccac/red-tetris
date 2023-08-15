@@ -58,7 +58,7 @@ export const goHome = (props, navigate) => {
 };
 
 export const restartGame = async (props, setGameRunning, username) => {
-  props.gameStarted(false);
+//   props.gameStarted(false);
   socket.emit('restartGame', username);
 };
 
