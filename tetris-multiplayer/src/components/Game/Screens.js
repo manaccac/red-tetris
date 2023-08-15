@@ -46,16 +46,14 @@ function CountdownScreen({ countdown }) {
     );
 }
 
-function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader }) {
-	console.log("playerWon =", playerWon);
-	console.log("myName =", myName);
-	console.log("isLeader =", isLeader);
+function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader, opponents }) {
+    let canDisplayRestart = !opponents || playerWon ? true : false;
     return (
         <div className="overlay">
             <div className="message">
                 <h1>Partie terminée</h1>
                 <button onClick={onGoHome}>Retour à la page d'accueil.</button>
-                {playerWon !== null && myName === isLeader && (
+                {canDisplayRestart && myName === isLeader && (
                     <button onClick={onRestart}>Recommencer</button>
                 )}
             </div>
@@ -65,15 +63,12 @@ function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader }) {
 
 
 function VictoryScreen({ onGoHome, onRestart, playerWon, myName, isLeader }) {
-	console.log("playerWon =", playerWon);
-	console.log("myName =", myName);
-	console.log("isLeader =", isLeader);
     return (
         <div className="overlay">
             <div className="message">
                 <h1>Victoire !</h1>
                 <button onClick={onGoHome}>Retour à la page d'accueil.</button>
-                {playerWon !== null && myName === isLeader && (
+                {myName === isLeader && (
                     <button onClick={onRestart}>Recommencer</button>
                 )}
             </div>

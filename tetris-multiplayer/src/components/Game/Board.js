@@ -186,9 +186,6 @@ function Board(props) {
   useEffect(() => {
     socket.on('gameStart', (response) => {
       console.log('gameStart received');
-      props.resetState();
-      props.gameStarted(false);
-      props.gameStarted(true);
       props.updatePiece([response.piece, response.nextPiece]);
       props.setOpponentName(response.opponentName);
     });
@@ -213,10 +210,7 @@ function Board(props) {
       props.setGameInfo(data);
     });
     socket.on('playerWon', (playerWhoWon) => {
-      console.log(playerWhoWon + ' won the game !');
-	  console.log("befor set:", props.playerWon);
-	  props.setPlayerWon(playerWhoWon);
-	  console.log(props.playerWon);
+      props.setPlayerWon(playerWhoWon);
     });
     socket.emit('askingGameInfos');
     // socket.emit('lookingForAGame', { userName: username, gameMode: props.gameMode, gameName: props.gameName });
@@ -303,8 +297,8 @@ function Board(props) {
         {props.opponentName}
       </div>
 
-      {props.isGameOver && (!props.isGameWon || props.isSpectator) && <GameOverScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader}/>}
-      {props.isGameOver && props.isGameWon && !props.isSpectator && <VictoryScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader}/>}
+      {props.isGameOver && (!props.isGameWon || props.isSpectator) && <GameOverScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} opponents={props.opponnents} />}
+      {props.isGameOver && props.isGameWon && !props.isSpectator && <VictoryScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} />}
       {(!props.gameStart && !props.isSpectator) && (
         <WaitingScreen
           opponentNames={props.opponents}

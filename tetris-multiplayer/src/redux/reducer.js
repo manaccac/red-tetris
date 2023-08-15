@@ -25,7 +25,6 @@ const initialState = {
 	gameMode: null, // normal, gravity, invisible
 	myName: null,
 	isSpectator: false,
-	playerWon: null,
 };
 
 function gameReducer(state = initialState, action) {
@@ -181,7 +180,15 @@ function gameReducer(state = initialState, action) {
 				//action.resolve();
 				return {
 					...initialState,
-					myName: state.myName
+					myName: state.myName,
+					board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+					// gameStart: false,
+					// isGameOver: false,
+					// role: undefined,
+					// opponents: {},
+					// gameMode: null,
+					// gameName: null,
+					// leader: null,
 				};
 
 			case 'ADD_INDESTRUCTIBLE_LINE':
@@ -307,11 +314,6 @@ function gameReducer(state = initialState, action) {
 				return {
 					...state,
 					isSpectator: action.payload,
-				};
-			case 'SET_PLAYER_WON':
-				return {
-					...state,
-					playerWon: action.payload,
 				};
 
 			default:

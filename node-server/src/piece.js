@@ -4,6 +4,7 @@ class Piece {
     position;
 
     constructor() {
+        console.log('piece consutrctor called');
         const pieceShapes = [
             { shape: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]], id: 1 }, // Carré
             { shape: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], id: 2 }, // Ligne

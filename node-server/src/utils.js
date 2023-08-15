@@ -1,6 +1,7 @@
 const { games, players, maxPlayerPerGame, io } = require('./gameState');
 const Player = require('./player');
 const Game = require('./game');
+const Piece = require('./piece');
 
 const leaveAllRooms = (socket) => {
 	const rooms = Object.keys(socket.rooms);
@@ -31,7 +32,7 @@ const sendBoardAndPieceToPlayer = (socket, dataBoard) => {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
 			// si besoin on créé la nouvelle pièce dans la game
 			if (gameData.pieces.length <= players.get(socket.id).pieceId) {
-				gameData.pieces.push(generateNewPiece());
+				gameData.pieces.push(new Piece());
 			}
 			//on envoit la pièce suivante au joueur qui vient de poser
 			socket.emit('updateNextPiece', [gameData.pieces[players.get(socket.id).pieceId]]);
@@ -145,32 +146,6 @@ const startGame = (socket, gameName) => {
 	})
 }
 
-const generateNewPiece = () => {
-	try {
-		const pieceShapes = [
-			{ shape: [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]], id: 1 }, // Carré
-			{ shape: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], id: 2 }, // Ligne
-			{ shape: [[0, 0, 0, 0], [0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]], id: 3 }, // T
-			{ shape: [[0, 0, 0, 0], [0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]], id: 4 }, // S
-			{ shape: [[0, 0, 0, 0], [1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]], id: 5 }, // Z
-			{ shape: [[0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0]], id: 6 }, // L inverse
-			{ shape: [[0, 0, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0]], id: 7 }, // L
-		];
-
-		const newPiece = pieceShapes[Math.floor(Math.random() * pieceShapes.length)];
-		const position = { x: 4, y: -1 };
-
-		return {
-			shape: newPiece.shape,
-			id: newPiece.id,
-			position: position,
-		};
-	} catch (error) {
-		console.error('Erreur lors de la génération d\'une nouvelle pièce :', error);
-		return null;
-	}
-};
-
 // sending to all clients in 'game' game(channel) except sender
 //socket.broadcast.to('game').emit('message', 'nice game');
-module.exports = { askingForGameInfos, startGame, restartGame, leavingGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking, generateNewPiece }
+module.exports = { askingForGameInfos, startGame, restartGame, leavingGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking }
