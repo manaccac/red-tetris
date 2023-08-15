@@ -163,9 +163,9 @@ function gameReducer(state = initialState, action) {
 				// //action.resolve();
 				return { ...state, piece: droppedPiece };
 			case 'UPDATE_PIECE':
-				console.log('in UPDATE_PIECE');
+				// console.log('in UPDATE_PIECE');
 				const pieces = action.payload;
-				console.log(action.payload);
+				// console.log(action.payload);
 				if (pieces.length === 1) {
 					return { ...state, nextPiece: action.payload[0] };
 				} else if (pieces.length === 2) {
@@ -180,9 +180,7 @@ function gameReducer(state = initialState, action) {
 				//action.resolve();
 				return {
 					...initialState,
-					board: Array.from({ length: 20 }, () => Array(10).fill(0)),
-					gameStart: false,
-					isGameOver: false,
+					myName: state.myName
 				};
 
 			case 'ADD_INDESTRUCTIBLE_LINE':
@@ -239,11 +237,11 @@ function gameReducer(state = initialState, action) {
 				const name_received = action.name;
 				console.log('opponentName', name_received);
 				console.log('state.myName', state.myName);
-				if (name_received === undefined){
+				if (name_received === undefined) {
 					console.warn(`Trying to update non-existing opponent: ${name_received}`);
 					return state;
 				}
-				
+
 				if (name_received !== state.myName) {
 					return {
 						...state,

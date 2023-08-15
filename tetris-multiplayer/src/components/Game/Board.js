@@ -57,14 +57,8 @@ export const goHome = (props, navigate) => {
 };
 
 export const restartGame = async (props, setGameRunning, username) => {
-  console.log('restart game function called');
-  setGameRunning(false);
-  await props.resetState();
-  // await props.generatePiece();
-  await props.setAwaitingOpponent(true);
-
-  console.log('going to emit soon');
-  socket.emit('lookingForAGame', username);
+  props.gameStarted(false);
+  socket.emit('restartGame', username);
 };
 
 
@@ -94,11 +88,10 @@ function Board(props) {
 
   const username = Cookies.get('username');
   //   props.setMyName(username);
-  console.log('username = set ' + props.myName);
 
 
   let navigate = useNavigate();
-  const [countdown, setCountdown] = useState(1);
+  const [countdown, setCountdown] = useState(5);
   const [gameRunning, setGameRunning] = useState(false);
 
 
@@ -144,11 +137,15 @@ function Board(props) {
   useEffect(() => {
     let countdownInterval;
 
+    console.log('in countdown useeffect');
+    console.log(props.gameStart);
     if (props.gameStart) {
+      // console.log('gameStart is true, but countdown is: ')
       countdownInterval = setInterval(() => {
         console.log("hello count :", countdownInterval);
         setCountdown((prevCountdown) => {
           if (prevCountdown <= 1) {
+            console.log('clearInterval got called');
             clearInterval(countdownInterval);
             setGameRunning(true);
             return 5;
@@ -186,6 +183,9 @@ function Board(props) {
 
   useEffect(() => {
     socket.on('gameStart', (response) => {
+      console.log('gameStart received');
+      props.resetState();
+      props.gameStarted(false);
       props.gameStarted(true);
       props.updatePiece([response.piece, response.nextPiece]);
       props.setOpponentName(response.opponentName);
@@ -207,11 +207,13 @@ function Board(props) {
       props.updatePiece(nextPiece);
     });
     socket.on('gameInfos', (data) => {
+      console.log('gameInfos received');
       props.setGameInfo(data);
     });
     socket.on('playerWon', (playerWhoWon) => {
       console.log(playerWhoWon + ' won the game !');
     });
+    socket.emit('askingGameInfos');
     // socket.emit('lookingForAGame', { userName: username, gameMode: props.gameMode, gameName: props.gameName });
     props.setAwaitingOpponent(true);
     return () => {
@@ -226,6 +228,7 @@ function Board(props) {
       socket.off('playerWon');
 
       props.resetState();
+      console.log('returned called');
       props.gameStarted(false);
     };
   }, []);

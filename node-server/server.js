@@ -1,4 +1,4 @@
-const { leavingGame, restartGame, startGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking } = require('./src/utils');
+const { askingForGameInfos, leavingGame, restartGame, startGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking } = require('./src/utils');
 const { http, io, players } = require('./src/gameState');
 
 http.listen(3001, () => {
@@ -10,8 +10,8 @@ io.on('connection', (socket) => {
         handleMatchMaking(socket, dataStartGame);
     });
 
-    socket.on('restartGame', (dataStartGame) => {
-        restartGame(socket, dataStartGame);
+    socket.on('restartGame', () => {
+        restartGame(socket);
     });
 
     socket.on('startGame', (gameName) => {
@@ -36,6 +36,10 @@ io.on('connection', (socket) => {
     socket.on('sendLines', (numberOfLines) => {
         console.log('reiceived sendLines, sending:' + numberOfLines);
         sendLinesToPlayer(socket, numberOfLines);
+    });
+
+    socket.on('askingGameInfos', () => {
+        askingForGameInfos(socket);
     });
 
     socket.on('gameOver', () => {

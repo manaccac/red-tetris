@@ -2,10 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 function WaitingScreen({ opponentNames, isLeader, onStartGame, myName, leader }) {
-    console.log("opponentNames =", opponentNames);
-    console.log("isLeader =", isLeader);
+    console.log('leader: ' + isLeader);
     console.log(opponentNames);
-    console.log(Object.keys(opponentNames).length);
     return (
         <div className="overlay">
             <div className="message">
@@ -14,7 +12,7 @@ function WaitingScreen({ opponentNames, isLeader, onStartGame, myName, leader })
                 <ul>
                     <li>{myName}</li>
                     {opponentNames && Object.keys(opponentNames).map((name, index) => (
-                        <li key={index}>{name}</li>
+                        <li key={index}>{name} + fail</li>
                     ))}
                 </ul>
                 <p>Nombre de joueurs : {opponentNames ? Object.keys(opponentNames).length + 1 : 0}</p>

@@ -61,6 +61,16 @@ class Game {
         }
     }
 
+    changeLeader() {
+        newLeader = this.players[Math.floor(Math.random() * this.players.size)].name;
+    }
+
+    resetGame() {
+        this.pieces = [];
+        this.pieces.push(new Piece());
+        this.pieces.push(new Piece());
+        currentGame.players.forEach((player) => player.pieceId = 0);
+    }
 }
 
 module.exports = Game; 

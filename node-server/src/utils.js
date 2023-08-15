@@ -20,12 +20,8 @@ const leavingGame = (socket) => {
 			if (gameData.players.length === 0) {
 				games.delete(gameId);
 				console.log('game is empty, deleting it');
-			} else if (gameData.players.length === 1 && gameData.isRunning) {
-				//On previent le client restant qu'il a gagné
-				io.to(gameId).emit("Victory");
-			} else {
-				io.to(currentGame.gameName).emit('playerLost', players.get(socket.id).name);
 			}
+			gameOver(socket);
 		}
 	}
 };
@@ -64,51 +60,42 @@ const gameOver = (socket) => {
 			socket.broadcast.to(gameId).emit('playerLost', players.get(socket.id).name);
 			// si tous les joueurs ont perdus sauf un, il a gagné
 			winner = gameData.getWinner(); // rempli si gagnant sinon null
-			console.log('winnerName ?:' + winner.name);
 			if (winner) {
+				console.log('winnerName ?:' + winner.name);
 				winner.socket.emit('Victory');
 				io.to(gameId).emit('playerWon', winner.name);
+				gameData.isRunning = false;
 			}
 			return;
 		}
 	}
 }
 
-const restartGame = (socket, dataStartGame) => {
-	if (!socket.username) { socket.username = dataStartGame.userName; }
+const restartGame = (socket) => {
+	// currentGame = games.get(gameName);
+	// currentGame.players.forEach((player) => player.pieceId = 0);
+	// currentGame.isRunning = true
+	// io.to(currentGame.gameName).emit('gameStart', {
+	// 	piece: currentGame.pieces[0],
+	// 	nextPiece: currentGame.pieces[1],
+	// 	gameMode: currentGame.gameMode
+	// })
 	for (const [gameId, gameData] of games.entries()) {
-		const clients = gameData.clients;
-		const index = clients.indexOf(socket);
-		if (index !== -1) {
-			if (clients.length == 2) {
-				for (const client of clients) {
-					client.pieceId = 0;
-				}
-				game = gameId;
-				games.get(game).pieces = [];
-				const players = games.get(game).clients;
-				let piece = generateNewPiece();
-				let nextPiece = generateNewPiece();
-				// pas besoin de stocker les deux premères pieces dans la game, elles sont envoyées direct
-				players[0].emit('gameStart', {
-					isFirstPlayer: true,
-					opponentName: players[1].username,
-					piece: piece,
-					nextPiece: nextPiece
-				})
-				players[1].emit('gameStart', {
-					isFirstPlayer: false,
-					opponentName: players[0].username,
-					piece: piece,
-					nextPiece: nextPiece
-				})
-				break;
-			} else { //l'autre a quitté, on repart en matchmaking
-				console.log('opponent left ?');
-				games.delete(gameId);
-				handleMatchMaking(socket, games, dataStartGame);
-			}
+		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
+			io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
+			startGame(socket, gameId);
+			return;
 		}
+	}
+}
+
+const askingForGameInfos = (socket) => {
+	for (const [gameId, gameData] of games.entries()) {
+		//si la game existe, lors d'un F5 par exemple, on renvoit les infos au joueur
+		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
+
+		}
+		return;
 	}
 }
 
@@ -149,7 +136,7 @@ const handleMatchMaking = (socket, dataStartGame) => {
 
 const startGame = (socket, gameName) => {
 	currentGame = games.get(gameName);
-	currentGame.players.forEach((player) => player.pieceId = 0);
+	currentGame.resetGame();
 	currentGame.isRunning = true
 	io.to(currentGame.gameName).emit('gameStart', {
 		piece: currentGame.pieces[0],
@@ -183,6 +170,7 @@ const generateNewPiece = () => {
 		return null;
 	}
 };
+
 // sending to all clients in 'game' game(channel) except sender
 //socket.broadcast.to('game').emit('message', 'nice game');
-module.exports = { startGame, restartGame, leavingGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking, generateNewPiece }
+module.exports = { askingForGameInfos, startGame, restartGame, leavingGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking, generateNewPiece }
