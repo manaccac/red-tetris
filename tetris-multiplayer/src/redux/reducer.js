@@ -24,6 +24,7 @@ const initialState = {
 	gameName: null, // le hash
 	gameMode: null, // normal, gravity, invisible
 	myName: null,
+	isSpectator: false,
 };
 
 function gameReducer(state = initialState, action) {
@@ -280,6 +281,11 @@ function gameReducer(state = initialState, action) {
 				return {
 					...state,
 					myName: action.payload,
+				};
+			case 'SET_SPECTATOR':
+				return {
+					...state,
+					isSpectator: action.payload,
 				};
 				  
 			default:

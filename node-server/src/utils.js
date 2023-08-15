@@ -89,6 +89,15 @@ const handleMatchMaking = (socket, rooms, dataStartGame, io) => {
 	rooms.set(room, { clients: clients, pieces: [] });
 	socket.join(room);
 
+	if (rooms.get(room).clients.length > 2) {
+		console.log("Spectateur");
+		spectateurs = rooms.get(room).clients;
+		// pour ce qui sont au dessus de 2 on les met en spectateur
+		for (let i = 2; i < spectateurs.length; i++) {
+			spectateurs[i].emit('spectator');
+		}
+	}
+
 	if (rooms.get(room).clients.length === 2) {
 		const players = rooms.get(room).clients;
 		console.log('gonna emit gameStart');

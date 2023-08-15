@@ -14,6 +14,7 @@ export const IS_VICTORY = 'IS_VICTORY';
 export const SET_OPPONENT_NAME = 'SET_OPPONENT_NAME';
 export const SET_LEADER = 'SET_LEADER';
 export const SET_MY_NAME = 'SET_MY_NAME';
+export const SET_SPECTATOR = 'SET_SPECTATOR';
 
 export function moveLeft(resolve = () => {}) {
     return { type: MOVE_LEFT, resolve };
@@ -92,4 +93,9 @@ export const setGameInfo = (gameInfo) => ({
 export const setMyName = (myName) => ({
 	type: SET_MY_NAME,
 	payload: myName
+});
+
+export const setSpectator = (isSpectator) => ({
+	type: SET_SPECTATOR,
+	payload: isSpectator
 });

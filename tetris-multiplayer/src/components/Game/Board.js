@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import {
   moveLeft, moveRight, rotate, moveDown, dropPiece, updatePiece,
-  resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard, setIsVictory, setOpponentName, setLeader, setMyName
+  resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard,
+  setIsVictory, setOpponentName, setLeader, setMyName, setSpectator
 } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
@@ -35,6 +36,7 @@ const mapStateToProps = (state) => ({
 	opponents: state.opponents,
 	gameMode: state.gameMode,
 	myName: state.myName,
+	isSpectator: state.isSpectator,
   
   });
 
@@ -82,6 +84,7 @@ export const mapDispatchToProps = (dispatch) => ({
   setOpponentName: (oppName) => dispatch(setOpponentName(oppName)),
   setLeader: (leader) => dispatch(setLeader(leader)),
   setMyName: (myname) => dispatch(setMyName(myname)),
+  setSpectator: (spectator) => dispatch(setSpectator(spectator)),
 });
 
 function Board(props) {
@@ -193,6 +196,11 @@ function Board(props) {
 	  props.updatePiece([response.piece, response.nextPiece]);
       props.setOpponentName(response.opponentName);
     });
+	socket.on('spectator', () => {
+		console.log('spectator mode');
+		props.setLeader(false);
+		props.setSpectator(true);
+	});
     socket.on('receivedLines', (numberOfLines) => {
       props.addIndestructibleLine(numberOfLines);
     });
@@ -273,11 +281,16 @@ function Board(props) {
       onKeyDown={handleKeyDown}
       tabIndex="0"
     >
-	  <div className="board" data-testid="board-container">
-	  	{renderCells()}
-	  </div>
+	{!props.isSpectator && (
+	<div className="board" data-testid="board-container">
+		{renderCells()}
+	</div>
+	)}
 
-	  <RenderNextPiece />
+
+	{!props.isSpectator && (
+		<RenderNextPiece />
+	)}
 	  <OpponentBoard />
       <div className="opponent-name">
         {props.opponentName}
@@ -285,13 +298,13 @@ function Board(props) {
 
 	  {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} />}
       {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} />}
-	  {!props.gameStart && (
-				<WaitingScreen
-					opponentNames={props.opponentNames}
-					isLeader={props.leader}
-					onStartGame={startGameHandler}
-				/>
-            )}
+	  {(!props.gameStart && !props.isSpectator) && (
+		<WaitingScreen
+			opponentNames={props.opponentNames}
+			isLeader={props.leader}
+			onStartGame={startGameHandler}
+		/>
+		)}
       {!props.isGameOver && props.gameStart && !gameRunning && <CountdownScreen countdown={countdown} />}
     </div>
   );
