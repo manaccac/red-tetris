@@ -18,7 +18,7 @@ const leavingGame = (socket, rooms, io, type) => {
 	}
 };
 
-const sendBoardAndPieceToPlayer = (socket, rooms, updatedBoard) => {
+const sendBoardAndPieceToPlayer = (socket, rooms, updatedBoard, userName) => {
 	for (const [roomId, roomData] of rooms.entries()) {
 		const clients = roomData.clients;
 		const index = clients.indexOf(socket);
@@ -29,6 +29,7 @@ const sendBoardAndPieceToPlayer = (socket, rooms, updatedBoard) => {
 			}
 			//on envoit la pièce suivante au joueur qui vient de poser
 			socket.emit('updateNextPiece', [roomData.pieces[socket.pieceId]]);
+			console.log("userName: " + userName)
 			console.log('socket.pieceId: ' + socket.pieceId);
 			console.log('nextPiece generated');
 			console.log(roomData.pieces[socket.pieceId]);
@@ -36,7 +37,7 @@ const sendBoardAndPieceToPlayer = (socket, rooms, updatedBoard) => {
 			console.log(roomData.pieces);
 			socket.pieceId++;
 			//on envoit le board a l'adversaire
-			socket.broadcast.to(roomId).emit('opponentBoardData', updatedBoard);
+			socket.broadcast.to(roomId).emit('opponentBoardData', updatedBoard, userName);
 		}
 	}
 }
@@ -72,7 +73,7 @@ const handleMatchMaking = (socket, rooms, dataStartGame, io) => {
 	for (const [roomId, roomData] of rooms.entries()) {
 		const clients = roomData.clients;
 		console.log('clients in room:' + clients);
-		if (clients.length < 2 && roomId.includes(dataStartGame.gameMode)) {
+		if (clients.length < 3 && roomId.includes(dataStartGame.gameMode)) {
 			room = roomId;
 			break;
 		}

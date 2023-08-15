@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import {
   moveLeft, moveRight, rotate, moveDown, dropPiece, updatePiece,
-  resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard, setIsVictory, setOpponentName, setLeader
+  resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard, setIsVictory, setOpponentName, setLeader, setMyName
 } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
@@ -34,6 +34,7 @@ const mapStateToProps = (state) => ({
 	leader: state.leader,
 	opponents: state.opponents,
 	gameMode: state.gameMode,
+	myName: state.myName,
   
   });
 
@@ -80,6 +81,7 @@ export const mapDispatchToProps = (dispatch) => ({
   updateOpponentBoard: (name, board) => dispatch(updateOpponentBoard(name, board)),
   setOpponentName: (oppName) => dispatch(setOpponentName(oppName)),
   setLeader: (leader) => dispatch(setLeader(leader)),
+  setMyName: (myname) => dispatch(setMyName(myname)),
 });
 
 function Board(props) {
@@ -87,6 +89,9 @@ function Board(props) {
 //   const gameMode = props.gameMode;
 
   const username = Cookies.get('username');
+  props.setMyName(username);
+  console.log('username = set ' + props.myName);
+
 
   let navigate = useNavigate();
   const [countdown, setCountdown] = useState(1);
@@ -194,11 +199,9 @@ function Board(props) {
     socket.on('Victory', () => {
       props.setIsVictory(true);
     });
-    socket.on('opponentBoardData', (opponentBoardData) => {
+    socket.on('opponentBoardData', (opponentBoardData, userName) => {
 	  console.log('opponentBoardData received from server');
-    //   props.updateOpponentBoard(opponentBoardData);
-	  props.updateOpponentBoard("mana",opponentBoardData);
-
+	  props.updateOpponentBoard(userName ,opponentBoardData);
     })
     socket.on('updateNextPiece', (nextPiece) => {
       console.log('nextPiece received from server : ', nextPiece);

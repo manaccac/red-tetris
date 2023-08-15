@@ -23,6 +23,7 @@ const initialState = {
 	role: null, //spectator, player
 	gameName: null, // le hash
 	gameMode: null, // normal, gravity, invisible
+	myName: null,
 };
 
 function gameReducer(state = initialState, action) {
@@ -102,7 +103,7 @@ function gameReducer(state = initialState, action) {
 							}
 						});
 					});
-					socket.emit('updateBoard', updatedBoard );
+					socket.emit('updateBoard', updatedBoard, state.myName );
 					if (piece.position.y < 0) {
 						//action.resolve();
 						socket.emit('gameOver');
@@ -226,7 +227,7 @@ function gameReducer(state = initialState, action) {
 			case 'UPDATE_OPPONENT_BOARD':
 				const board_received = action.board;
 				const name_received = action.name;
-				if (state.opponents[name_received]) {
+				// if (state.opponents[name_received]) {
 				  return {
 					...state,
 					opponents: {
@@ -237,10 +238,11 @@ function gameReducer(state = initialState, action) {
 					  }
 					}
 				  };
-				} else {
-				  console.warn(`Trying to update non-existing opponent: ${name_received}`);
-				  return state;
-				}
+				// }
+				// else {
+				//   console.warn(`Trying to update non-existing opponent: ${name_received}`);
+				//   return state;
+				// }
 				  
 			case 'SET_LEADER':
 				return {
@@ -273,6 +275,11 @@ function gameReducer(state = initialState, action) {
 				  gameMode,
 				  gameName,
 				  role,
+				};
+			case 'SET_MY_NAME':
+				return {
+					...state,
+					myName: action.payload,
 				};
 				  
 			default:
