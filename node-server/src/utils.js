@@ -1,4 +1,4 @@
-const { games, players, maxPlayerPerGame } = require('./gameState');
+const { games, players, maxPlayerPerGame, io } = require('./gameState');
 const Player = require('./player');
 const Game = require('./game');
 
@@ -12,7 +12,7 @@ const leaveAllRooms = (socket) => {
 	});
 };
 
-const leavingGame = (socket, io, type) => {
+const leavingGame = (socket, type) => {
 	console.log('leavingGame called');
 	leaveAllRooms(socket);
 	for (const [gameId, gameData] of games.entries()) {
@@ -114,6 +114,7 @@ const restartGame = (socket, dataStartGame) => {
 }
 
 const handleMatchMaking = (socket, dataStartGame) => {
+	console.log('matchmaking called');
 	if (!players.has(socket.id)) { // si le joueur n'existe pas, création
 		player = new Player(dataStartGame.userName, socket);
 		players.set(socket.id, player);
@@ -130,13 +131,19 @@ const handleMatchMaking = (socket, dataStartGame) => {
 			if (currentGame.isRunning) {// game en cours, prevenir le client qu'il sera spectateur
 				socket.join(currentGame.gameName);
 				currentGame.addPlayer(socket);
-				socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'spectator' });
+				io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
+				// socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'spectator' });
+				socket.emit('spectator');
 			} else if (currentGame.players.length == maxPlayerPerGame) {// game pleine, on prévient
 				socket.emit('GameFull');
 			} else { // partie trouvée et places dispos, ajout à la salle d'attente
 				socket.join(currentGame.gameName);
 				currentGame.addPlayer(socket);
-				socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'player' });
+				// tell everyone new player
+				console.log('gonna emit to everyooooone');
+				console.log(io.sockets.adapter.rooms.get(currentGame.gameName));
+				io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
+				// socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'player' });
 			}
 		} else { // la partie n'existe pas, prévenir l'user et retour menu
 			socket.emit('NoGameFound');

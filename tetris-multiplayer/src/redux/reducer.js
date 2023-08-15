@@ -104,7 +104,7 @@ function gameReducer(state = initialState, action) {
 							}
 						});
 					});
-					socket.emit('updateBoard', updatedBoard, state.myName );
+					socket.emit('updateBoard', updatedBoard, state.myName);
 					if (piece.position.y < 0) {
 						//action.resolve();
 						socket.emit('gameOver');
@@ -210,16 +210,16 @@ function gameReducer(state = initialState, action) {
 			case 'SET_OPPONENT_NAME':
 				const opponentName = action.payload;
 				return {
-				  ...state,
-				  opponents: {
-					...state.opponents,
-					[opponentName]: {
-					  ...state.opponents[opponentName],
-					  name: opponentName,
-					  board: [] // Initialiser le tableau du board de l'adversaire
+					...state,
+					opponents: {
+						...state.opponents,
+						[opponentName]: {
+							...state.opponents[opponentName],
+							name: opponentName,
+							board: [] // Initialiser le tableau du board de l'adversaire
+						}
 					}
-				  }
-				};		
+				};
 			case 'SET_AWAITING_OPPONENT':
 				return {
 					...state,
@@ -229,22 +229,22 @@ function gameReducer(state = initialState, action) {
 				const board_received = action.board;
 				const name_received = action.name;
 				// if (state.opponents[name_received]) {
-				  return {
+				return {
 					...state,
 					opponents: {
-					  ...state.opponents,
-					  [name_received]: {
-						...state.opponents[name_received],
-						board: board_received
-					  }
+						...state.opponents,
+						[name_received]: {
+							...state.opponents[name_received],
+							board: board_received
+						}
 					}
-				  };
-				// }
-				// else {
-				//   console.warn(`Trying to update non-existing opponent: ${name_received}`);
-				//   return state;
-				// }
-				  
+				};
+			// }
+			// else {
+			//   console.warn(`Trying to update non-existing opponent: ${name_received}`);
+			//   return state;
+			// }
+
 			case 'SET_LEADER':
 				return {
 					...state,
@@ -257,25 +257,25 @@ function gameReducer(state = initialState, action) {
 				// 	console.log("Opponent Board:", opponent.board);
 				// });
 				// console.log("gameMode: " + state.gameMode)
-				// console.log("gameName: " + state.gameName)
+				console.log("gameName: " + action.payload.gameName);
 				// console.log("role: " + state.role)
 
 				// console.log('Setting game info...');
 				// console.log(action.payload);
 				const { leader, players, gameMode, gameName, role } = action.payload;
 				return {
-				  ...state,
-				  leader,
-				  opponents: players.reduce((opponentsObj, playerName) => {
-					opponentsObj[playerName] = {
-					  name: playerName,
-					  board: [],
-					};
-					return opponentsObj;
-				  }, {}),
-				  gameMode,
-				  gameName,
-				  role,
+					...state,
+					leader,
+					opponents: players.reduce((opponentsObj, playerName) => {
+						opponentsObj[playerName] = {
+							name: playerName,
+							board: [],
+						};
+						return opponentsObj;
+					}, {}),
+					gameMode,
+					gameName,
+					role,
 				};
 			case 'SET_MY_NAME':
 				return {
@@ -287,7 +287,7 @@ function gameReducer(state = initialState, action) {
 					...state,
 					isSpectator: action.payload,
 				};
-				  
+
 			default:
 				return state;
 		}

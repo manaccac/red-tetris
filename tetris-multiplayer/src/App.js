@@ -14,7 +14,7 @@ function App() {
   const [username, setUsername] = useState('');
 
   useEffect(() => {
-	console.log('useeffect');
+    console.log('useeffect');
     const cookieUsername = Cookies.get('username');
     if (cookieUsername) {
       setUsername(cookieUsername);
@@ -28,18 +28,12 @@ function App() {
       setIsConnected(false);
     }
 
-    function onStopGame() {
-		
-    }
-
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
-    socket.on('stopGame', onStopGame);
 
     return () => {
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
-      socket.off('stopGame', onStopGame);
     };
   }, []);
 

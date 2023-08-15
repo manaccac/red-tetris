@@ -22,7 +22,11 @@ class Game {
     }
 
     getPlayerNames() {
-        return this.players.map(player => player.getName());
+        if (this.players.length > 0)
+            return this.players.map(player => player.getName());
+        else {
+            return '';
+        }
     }
 
     get gameInfos() {
@@ -36,7 +40,8 @@ class Game {
     }
 
     addPlayer(socket) {
-        this.players.push(players.get(socket.Id));
+        console.log('adding player to game');
+        this.players.push(players.get(socket.id));
     }
 
     removePlayer(socket) {

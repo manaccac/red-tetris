@@ -1,12 +1,5 @@
-const express = require('express');
 const { leavingGame, restartGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking } = require('./src/utils');
-const app = express();
-const http = require('http').Server(app);
-const io = require('socket.io')(http, {
-    cors: {
-        origin: 'http://localhost:3000'
-    },
-});
+const { http, io } = require('./src/gameState');
 
 http.listen(3001, () => {
     console.log('Server is running on port 3001');
@@ -50,3 +43,5 @@ io.on('connection', (socket) => {
         gameOver(socket);
     });
 });
+
+module.exports = { io };
