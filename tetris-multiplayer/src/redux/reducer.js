@@ -229,8 +229,8 @@ function gameReducer(state = initialState, action) {
 				if (opponentName === undefined) {
 					return state;
 				}
-				console.log('opponentName', opponentName);
-				console.log('state.myName', state.myName);
+				// console.log('opponentName', opponentName);
+				// console.log('state.myName', state.myName);
 				if (opponentName !== state.myName) {
 					return {
 						...state,

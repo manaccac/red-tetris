@@ -22,6 +22,9 @@ const Menu = () => {
       navigate(`${data.gameName}[${username}]`);
     });
 
+    //WHILE DEBUG ONLY
+    socket.emit('setUsername', username);
+
     socket.on('NoGameFound', () => {
       alert('caca');
     });

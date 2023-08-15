@@ -216,8 +216,8 @@ function Board(props) {
     socket.emit('askingGameInfos');
     // socket.emit('lookingForAGame', { userName: username, gameMode: props.gameMode, gameName: props.gameName });
     props.setAwaitingOpponent(true);
+
     return () => {
-      console.log('emitting leftGame');
       socket.emit('leftGame');
       socket.off('Victory');
       socket.off('receivedLines');
@@ -301,7 +301,7 @@ function Board(props) {
 
       {props.isGameOver && (!props.isGameWon || props.isSpectator) && <GameOverScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} opponents={props.opponnents} />}
       {props.isGameOver && props.isGameWon && !props.isSpectator && <VictoryScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} />}
-      {(!props.gameStart && !props.isSpectator) && (
+      {!props.isGameOver && (!props.gameStart && !props.isSpectator) && (
         <WaitingScreen
           opponentNames={props.opponents}
           myName={props.myName}

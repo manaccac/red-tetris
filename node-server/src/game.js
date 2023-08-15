@@ -62,14 +62,17 @@ class Game {
     }
 
     changeLeader() {
-        newLeader = this.players[Math.floor(Math.random() * this.players.size)].name;
+        this.leader = this.players[Math.floor(Math.random() * this.players.length)].name;
     }
 
     resetGame() {
         this.pieces = [];
         this.pieces.push(new Piece());
         this.pieces.push(new Piece());
-        currentGame.players.forEach((player) => player.pieceId = 2);
+        currentGame.players.forEach((player) => {
+            player.gameOver = false;
+            player.pieceId = 2;
+        });
     }
 }
 

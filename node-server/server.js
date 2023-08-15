@@ -16,9 +16,10 @@ io.on('connection', (socket) => {
             }
         }
         if (isAvailable) {
-            let player = new Player(dataStartGame.userName, socket);
+            let player = new Player(username, socket);
             players.set(socket.id, player);
         }
+        console.log('name available ? : ' + isAvailable);
         socket.emit('usernameRep', isAvailable);
     });
 
@@ -55,9 +56,9 @@ io.on('connection', (socket) => {
         sendLinesToPlayer(socket, numberOfLines);
     });
 
-    socket.on('askingGameInfos', () => {
-        askingForGameInfos(socket);
-    });
+    // socket.on('askingGameInfos', () => {
+    //     askingForGameInfos(socket);
+    // });
 
     socket.on('gameOver', () => {
         gameOver(socket);

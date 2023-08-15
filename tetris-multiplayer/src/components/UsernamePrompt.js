@@ -8,6 +8,7 @@ function UsernamePrompt({ onUsernameSubmit }) {
 
   useEffect(() => {
     const handleUsernameRep = (isAvailable) => {
+      console.log('handleUsernameRepCalled');
       if (isAvailable) {
         Cookies.set('username', username);
         onUsernameSubmit(username);

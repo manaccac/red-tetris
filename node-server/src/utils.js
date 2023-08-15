@@ -4,27 +4,33 @@ const Game = require('./game');
 const Piece = require('./piece');
 
 const leaveAllRooms = (socket) => {
-	const rooms = Object.keys(socket.rooms);
+	const rooms = socket.rooms;
 
 	rooms.forEach(room => {
 		if (room !== socket.id) { // Ne quittez pas la room correspondant à l'ID de socket lui-même
 			socket.leave(room);
+			console.log('leaving a room ?????????????');
 		}
 	});
 };
 
 const leavingGame = (socket) => {
+	console.log('leavingGame');
 	leaveAllRooms(socket);
 	if (!players.has(socket.id)) return;
 	for (const [gameId, gameData] of games.entries()) {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
+			gameOver(socket);
 			gameData.removePlayer(socket);
 			if (gameData.players.length === 0) {
 				games.delete(gameId);
 			} else {
+				console.log('list of socket in:');
+				if (gameData.leader == players.get(socket.id).name) {// si le leaver est leader, alors change leader
+					gameData.changeLeader();
+				}
 				io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
 			}
-			gameOver(socket);
 		}
 	}
 };
@@ -75,17 +81,10 @@ const gameOver = (socket) => {
 }
 
 const restartGame = (socket) => {
-	// currentGame = games.get(gameName);
-	// currentGame.players.forEach((player) => player.pieceId = 0);
-	// currentGame.isRunning = true
-	// io.to(currentGame.gameName).emit('gameStart', {
-	// 	piece: currentGame.pieces[0],
-	// 	nextPiece: currentGame.pieces[1],
-	// 	gameMode: currentGame.gameMode
-	// })
 	for (const [gameId, gameData] of games.entries()) {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
-			io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
+			gameData.changeLeader();
+			io.to(gameId).emit('gameInfos', { ...gameData.gameInfos });
 			startGame(socket, gameId);
 			return;
 		}
@@ -104,7 +103,10 @@ const askingForGameInfos = (socket) => {
 
 const handleMatchMaking = (socket, dataStartGame) => {
 	console.log('matchmaking called');
-
+	if (!players.has(socket.id)) { // si le joueur n'existe pas, création
+		player = new Player(dataStartGame.userName, socket);
+		players.set(socket.id, player);
+	}
 	if (!dataStartGame.gameName) { // pas de game renseignée, c'est donc une création de game{
 		currentGame = new Game(socket, dataStartGame.gameMode);
 		games.set(currentGame.gameName, currentGame);
@@ -118,6 +120,7 @@ const handleMatchMaking = (socket, dataStartGame) => {
 				currentGame.addPlayer(socket);
 				//tell everyone new comer but tell him he's spectator
 				io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
+				console.log('emitting spectator');
 				socket.emit('spectator');
 			} else if (currentGame.players.length == maxPlayerPerGame) {// game pleine, on prévient
 				socket.emit('GameFull');
@@ -137,6 +140,7 @@ const startGame = (socket, gameName) => {
 	currentGame = games.get(gameName);
 	currentGame.resetGame();
 	currentGame.isRunning = true
+
 	io.to(currentGame.gameName).emit('gameStart', {
 		piece: currentGame.pieces[0],
 		nextPiece: currentGame.pieces[1],
