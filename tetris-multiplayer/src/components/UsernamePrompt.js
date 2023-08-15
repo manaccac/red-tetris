@@ -1,25 +1,24 @@
 import React, { useState } from 'react';
 import Cookies from 'js-cookie';
 
-function UsernamePrompt() {
+function UsernamePrompt({ onUsernameSubmit }) {
 	const [username, setUsername] = useState('');
-  
+
 	const handleUsernameSubmit = (e) => {
-	  e.preventDefault();
-	  Cookies.set('username', username);
-	  window.location.reload();
+		e.preventDefault();
+		Cookies.set('username', username);
+		onUsernameSubmit(username);
 	};
-  
+
 	return (
-	  <form onSubmit={handleUsernameSubmit} data-testid="usernamePrompt">
-		<label>
-		  Nom d'utilisateur:
-		  <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
-		</label>
-		<input type="submit" value="Envoyer" />
-	  </form>
+		<form onSubmit={handleUsernameSubmit} data-testid="usernamePrompt">
+			<label>
+				Nom d'utilisateur:
+				<input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+			</label>
+			<input type="submit" value="Envoyer" />
+		</form>
 	);
-  }
-  
+}
+
 export default UsernamePrompt;
-  

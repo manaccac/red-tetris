@@ -14,7 +14,6 @@ function App() {
   const [username, setUsername] = useState('');
 
   useEffect(() => {
-    console.log('useeffect');
     const cookieUsername = Cookies.get('username');
     if (cookieUsername) {
       setUsername(cookieUsername);
@@ -37,10 +36,14 @@ function App() {
     };
   }, []);
 
+  const handleUsernameSubmit = (newUsername) => {
+    setUsername(newUsername);
+  };
+
   return (
     <Router>
       {!username ? (
-        <UsernamePrompt data-testid="usernamePrompt" />
+        <UsernamePrompt onUsernameSubmit={handleUsernameSubmit} data-testid="usernamePrompt" />
       ) : (
         <Routes>
           <Route path="/" element={<Home />} />
@@ -50,5 +53,7 @@ function App() {
     </Router>
   );
 }
+
+
 
 export default App;

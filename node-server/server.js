@@ -1,11 +1,27 @@
 const { askingForGameInfos, leavingGame, restartGame, startGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, handleMatchMaking } = require('./src/utils');
 const { http, io, players } = require('./src/gameState');
-
+const Player = require('./src/player');
 http.listen(3001, () => {
     console.log('Server is running on port 3001');
 });
 
 io.on('connection', (socket) => {
+
+    socket.on('setUsername', (username) => {
+        var isAvailable = true;
+        for (const [socketId, player] of players) {
+            if (player.getName() === username) {
+                isAvailable = false;
+                break;
+            }
+        }
+        if (isAvailable) {
+            let player = new Player(dataStartGame.userName, socket);
+            players.set(socket.id, player);
+        }
+        socket.emit('usernameRep', isAvailable);
+    });
+
     socket.on('lookingForAGame', (dataStartGame) => {
         handleMatchMaking(socket, dataStartGame);
     });
@@ -22,11 +38,12 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('socket Id disconnected :' + socket.id);
-        leavingGame(socket, io, 'disconnect');
+        leavingGame(socket);
+        players.delete(socket.id);
     });
 
     socket.on('leftGame', () => {
-        leavingGame(socket, io, 'leftGame');
+        leavingGame(socket);
     });
 
     socket.on('updateBoard', (updatedBoard) => {

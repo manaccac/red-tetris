@@ -217,6 +217,7 @@ function Board(props) {
     // socket.emit('lookingForAGame', { userName: username, gameMode: props.gameMode, gameName: props.gameName });
     props.setAwaitingOpponent(true);
     return () => {
+      console.log('emitting leftGame');
       socket.emit('leftGame');
       socket.off('Victory');
       socket.off('receivedLines');
