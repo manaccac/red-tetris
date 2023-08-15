@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { socket } from '../socket';
+import { setMyName } from '../redux/actions';
 
 const Menu = () => {
   const [gameName, setGameName] = useState('');
@@ -38,6 +39,8 @@ const Menu = () => {
   const handleSearchGame = () => {
     socket.emit('lookingForAGame', { userName: username, gameMode: null, gameName: gameName });
   };
+
+  dispatch(setMyName(username));
 
 
 

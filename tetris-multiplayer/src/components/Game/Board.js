@@ -93,7 +93,7 @@ function Board(props) {
   //   const gameMode = props.gameMode;
 
   const username = Cookies.get('username');
-  props.setMyName(username);
+//   props.setMyName(username);
   console.log('username = set ' + props.myName);
 
 

@@ -207,38 +207,49 @@ function gameReducer(state = initialState, action) {
 					isGameWon: true,
 					isGameOver: true,
 				}
-			case 'SET_OPPONENT_NAME':
-				const opponentName = action.payload;
-				return {
-					...state,
-					opponents: {
-						...state.opponents,
-						[opponentName]: {
-							...state.opponents[opponentName],
-							name: opponentName,
-							board: [] // Initialiser le tableau du board de l'adversaire
-						}
-					}
-				};
 			case 'SET_AWAITING_OPPONENT':
 				return {
 					...state,
 					awaitingOpponent: action.payload,
 				};
-			case 'UPDATE_OPPONENT_BOARD':
-				const board_received = action.board;
-				const name_received = action.name;
-				// if (state.opponents[name_received]) {
-				return {
-					...state,
-					opponents: {
-						...state.opponents,
-						[name_received]: {
-							...state.opponents[name_received],
-							board: board_received
-						}
+				case 'SET_OPPONENT_NAME':
+					const opponentName = action.payload;
+					console.log('opponentName', opponentName);
+					console.log('state.myName', state.myName);
+					if (opponentName !== state.myName) {
+						return {
+							...state,
+							opponents: {
+								...state.opponents,
+								[opponentName]: {
+									...state.opponents[opponentName],
+									name: opponentName,
+									board: [] // Initialiser le tableau du board de l'adversaire
+								}
+							}
+						};
 					}
-				};
+					return state;
+				
+				case 'UPDATE_OPPONENT_BOARD':
+					const board_received = action.board;
+					const name_received = action.name;
+					console.log('opponentName', name_received);
+					console.log('state.myName', state.myName);
+					if (name_received !== state.myName) {
+						return {
+							...state,
+							opponents: {
+								...state.opponents,
+								[name_received]: {
+									...state.opponents[name_received],
+									board: board_received
+								}
+							}
+						};
+					}
+					return state;
+				
 			// }
 			// else {
 			//   console.warn(`Trying to update non-existing opponent: ${name_received}`);
@@ -257,16 +268,19 @@ function gameReducer(state = initialState, action) {
 				// 	console.log("Opponent Board:", opponent.board);
 				// });
 				// console.log("gameMode: " + state.gameMode)
-				console.log("gameName: " + action.payload.gameName);
+				// console.log("gameName: " + action.payload.gameName);
+				console.log("state.myName:", state.myName);
+
 				// console.log("role: " + state.role)
 
 				// console.log('Setting game info...');
 				// console.log(action.payload);
 				const { leader, players, gameMode, gameName, role } = action.payload;
+				const filteredPlayers = players.filter(playerName => playerName !== state.myName);
 				return {
 					...state,
 					leader,
-					opponents: players.reduce((opponentsObj, playerName) => {
+					opponents: filteredPlayers.reduce((opponentsObj, playerName) => {
 						opponentsObj[playerName] = {
 							name: playerName,
 							board: [],
