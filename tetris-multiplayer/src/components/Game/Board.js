@@ -195,6 +195,7 @@ function Board(props) {
       props.setOpponentName(response.opponentName);
     });
     socket.on('spectator', () => {
+		console.log('spectator');
       props.setLeader(false);
       props.setSpectator(true);
     });

@@ -290,6 +290,7 @@ function gameReducer(state = initialState, action) {
 				// console.log("gameMode: " + state.gameMode)
 				// console.log("gameName: " + action.payload.gameName);
 				console.log("state.myName:", state.myName);
+				console.log("action.payload.players:", action.payload);
 
 				// console.log("role: " + state.role)
 
@@ -297,6 +298,8 @@ function gameReducer(state = initialState, action) {
 				// console.log(action.payload);
 				const { leader, players, gameMode, gameName, role } = action.payload;
 				const filteredPlayers = players.filter(playerName => playerName !== state.myName);
+				if (role === 'spectator')
+					state.isSpectator = true;
 				return {
 					...state,
 					leader,

@@ -119,7 +119,7 @@ const handleMatchMaking = (socket, dataStartGame) => {
 				socket.join(currentGame.gameName);
 				currentGame.addPlayer(socket);
 				//tell everyone new comer but tell him he's spectator
-				io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
+				socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'spectator' });
 				console.log('emitting spectator');
 				socket.emit('spectator');
 			} else if (currentGame.players.length == maxPlayerPerGame) {// game pleine, on prévient
