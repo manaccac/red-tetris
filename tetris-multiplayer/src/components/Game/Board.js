@@ -276,6 +276,7 @@ function Board(props) {
 };
 
   return (
+
     <div
       className="game-container"
       onKeyDown={handleKeyDown}
@@ -286,6 +287,7 @@ function Board(props) {
 		{renderCells()}
 	</div>
 	)}
+	{(props.isSpectator) && (<h1>Spectateur</h1>)}
 
 
 	{!props.isSpectator && (
@@ -296,8 +298,8 @@ function Board(props) {
         {props.opponentName}
       </div>
 
-	  {props.isGameOver && !props.isGameWon && <GameOverScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} />}
-      {props.isGameOver && props.isGameWon && <VictoryScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} />}
+	  {props.isGameOver && (!props.isGameWon || props.isSpectator) && <GameOverScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} />}
+      {props.isGameOver && props.isGameWon && !props.isSpectator && <VictoryScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} />}
 	  {(!props.gameStart && !props.isSpectator) && (
 		<WaitingScreen
 			opponentNames={props.opponentNames}
