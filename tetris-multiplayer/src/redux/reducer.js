@@ -214,6 +214,9 @@ function gameReducer(state = initialState, action) {
 				};
 			case 'SET_OPPONENT_NAME':
 				const opponentName = action.payload;
+				if (opponentName === undefined) {
+					return state;
+				}
 				console.log('opponentName', opponentName);
 				console.log('state.myName', state.myName);
 				if (opponentName !== state.myName) {
@@ -236,6 +239,11 @@ function gameReducer(state = initialState, action) {
 				const name_received = action.name;
 				console.log('opponentName', name_received);
 				console.log('state.myName', state.myName);
+				if (name_received === undefined){
+					console.warn(`Trying to update non-existing opponent: ${name_received}`);
+					return state;
+				}
+				
 				if (name_received !== state.myName) {
 					return {
 						...state,

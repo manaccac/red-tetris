@@ -41,7 +41,7 @@ const sendBoardAndPieceToPlayer = (socket, dataBoard) => {
 			socket.emit('updateNextPiece', [gameData.pieces[players.get(socket.id).pieceId]]);
 			players.get(socket.id).pieceId++;
 			//on envoit le board a l'adversaire
-			socket.broadcast.to(gameId).emit('opponentBoardData', dataBoard);
+			socket.broadcast.to(gameId).emit('opponentBoardData', dataBoard, players.get(socket.id).name);
 			return;
 		}
 	}
