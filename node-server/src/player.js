@@ -3,7 +3,7 @@ class Player {
     socket;
     isInGame = false;
     score = 0;
-    pieceId = 0;
+    pieceId = 2;
     gameOver = false;
     status; //Statut: [player/spectator]
     constructor(name, socket) {

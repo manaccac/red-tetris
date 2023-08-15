@@ -69,7 +69,7 @@ class Game {
         this.pieces = [];
         this.pieces.push(new Piece());
         this.pieces.push(new Piece());
-        currentGame.players.forEach((player) => player.pieceId = 0);
+        currentGame.players.forEach((player) => player.pieceId = 2);
     }
 }
 

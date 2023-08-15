@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import {
   moveLeft, moveRight, rotate, moveDown, dropPiece, updatePiece,
   resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard,
-  setIsVictory, setOpponentName, setLeader, setMyName, setSpectator, setGameInfo, setPlayerWon
+  setIsVictory, resetGameState, setOpponentName, setLeader, setMyName, setSpectator, setGameInfo, setPlayerWon
 } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
@@ -58,7 +58,6 @@ export const goHome = (props, navigate) => {
 };
 
 export const restartGame = async (props, setGameRunning, username) => {
-  props.gameStarted(false);
   socket.emit('restartGame', username);
 };
 
@@ -82,6 +81,7 @@ export const mapDispatchToProps = (dispatch) => ({
   setSpectator: (spectator) => dispatch(setSpectator(spectator)),
   setGameInfo: (gameInfos) => dispatch(setGameInfo(gameInfos)),
   setPlayerWon: (playerWon) => dispatch(setPlayerWon(playerWon)),
+  resetGameState: () => dispatch(resetGameState()),
 });
 
 function Board(props) {
@@ -163,7 +163,7 @@ function Board(props) {
     return () => {
       clearInterval(countdownInterval);
     };
-  }, [props.gameStart]);
+  }, [props.gameStart, gameRunning]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -181,11 +181,16 @@ function Board(props) {
       window.removeEventListener('keydown', handleKeyDown);
       clearInterval(interval);
     };
-  }, [props.isGameOver, gameRunning, props.board]);
+  }, [props.isGameOver, gameRunning]);
 
   useEffect(() => {
+    socket.on('gameInfos', (data) => {
+      console.log('gameInfos received');
+      props.setGameInfo(data);
+    });
     socket.on('gameStart', (response) => {
-      console.log('gameStart received');
+      props.resetGameState();
+      setGameRunning(false);
       props.updatePiece([response.piece, response.nextPiece]);
       props.setOpponentName(response.opponentName);
     });
@@ -204,10 +209,6 @@ function Board(props) {
     })
     socket.on('updateNextPiece', (nextPiece) => {
       props.updatePiece(nextPiece);
-    });
-    socket.on('gameInfos', (data) => {
-      console.log('gameInfos received');
-      props.setGameInfo(data);
     });
     socket.on('playerWon', (playerWhoWon) => {
       props.setPlayerWon(playerWhoWon);
