@@ -15,12 +15,14 @@ const leaveAllRooms = (socket) => {
 
 const leavingGame = (socket) => {
 	leaveAllRooms(socket);
+	if (!players.has(socket.id)) return;
 	for (const [gameId, gameData] of games.entries()) {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
 			gameData.removePlayer(socket);
 			if (gameData.players.length === 0) {
 				games.delete(gameId);
-				console.log('game is empty, deleting it');
+			} else {
+				io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
 			}
 			gameOver(socket);
 		}
@@ -102,10 +104,6 @@ const askingForGameInfos = (socket) => {
 
 const handleMatchMaking = (socket, dataStartGame) => {
 	console.log('matchmaking called');
-	if (!players.has(socket.id)) { // si le joueur n'existe pas, création
-		player = new Player(dataStartGame.userName, socket);
-		players.set(socket.id, player);
-	}
 
 	if (!dataStartGame.gameName) { // pas de game renseignée, c'est donc une création de game{
 		currentGame = new Game(socket, dataStartGame.gameMode);

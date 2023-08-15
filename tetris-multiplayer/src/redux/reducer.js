@@ -190,7 +190,13 @@ function gameReducer(state = initialState, action) {
 					// gameName: null,
 					// leader: null,
 				};
-
+			case 'RESET_GAME_STATE':
+				return {
+					...state,
+					board: Array.from({ length: 20 }, () => Array(10).fill(0)),
+					gameStart: true,
+					isGameOver: false,
+				};
 			case 'ADD_INDESTRUCTIBLE_LINE':
 				console.log('Adding indestructible lines...');
 				let newBoard = [...state.board];

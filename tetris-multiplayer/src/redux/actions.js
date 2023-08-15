@@ -6,6 +6,7 @@ export const DROP_PIECE = 'DROP_PIECE';
 export const UPDATE_PIECE = 'UPDATE_PIECE';
 export const UPDATE_BOARD = 'UPDATE_BOARD';
 export const RESET_STATE = 'RESET_STATE';
+export const RESET_GAME_STATE = 'RESET_GAME_STATE';
 export const ADD_INDESTRUCTIBLE_LINE = 'ADD_INDESTRUCTIBLE_LINE';
 export const GAME_STARTED = 'GAME_STARTED';
 export const SET_AWAITING_OPPONENT = 'SET_AWAITING_OPPONENT';
@@ -17,28 +18,32 @@ export const SET_MY_NAME = 'SET_MY_NAME';
 export const SET_SPECTATOR = 'SET_SPECTATOR';
 export const SET_PLAYER_WON = 'SET_PLAYER_WON';
 
-export function moveLeft(resolve = () => {}) {
-    return { type: MOVE_LEFT, resolve };
+export function moveLeft(resolve = () => { }) {
+	return { type: MOVE_LEFT, resolve };
 }
 
-export function moveRight(resolve = () => {}) {
-    return { type: MOVE_RIGHT, resolve };
+export function moveRight(resolve = () => { }) {
+	return { type: MOVE_RIGHT, resolve };
 }
 
-export function rotate(resolve = () => {}) {
-    return { type: ROTATE, resolve };
+export function rotate(resolve = () => { }) {
+	return { type: ROTATE, resolve };
 }
 
-export function moveDown(resolve = () => {}) {
-    return { type: MOVE_DOWN, resolve };
+export function moveDown(resolve = () => { }) {
+	return { type: MOVE_DOWN, resolve };
 }
 
-export function dropPiece(resolve = () => {}) {
-    return { type: DROP_PIECE, resolve };
+export function dropPiece(resolve = () => { }) {
+	return { type: DROP_PIECE, resolve };
 }
 
 export function resetState(resolve) {
 	return { type: RESET_STATE, resolve };
+}
+
+export function resetGameState(resolve) {
+	return { type: RESET_GAME_STATE, resolve };
 }
 
 export function updateBoard(board) {
@@ -63,9 +68,9 @@ export const setAwaitingOpponent = (awaiting) => ({
 });
 
 export const updateOpponentBoard = (name, board) => ({
-    type: 'UPDATE_OPPONENT_BOARD',
-    name: name,
-    board: board
+	type: 'UPDATE_OPPONENT_BOARD',
+	name: name,
+	board: board
 });
 
 
@@ -81,15 +86,15 @@ export const setOpponentName = (oppName) => ({
 
 export function setLeader(isLeader) {
 	return {
-	  type: SET_LEADER,
-	  payload: isLeader
+		type: SET_LEADER,
+		payload: isLeader
 	};
 }
 
 export const setGameInfo = (gameInfo) => ({
 	type: 'SET_GAME_INFO',
 	payload: gameInfo,
-  });
+});
 
 export const setMyName = (myName) => ({
 	type: SET_MY_NAME,
