@@ -25,6 +25,7 @@ const initialState = {
 	gameMode: null, // normal, gravity, invisible
 	myName: null,
 	isSpectator: false,
+	playerWon: null,
 };
 
 function gameReducer(state = initialState, action) {
@@ -306,6 +307,11 @@ function gameReducer(state = initialState, action) {
 				return {
 					...state,
 					isSpectator: action.payload,
+				};
+			case 'SET_PLAYER_WON':
+				return {
+					...state,
+					playerWon: action.payload,
 				};
 
 			default:
