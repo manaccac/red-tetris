@@ -53,7 +53,7 @@ class Game {
     }
 
     getWinner() {
-        const playersWithGameOverFalse = this.players.filter(player => !player.gameOver);
+        const playersWithGameOverFalse = this.players.filter(player => !player.gameOver && player.role !== 'spectator');
         if (playersWithGameOverFalse.length === 1) {
             return playersWithGameOverFalse[0];
         } else {
@@ -72,6 +72,7 @@ class Game {
         currentGame.players.forEach((player) => {
             player.gameOver = false;
             player.pieceId = 2;
+            player.role = 'player';
         });
     }
 }

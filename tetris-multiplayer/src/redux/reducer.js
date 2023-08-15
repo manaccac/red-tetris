@@ -196,6 +196,8 @@ function gameReducer(state = initialState, action) {
 					board: Array.from({ length: 20 }, () => Array(10).fill(0)),
 					gameStart: true,
 					isGameOver: false,
+					isSpectator: false,
+					role: 'player',
 				};
 			case 'ADD_INDESTRUCTIBLE_LINE':
 				console.log('Adding indestructible lines...');

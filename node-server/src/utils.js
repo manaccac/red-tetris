@@ -20,16 +20,19 @@ const leavingGame = (socket) => {
 	if (!players.has(socket.id)) return;
 	for (const [gameId, gameData] of games.entries()) {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
-			gameOver(socket);
+			if (players.get(socket.id).role !== 'spectator') {
+				gameOver(socket);
+			}
 			gameData.removePlayer(socket);
 			if (gameData.players.length === 0) {
 				games.delete(gameId);
 			} else {
-				console.log('list of socket in:');
 				if (gameData.leader == players.get(socket.id).name) {// si le leaver est leader, alors change leader
 					gameData.changeLeader();
 				}
-				io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
+				if (players.get(socket.id).role !== 'spectator') {
+					io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
+				}
 			}
 		}
 	}
@@ -111,6 +114,7 @@ const handleMatchMaking = (socket, dataStartGame) => {
 		currentGame = new Game(socket, dataStartGame.gameMode);
 		games.set(currentGame.gameName, currentGame);
 		socket.join(currentGame.gameName);
+		players.get(socket.id).role = 'player';
 		socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'player' });
 	} else { // nom renseigné, le joueur cherche une partie avec un nom spécifique
 		currentGame = games.get(dataStartGame.gameName);
@@ -120,15 +124,15 @@ const handleMatchMaking = (socket, dataStartGame) => {
 				currentGame.addPlayer(socket);
 				//tell everyone new comer but tell him he's spectator
 				socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'spectator' });
-				console.log('emitting spectator');
-				socket.emit('spectator');
+				players.get(socket.id).role = 'spectator';
 			} else if (currentGame.players.length == maxPlayerPerGame) {// game pleine, on prévient
 				socket.emit('GameFull');
 			} else { // partie trouvée et places dispos, ajout à la salle d'attente
 				socket.join(currentGame.gameName);
 				currentGame.addPlayer(socket);
 				// tell everyone new player
-				io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
+				io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos, role: 'player' });
+				players.get(socket.id).role = 'player';
 			}
 		} else { // la partie n'existe pas, prévenir l'user et retour menu
 			socket.emit('NoGameFound');
