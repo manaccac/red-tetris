@@ -18,7 +18,7 @@ function WaitingScreen({ opponentNames, isLeader, onStartGame, myName, leader })
                     ))}
                 </ul>
                 <p>Nombre de joueurs : {opponentNames ? Object.keys(opponentNames).length + 1 : 0}</p>
-                {isLeader && (
+                {isLeader === myName && (
                     <button onClick={onStartGame} data-testid="start-game-btn">Démarrer la partie</button>
                 )}
                 <div className="loading-animation"></div>
@@ -26,6 +26,7 @@ function WaitingScreen({ opponentNames, isLeader, onStartGame, myName, leader })
         </div>
     );
 }
+
 
 
 const mapStateToProps = (state) => ({
@@ -47,25 +48,36 @@ function CountdownScreen({ countdown }) {
     );
 }
 
-function GameOverScreen({ onGoHome, onRestart }) {
+function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader }) {
+	console.log("playerWon =", playerWon);
+	console.log("myName =", myName);
+	console.log("isLeader =", isLeader);
     return (
         <div className="overlay">
             <div className="message">
                 <h1>Partie terminée</h1>
                 <button onClick={onGoHome}>Retour à la page d'accueil.</button>
-                <button onClick={onRestart}>Recommencer</button>
+                {playerWon !== null && myName === isLeader && (
+                    <button onClick={onRestart}>Recommencer</button>
+                )}
             </div>
         </div>
     );
 }
 
-function VictoryScreen({ onGoHome, onRestart }) {
+
+function VictoryScreen({ onGoHome, onRestart, playerWon, myName, isLeader }) {
+	console.log("playerWon =", playerWon);
+	console.log("myName =", myName);
+	console.log("isLeader =", isLeader);
     return (
         <div className="overlay">
             <div className="message">
                 <h1>Victoire !</h1>
                 <button onClick={onGoHome}>Retour à la page d'accueil.</button>
-                <button onClick={onRestart}>Recommencer</button>
+                {playerWon !== null && myName === isLeader && (
+                    <button onClick={onRestart}>Recommencer</button>
+                )}
             </div>
         </div>
     );
