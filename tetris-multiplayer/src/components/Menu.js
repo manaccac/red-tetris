@@ -29,15 +29,15 @@ const Menu = () => {
       alert('caca');
     });
 
-    socket.on('gameFull', () => {
-      console.log('gamefull');
+    socket.on('GameFull', () => {
+      console.log('GameFull');
       alert('game full');
     });
 
     return () => {
       socket.off('gameInfos');
       socket.off('NoGameFound');
-      socket.off('gameFull');
+      socket.off('GameFull');
     };
   }, []);
 
