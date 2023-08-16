@@ -74,15 +74,13 @@ export function isCollision(piece, x, y, board) {
 
 		for (let row = 0; row < shapeHeight; row++) {
 			for (let col = 0; col < shapeWidth; col++) {
-				if (
+				if ( y + row > -1 &&
 					shape[row][col] !== 0 &&
 					(y + row >= board.length ||
 						x + col < 0 ||
 						x + col >= board[0].length ||
 						board[y + row][x + col] !== 0)
 				) {
-					console.log('Collision détectée');
-					console.log('Piece :', piece);
 					return true;
 				}
 			}
