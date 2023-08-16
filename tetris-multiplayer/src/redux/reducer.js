@@ -94,6 +94,14 @@ function gameReducer(state = initialState, action) {
 				newPosition = { ...piece.position };
 				newPosition.y += 1;
 				if (isCollision(piece, newPosition.x, newPosition.y, state.board)) {
+					if (piece.position.y < 0) {
+						socket.emit('gameOver');
+						return {
+							...state,
+							// board: updatedBoard,
+							isGameOver: true,
+						};
+					}
 					const updatedBoard = [...state.board];
 					piece.shape.forEach((row, y) => {
 						row.forEach((cell, x) => {
@@ -105,15 +113,6 @@ function gameReducer(state = initialState, action) {
 						});
 					});
 					socket.emit('updateBoard', updatedBoard);
-					if (piece.position.y < 0) {
-						//action.resolve();
-						socket.emit('gameOver');
-						return {
-							...state,
-							board: updatedBoard,
-							isGameOver: true,
-						};
-					}
 					const completedLines = [];
 					updatedBoard.forEach((row, y) => {
 						if (row.every((cell) => cell > 0)) {

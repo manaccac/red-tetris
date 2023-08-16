@@ -63,7 +63,7 @@ export function rotateMatrix(matrix) {
 
 export function isCollision(piece, x, y, board) {
 	try {
-		if (!board || !piece || y === -1) {
+		if (!board || !piece || y < -1) {
 			if (x >= 9 || x <= 0)
 				return true;
 			return false;
@@ -81,6 +81,8 @@ export function isCollision(piece, x, y, board) {
 						x + col >= board[0].length ||
 						board[y + row][x + col] !== 0)
 				) {
+					console.log('Collision détectée');
+					console.log('Piece :', piece);
 					return true;
 				}
 			}
