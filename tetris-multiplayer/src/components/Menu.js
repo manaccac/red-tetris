@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { socket } from '../socket';
 import { setMyName } from '../redux/actions';
+import { toast } from 'react-toastify';
+
 
 const Menu = () => {
   const [gameName, setGameName] = useState('');
@@ -26,12 +28,18 @@ const Menu = () => {
     socket.emit('setUsername', username);
 
     socket.on('NoGameFound', () => {
-      alert('caca');
-    });
+		toast.error('No Game Found', {
+			position: toast.POSITION.BOTTOM_RIGHT,
+			autoClose: 5000,
+		  });
+	});
 
     socket.on('GameFull', () => {
-      console.log('GameFull');
-      alert('game full');
+		toast.error('Game Full', {
+			position: toast.POSITION.BOTTOM_RIGHT,
+			autoClose: 5000,
+		  });
+		  
     });
 
     return () => {

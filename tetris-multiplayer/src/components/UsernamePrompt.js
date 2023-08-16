@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { socket } from '../socket';
+import { toast } from 'react-toastify';
+
 
 function UsernamePrompt({ onUsernameSubmit }) {
   const [username, setUsername] = useState('');
@@ -13,7 +15,11 @@ function UsernamePrompt({ onUsernameSubmit }) {
         Cookies.set('username', username);
         onUsernameSubmit(username);
       } else {
-        setErrorMessage('Ce nom d\'utilisateur est déjà pris.');
+		toast.error('Ce nom d\'utilisateur est déjà pris.', {
+			position: toast.POSITION.BOTTOM_RIGHT,
+			autoClose: 5000,
+		  });
+        // setErrorMessage('Ce nom d\'utilisateur est déjà pris.');
       }
     };
 

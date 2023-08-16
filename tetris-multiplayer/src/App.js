@@ -3,6 +3,8 @@ import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import Game from './components/Game/Game';
 import Home from './components/Home/Home';
 import UsernamePrompt from './components/UsernamePrompt';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { socket } from './socket';
 import Cookies from 'js-cookie';
 import './App.css';
@@ -42,6 +44,8 @@ function App() {
   
 	return (
 	  <Router>
+		<ToastContainer />
+
 		{!username ? (
 		  <UsernamePrompt onUsernameSubmit={handleUsernameSubmit} data-testid="usernamePrompt" />
 		) : (
