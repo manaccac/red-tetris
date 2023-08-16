@@ -1,30 +1,118 @@
-.menu {
+.user-info {
+	position: absolute;
+	top: 10px;
+	right: 10px;
 	display: flex;
-	justify-content: space-around;
-}
+	align-items: center;
+  }
   
-.button {
-	display: inline-block;
+  .profile-image {
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	margin-right: 15px;
+  }
+  
+  .username {
+	font-size: 20px;
+	font-weight: 500;
+	margin-right: 20px;
+  }
+  
+  .score {
+	display: flex;
+	align-items: center;
+  }
+  
+  .crown-icon {
+	width: 30px;
+	height: 30px;
+	margin-right: 5px;
+  }
+  
+
+.menu-container {
+	margin: 20px;
+	display: flex;
+	align-items: flex-start; /* Alignement des éléments en haut du conteneur */
+	justify-content: center; /* Centre horizontalement */
+	flex-direction: column;
+	padding: 20px;
+}
+
+.search-game {
+	width: 100%;
+	max-width: 400px;
+	text-align: center;
+	margin-bottom: 40px;
+	align-self: center; /* Centre cet élément dans le conteneur */
+}
+
+.create-game {
+	width: 100%;
+	text-align: center;
+	margin-bottom: 20px;
+	align-self: center; /* Centre cet élément dans le conteneur */
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-bottom: 10px;
+}
+
+input {
+	width: 100%;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+
+button {
 	padding: 10px 20px;
-	border: none;
+	border: 2px solid rgba(128, 0, 128, 0.662);
 	background-color: rgba(128, 0, 128, 0.662);
-	color: #fff;
+	color: white;
 	text-decoration: none;
 	text-align: center;
 	transition: background-color 0.3s ease;
+	cursor: pointer;
 }
-  
-.button:hover {
+
+button:hover {
 	background-color: purple;
+	border-color: purple;
 }
-  
+
+.menu {
+	display: flex;
+	justify-content: center;
+	align-items: center; /* Centre verticalement */
+	margin-top: 20px; /* Ajoutez un peu d'espace au-dessus du menu */
+}
+
 .menu li {
 	list-style-type: none;
-	margin-bottom: 10px;
+	flex-grow: 1;
+	text-align: center; /* Centre le contenu des boutons */
 }
-  
-.game-in-progress {
-	margin-top: 20px;
+
+.menu button {
+	width: 30%; /* Les boutons prendront toute la largeur du conteneur */
 	padding: 10px;
-	background-color: #f0f0f0;
+	border: 2px solid rgba(128, 0, 128, 0.662);
+	background-color: rgba(128, 0, 128, 0.662);
+	color: white;
+	text-decoration: none;
+	text-align: center;
+	transition: background-color 0.3s ease;
+	cursor: pointer;
+}
+
+.menu button:hover {
+	background-color: purple;
+	border-color: purple;
+}
+
+.menu li:not(:last-child) {
+	margin-left: 30px;
+
 }

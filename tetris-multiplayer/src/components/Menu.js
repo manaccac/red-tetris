@@ -6,10 +6,10 @@ import { socket } from '../socket';
 import { setMyName } from '../redux/actions';
 import { toast } from 'react-toastify';
 
-
 const Menu = () => {
   const [gameName, setGameName] = useState('');
   const username = Cookies.get('username');
+  const image = Cookies.get('image');
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const gameNameFromReducer = useSelector(state => state.gameName);
@@ -62,29 +62,42 @@ const Menu = () => {
 
 
   return (
-    <div>
-      <div className="menu">
-        <li>
-          <button className="button" onClick={() => handleLaunchGame('normal')}>Normal</button>
-        </li>
-        <li>
-          <button className="button" onClick={() => handleLaunchGame('invisible')}>Invisible</button>
-        </li>
-        <li>
-          <button className="button" onClick={() => handleLaunchGame('graviter')}>Graviter Aléatoire</button>
-        </li>
-      </div>
-      <div>
-        <input
-          type="text"
-          value={gameName}
-          onChange={(e) => setGameName(e.target.value)}
-          placeholder="Rechercher une partie"
-        />
-        <button onClick={() => handleSearchGame(gameName)}>Rechercher</button>
-      </div>
-    </div>
+	<div className="menu-container">
+	  <div className="user-info">
+	  <img src={`/user_pic/${image}-removebg-preview.png`} alt="Profile" className="profile-image" />
+		<span className="username">{username}</span>
+		<span className="score">
+		  <img src="/crown.png" alt="Crown" className="crown-icon" />
+		  1
+		</span>
+	  </div>
+	  <div className="search-game">
+		<h2>Recherche de partie</h2>
+		<input
+		  type="text"
+		  value={gameName}
+		  onChange={(e) => setGameName(e.target.value)}
+		  placeholder="Rechercher une partie"
+		/>
+		<button onClick={() => handleSearchGame(gameName)}>Rechercher</button>
+	  </div>
+	  <div className="create-game">
+		<h2>Créer une partie</h2>
+		<div className="menu">
+		  <li>
+			<button className="button" onClick={() => handleLaunchGame('normal')}>Normal</button>
+		  </li>
+		  <li>
+			<button className="button" onClick={() => handleLaunchGame('invisible')}>Invisible</button>
+		  </li>
+		  <li>
+			<button className="button" onClick={() => handleLaunchGame('graviter')}>Graviter Aléatoire</button>
+		  </li>
+		</div>
+	  </div>
+	</div>  
   );
+  
 };
 
 export default Menu;

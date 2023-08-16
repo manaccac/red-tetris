@@ -5,46 +5,59 @@ import { toast } from 'react-toastify';
 
 
 function UsernamePrompt({ onUsernameSubmit }) {
-  const [username, setUsername] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-
-  useEffect(() => {
-    const handleUsernameRep = (isAvailable) => {
-      console.log('handleUsernameRepCalled');
-      if (isAvailable) {
-        Cookies.set('username', username);
-        onUsernameSubmit(username);
-      } else {
-		toast.error('Ce nom d\'utilisateur est déjà pris.', {
+	const [username, setUsername] = useState('');
+	const [selectedImageIndex, setSelectedImageIndex] = useState(1);
+	const [errorMessage, setErrorMessage] = useState('');
+  
+	useEffect(() => {
+	  const handleUsernameRep = (isAvailable) => {
+		console.log('handleUsernameRepCalled');
+		if (isAvailable) {
+		  Cookies.set('username', username);
+		  Cookies.set('image', selectedImageIndex)
+		  onUsernameSubmit(username, selectedImageIndex);
+		} else {
+		  toast.error('Ce nom d\'utilisateur est déjà pris.', {
 			position: toast.POSITION.BOTTOM_RIGHT,
 			autoClose: 5000,
 		  });
-        // setErrorMessage('Ce nom d\'utilisateur est déjà pris.');
-      }
-    };
-
-    socket.on('usernameRep', handleUsernameRep);
-
-    return () => {
-      socket.off('usernameRep', handleUsernameRep);
-    };
-  }, [username, onUsernameSubmit]);
-
-  const handleUsernameSubmit = (e) => {
-    e.preventDefault();
-    socket.emit('setUsername', username);
-  };
-
-  return (
-    <form onSubmit={handleUsernameSubmit} data-testid="usernamePrompt">
-      <label>
-        Nom d'utilisateur:
-        <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
-      </label>
-      <input type="submit" value="Envoyer" />
-      {errorMessage && <p className="error-message">{errorMessage}</p>}
-    </form>
-  );
-}
+		}
+	  };
+  
+	  socket.on('usernameRep', handleUsernameRep);
+  
+	  return () => {
+		socket.off('usernameRep', handleUsernameRep);
+	  };
+	}, [username, selectedImageIndex, onUsernameSubmit]);
+  
+	const handleUsernameSubmit = (e) => {
+	  e.preventDefault();
+	  socket.emit('setUsername', username);
+	};
+  
+	return (
+	  <form onSubmit={handleUsernameSubmit} data-testid="usernamePrompt">
+		<label>
+		  Nom d'utilisateur:
+		  <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+		</label>
+		<div className="image-selector">
+		  {Array.from({ length: 24 }, (_, i) => i + 1).map((index) => (
+			<img
+			  key={index}
+			  src={`/user_pic/${index}-removebg-preview.png`}
+			  alt={`Profile ${index}`}
+			  className={`profile-image ${selectedImageIndex === index ? 'selected' : ''}`}
+			  onClick={() => setSelectedImageIndex(index)}
+			/>
+		  ))}
+		</div>
+		<input type="submit" value="Envoyer" />
+		{errorMessage && <p className="error-message">{errorMessage}</p>}
+	  </form>
+	);
+  }
+    
 
 export default UsernamePrompt;

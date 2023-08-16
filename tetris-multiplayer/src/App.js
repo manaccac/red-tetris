@@ -10,15 +10,19 @@ import Cookies from 'js-cookie';
 import './App.css';
 
 console.log('username = ', Cookies.get('username'));
+console.log('image = ', Cookies.get('image'));
 
 function App() {
 	const [isConnected, setIsConnected] = useState(socket.connected);
 	const [username, setUsername] = useState('');
+	const [image, setImage] = useState('');
   
 	useEffect(() => {
 	  const cookieUsername = Cookies.get('username');
+	  const cookieImage = Cookies.get('image');
 	  if (cookieUsername) {
 		setUsername(cookieUsername);
+		setImage(cookieImage);
 		  
 		function onConnect() {
 			setIsConnected(true);
@@ -38,8 +42,9 @@ function App() {
 	  }
 	}, []);
   
-	const handleUsernameSubmit = (newUsername) => {
+	const handleUsernameSubmit = (newUsername, newImage) => {
 	  setUsername(newUsername);
+	  setImage(newImage)
 	};
   
 	return (
