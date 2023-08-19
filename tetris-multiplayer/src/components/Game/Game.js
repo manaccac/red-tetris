@@ -3,11 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import Board from './Board';
 
-function Game() {
+function Game(props) {
   return (
     <div className="game">
       {/* <Score player="J1" /> */}
-      {<Board />}
+      {<Board  updateScore={props.updateScore}/>}
       {/* <Score player="J2" /> */}
     </div>
   );

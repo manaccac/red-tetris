@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, setState, useRef } from 'react';
 import { connect } from 'react-redux';
 import {
   moveLeft, moveRight, rotate, moveDown, dropPiece, updatePiece,
@@ -51,11 +51,12 @@ export function getRandomDelay(props) {
     return 500;
 }
 
-export const goHome = (props, navigate) => {
-  props.resetState();
-  props.setAwaitingOpponent(false);
-  navigate('/');
-};
+const goHome = (props, navigate, setScoreUpdated) => {
+    setScoreUpdated(false);
+    props.resetState();
+    props.setAwaitingOpponent(false);
+    navigate('/');
+  };
 
 export const restartGame = async (props, setGameRunning, username) => {
   socket.emit('restartGame', username);
@@ -91,15 +92,21 @@ function Board(props) {
   const username = Cookies.get('username');
   //   props.setMyName(username);
 
+  const [scoreUpdated, setScoreUpdated] = useState(false);
+
 
   let navigate = useNavigate();
   const [countdown, setCountdown] = useState(5);
   const [gameRunning, setGameRunning] = useState(false);
 
+  const scoreUpdatedRef = useRef(scoreUpdated);
+
 
   const handleRestartGame = () => {
+    setScoreUpdated(false);
     restartGame(props, setGameRunning, username);
   };
+
 
   const handleKeyDown = async (event) => {
     try {
@@ -184,6 +191,11 @@ function Board(props) {
   }, [props.isGameOver, gameRunning]);
 
   useEffect(() => {
+	scoreUpdatedRef.current = scoreUpdated;
+  }, [scoreUpdated]);
+  
+
+  useEffect(() => {
     socket.on('gameInfos', (data) => {
       console.log('gameInfos received');
       props.setGameInfo(data);
@@ -202,9 +214,23 @@ function Board(props) {
     socket.on('receivedLines', (numberOfLines) => {
       props.addIndestructibleLine(numberOfLines);
     });
-    socket.on('Victory', () => {
-      props.setIsVictory(true);
-    });
+	socket.on('Victory', () => {
+		console.log('Victory : ' , scoreUpdatedRef.current);
+		if (!scoreUpdatedRef.current) {
+		  // Récupérez la valeur actuelle du cookie de score
+		  const currentScore = parseInt(Cookies.get('score'), 10) || 0;
+		  
+		  // Incrémentez le score
+		  const newScore = currentScore + 1;
+		  
+		  // Mettez à jour le cookie de score avec la nouvelle valeur
+		  Cookies.set('score', newScore);
+		  
+		  props.setIsVictory(true);
+		  props.updateScore(newScore); 
+		  setScoreUpdated(true);
+		}
+	  }); 
     socket.on('opponentBoardData', (opponentBoardData, userName) => {
       props.updateOpponentBoard(userName, opponentBoardData);
     })
@@ -300,8 +326,8 @@ function Board(props) {
         {props.opponentName}
       </div>
 
-      {props.isGameOver && (!props.isGameWon || props.isSpectator) && <GameOverScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} opponents={props.opponnents} />}
-      {props.isGameOver && props.isGameWon && !props.isSpectator && <VictoryScreen onGoHome={() => goHome(props, navigate)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} />}
+	  {props.isGameOver && (!props.isGameWon || props.isSpectator) && <GameOverScreen onGoHome={() => goHome(props, navigate, setScoreUpdated)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} opponents={props.opponnents} />}
+	  {props.isGameOver && props.isGameWon && !props.isSpectator && <VictoryScreen onGoHome={() => goHome(props, navigate, setScoreUpdated)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} />}
       {!props.isGameOver && (!props.gameStart && !props.isSpectator) && (
         <WaitingScreen
           opponentNames={props.opponents}
