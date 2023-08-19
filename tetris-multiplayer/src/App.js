@@ -12,7 +12,20 @@ import './App.css';
 console.log('username = ', Cookies.get('username'));
 console.log('image = ', Cookies.get('image'));
 
-function App() {
+export const UserInfo = ({ username, image, onProfileClick }) => {
+	return (
+	  <div className="user-info" onClick={onProfileClick}>
+		<img src={`/user_pic/${image}-removebg-preview.png`} alt="Profile" className="profile-image" />
+		<span className="username">{username}</span>
+		<span className="score">
+		  <img src="/crown.png" alt="Crown" className="crown-icon" />
+		  1
+		</span>
+	  </div>
+	);
+  };
+  
+  function App() {
 	const [isConnected, setIsConnected] = useState(socket.connected);
 	const [username, setUsername] = useState('');
 	const [image, setImage] = useState('');
@@ -23,48 +36,53 @@ function App() {
 	  if (cookieUsername) {
 		setUsername(cookieUsername);
 		setImage(cookieImage);
-		  
+  
 		function onConnect() {
-			setIsConnected(true);
-		  }
-	  
-		  function onDisconnect() {
-			setIsConnected(false);
-		  }
-	  
-		  socket.on('connect', onConnect);
-		  socket.on('disconnect', onDisconnect);
-	  
-		  return () => {
-			socket.off('connect', onConnect);
-			socket.off('disconnect', onDisconnect);
-		  };
+		  setIsConnected(true);
+		}
+  
+		function onDisconnect() {
+		  setIsConnected(false);
+		}
+  
+		socket.on('connect', onConnect);
+		socket.on('disconnect', onDisconnect);
+  
+		return () => {
+		  socket.off('connect', onConnect);
+		  socket.off('disconnect', onDisconnect);
+		};
 	  }
 	}, []);
   
 	const handleUsernameSubmit = (newUsername, newImage) => {
 	  setUsername(newUsername);
-	  setImage(newImage)
+	  setImage(newImage);
+	};
+  
+	const handleProfileClick = () => {
+	  setUsername('');
+	  setImage('');
 	};
   
 	return (
 	  <Router>
 		<ToastContainer />
-
+  
 		{!username ? (
 		  <UsernamePrompt onUsernameSubmit={handleUsernameSubmit} data-testid="usernamePrompt" />
 		) : (
-		  <Routes>
-			<Route path="/" element={<Home />} />
-			<Route path="/:hash" element={<Game />} />
-		  </Routes>
+		  <>
+			<UserInfo username={username} image={image} onProfileClick={handleProfileClick} />
+			<Routes>
+			  <Route path="/" element={<Home />} />
+			  <Route path="/:hash" element={<Game />} />
+			</Routes>
+		  </>
 		)}
 	  </Router>
 	);
   }
   
+  export default App;
   
-
-
-
-export default App;

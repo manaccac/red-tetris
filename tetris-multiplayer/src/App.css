@@ -37,6 +37,9 @@
   }
 }
 
+.user-info {
+	cursor: pointer;
+}
 
 .image-selector {
 	display: flex;
@@ -55,6 +58,6 @@
   
   .profile-image.selected {
 	transform: scale(1.5); /* Agrandit l'image de 50% */
-	border-color: blue;
+	/* border-color: blue; */
   }
   

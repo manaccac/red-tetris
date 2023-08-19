@@ -63,14 +63,6 @@ const Menu = () => {
 
   return (
 	<div className="menu-container">
-	  <div className="user-info">
-	  <img src={`/user_pic/${image}-removebg-preview.png`} alt="Profile" className="profile-image" />
-		<span className="username">{username}</span>
-		<span className="score">
-		  <img src="/crown.png" alt="Crown" className="crown-icon" />
-		  1
-		</span>
-	  </div>
 	  <div className="search-game">
 		<h2>Recherche de partie</h2>
 		<input
