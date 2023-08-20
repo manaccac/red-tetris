@@ -50,29 +50,30 @@ function UsernamePrompt({ onUsernameSubmit }) {
   
 
   return (
-    <form onSubmit={handleUsernameSubmit} data-testid="usernamePrompt">
-      <label>
-        Nom d'utilisateur:
-        <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
-      </label>
-      <div className="image-selector">
-        {Array.from({ length: 24 }, (_, i) => i + 1).map((index) => (
-          <img
-            key={index}
-            src={`/user_pic/${index}-removebg-preview.png`}
-            alt={`Profile ${index}`}
-            className={`profile-image ${selectedImageIndex === index ? 'selected' : ''}`}
-            onClick={() => setSelectedImageIndex(index)}
-          />
-        ))}
-      </div>
-
+	<form onSubmit={handleUsernameSubmit} data-testid="usernamePrompt">
+	  <label className="username-label">
+		Nom d'utilisateur:
+		<input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+	  </label>
+	  <div className="image-selector">
+		{Array.from({ length: 24 }, (_, i) => i + 1).map((index) => (
+		  <img
+			key={index}
+			src={`/user_pic/${index}-removebg-preview.png`}
+			alt={`Profile ${index}`}
+			className={`profile-image ${selectedImageIndex === index ? 'selected' : ''}`}
+			onClick={() => setSelectedImageIndex(index)}
+		  />
+		))}
+	  </div>
+  
 	  <ColorPicker />
-
-      <input type="submit" value="Envoyer" />
-      {errorMessage && <p className="error-message">{errorMessage}</p>}
-    </form>
+  
+	  <input type="submit" value="Envoyer" className="submit-button" />
+	  {errorMessage && <p className="error-message">{errorMessage}</p>}
+	</form>
   );
+  
 }
 
 export default UsernamePrompt;
