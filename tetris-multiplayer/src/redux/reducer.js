@@ -25,6 +25,7 @@ const initialState = {
 	gameMode: null, // normal, gravity, invisible
 	myName: null,
 	isSpectator: false,
+	playerWhoWon: null,
 };
 
 function gameReducer(state = initialState, action) {
@@ -112,7 +113,7 @@ function gameReducer(state = initialState, action) {
 							}
 						});
 					});
-					socket.emit('updateBoard', updatedBoard);
+					// socket.emit('updateBoard', updatedBoard);
 					const completedLines = [];
 					updatedBoard.forEach((row, y) => {
 						if (row.every((cell) => cell > 0)) {
@@ -122,26 +123,28 @@ function gameReducer(state = initialState, action) {
 					if (completedLines.length > 0) {
 						let completedLinesWithoutIndestructible = completedLines.filter(lineIndex => !updatedBoard[lineIndex].includes(-1));
 						setTimeout(() => {
-						  completedLinesWithoutIndestructible.reduce((acc, lineIndex) => {
-							acc.splice(lineIndex, 1);
-							acc.unshift(Array(10).fill(0));
-							return acc;
-						  }, updatedBoard);
-						  const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
-						  if (completedLines.length > 1) {
-							socket.emit('sendLines', completedLines.length - 1);
-						  }
-						  //action.resolve();
-						  return {
-							...state,
-							board: updatedBoard,
-							piece: state.nextPiece,
-							// nextPiece: nextPiece,
-							score: score,
-							//   opponentBoard: updatedBoard,
-						  };
+							completedLinesWithoutIndestructible.reduce((acc, lineIndex) => {
+								acc.splice(lineIndex, 1);
+								acc.unshift(Array(10).fill(0));
+								return acc;
+							}, updatedBoard);
+							const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
+							if (completedLines.length > 1) {
+								socket.emit('sendLines', completedLines.length - 1);
+							}
+							//action.resolve();
+							socket.emit('updateBoard', updatedBoard);
+							return {
+								...state,
+								board: updatedBoard,
+								piece: state.nextPiece,
+								// nextPiece: nextPiece,
+								score: score,
+								//   opponentBoard: updatedBoard,
+							};
 						}, 500); // Ajoutez un délai de 500 ms avant de supprimer la ligne
-					  }					  
+					}
+					socket.emit('updateBoard', updatedBoard);
 					//action.resolve();
 					return {
 						...state,
@@ -198,7 +201,9 @@ function gameReducer(state = initialState, action) {
 					gameStart: true,
 					isGameOver: false,
 					isSpectator: false,
+					isGameWon: false,
 					role: 'player',
+					playerWhoWon: null
 				};
 			case 'ADD_INDESTRUCTIBLE_LINE':
 				console.log('Adding indestructible lines...');
@@ -327,7 +332,11 @@ function gameReducer(state = initialState, action) {
 					...state,
 					isSpectator: action.payload,
 				};
-
+			case 'SET_PLAYER_WON':
+				return {
+					...state,
+					playerWhoWon: action.payload,
+				}
 			default:
 				return state;
 		}

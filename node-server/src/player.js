@@ -1,21 +1,20 @@
 class Player {
-    name = '';
+	name = '';
 	image;
 	winScore = 0;
-    socket;
-    isInGame = false;
-    score = 0;
-    pieceId = 2;
-    gameOver = false;
-    status; //Statut: [player/spectator]
-    constructor(name, winScore, image, socket) {
-        this.name = name;
-		this.winScore = winScore;
+	socket;
+	isInGame = false;
+	score = 0;
+	pieceId = 2;
+	gameOver = false;
+	status; //Statut: [player/spectator]
+	constructor(name, image, socket) {
+		this.name = name;
 		this.image = image;
-        this.socket = socket;
-    }
+		this.socket = socket;
+	}
 
-	getPlayeInfo(){
+	getPlayeInfo() {
 		const res = {
 			name: this.name,
 			winScore: this.winScore,
@@ -24,9 +23,9 @@ class Player {
 		return res;
 	}
 
-    getName() {
-        return this.name;
-    }
+	getName() {
+		return this.name;
+	}
 	getWinScore() {
 		return this.winScore;
 	}

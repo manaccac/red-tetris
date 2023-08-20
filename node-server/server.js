@@ -7,16 +7,16 @@ http.listen(3001, () => {
 
 io.on('connection', (socket) => {
 
-    socket.on('setUsername', (username) => {
+    socket.on('setUserInfos', (userInfos) => {
         var isAvailable = true;
         for (const [socketId, player] of players) {
-            if (player.getName() === username) {
+            if (player.getName() === userInfos.username) {
                 isAvailable = false;
                 break;
             }
         }
         if (isAvailable) {
-            let player = new Player(username, socket);
+            let player = new Player(userInfos.username, userInfos.imageId, socket);
             players.set(socket.id, player);
         }
         console.log('name available ? : ' + isAvailable);

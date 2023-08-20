@@ -75,6 +75,7 @@ const gameOver = (socket) => {
 			if (winner) {
 				console.log('winnerName ?:' + winner.name);
 				winner.socket.emit('Victory');
+				winner.winScore++;
 				io.to(gameId).emit('playerWon', winner.name);
 				gameData.isRunning = false;
 			}

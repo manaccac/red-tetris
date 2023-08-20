@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-function WaitingScreen({ opponentNames, isLeader, onStartGame, myName, leader }) {
+function WaitingScreen({ opponentNames, isLeader, onStartGame, myName }) {
     console.log('leader: ' + isLeader);
     console.log(opponentNames);
     return (
@@ -46,7 +46,7 @@ function CountdownScreen({ countdown }) {
     );
 }
 
-function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader, opponents }) {
+function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader, opponents, playerWhoWon }) {
     let canDisplayRestart = !opponents || playerWon ? true : false;
     return (
         <div className="overlay">
@@ -54,7 +54,7 @@ function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader, oppo
                 <h1>Partie terminée</h1>
                 <button onClick={onGoHome}>Retour à la page d'accueil.</button>
                 {canDisplayRestart && myName === isLeader && (
-                    <button onClick={onRestart}>Recommencer</button>
+                    <button onClick={onRestart}>{playerWhoWon ? 'Recommencer' : 'Partie en cours'}</button>
                 )}
             </div>
         </div>
@@ -62,14 +62,14 @@ function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader, oppo
 }
 
 
-function VictoryScreen({ onGoHome, onRestart, playerWon, myName, isLeader }) {
+function VictoryScreen({ onGoHome, onRestart, myName, isLeader, playerWhoWon }) {
     return (
         <div className="overlay">
             <div className="message">
                 <h1>Victoire !</h1>
                 <button onClick={onGoHome}>Retour à la page d'accueil.</button>
                 {myName === isLeader && (
-                    <button onClick={onRestart}>Recommencer</button>
+                    <button onClick={onRestart}>{playerWhoWon ? 'Recommencer' : 'Partie en cours'}</button>
                 )}
             </div>
         </div>

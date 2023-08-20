@@ -37,43 +37,43 @@ function UsernamePrompt({ onUsernameSubmit }) {
   }, [username, selectedImageIndex, onUsernameSubmit]);
 
   const handleUsernameSubmit = (e) => {
-	console.log('handleUsernameSubmitCalled');
-	e.preventDefault();
-	socket.emit('setUsername', username);
-  
-	// Store block colors in cookies
-	const blockColors = getBlockColors();
-	for (const [key, value] of Object.entries(blockColors)) {
-	  Cookies.set(key, value);
-	}
+    console.log('handleUsernameSubmitCalled');
+    e.preventDefault();
+    socket.emit('setUserInfos', { username: username, image: selectedImageIndex });
+
+    // Store block colors in cookies
+    const blockColors = getBlockColors();
+    for (const [key, value] of Object.entries(blockColors)) {
+      Cookies.set(key, value);
+    }
   };
-  
+
 
   return (
-	<form onSubmit={handleUsernameSubmit} data-testid="usernamePrompt">
-	  <label className="username-label">
-		Nom d'utilisateur:
-		<input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
-	  </label>
-	  <div className="image-selector">
-		{Array.from({ length: 24 }, (_, i) => i + 1).map((index) => (
-		  <img
-			key={index}
-			src={`/user_pic/${index}-removebg-preview.png`}
-			alt={`Profile ${index}`}
-			className={`profile-image ${selectedImageIndex === index ? 'selected' : ''}`}
-			onClick={() => setSelectedImageIndex(index)}
-		  />
-		))}
-	  </div>
-  
-	  <ColorPicker />
-  
-	  <input type="submit" value="Envoyer" className="submit-button" />
-	  {errorMessage && <p className="error-message">{errorMessage}</p>}
-	</form>
+    <form onSubmit={handleUsernameSubmit} data-testid="usernamePrompt">
+      <label className="username-label">
+        Nom d'utilisateur:
+        <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+      </label>
+      <div className="image-selector">
+        {Array.from({ length: 24 }, (_, i) => i + 1).map((index) => (
+          <img
+            key={index}
+            src={`/user_pic/${index}-removebg-preview.png`}
+            alt={`Profile ${index}`}
+            className={`profile-image ${selectedImageIndex === index ? 'selected' : ''}`}
+            onClick={() => setSelectedImageIndex(index)}
+          />
+        ))}
+      </div>
+
+      <ColorPicker />
+
+      <input type="submit" value="Envoyer" className="submit-button" />
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
+    </form>
   );
-  
+
 }
 
 export default UsernamePrompt;

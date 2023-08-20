@@ -28,21 +28,21 @@ const Menu = () => {
     });
 
     //WHILE DEBUG ONLY
-    socket.emit('setUsername', username);
+    socket.emit('setUserInfos', { username: username, image: cookieImage });
 
     socket.on('NoGameFound', () => {
-		toast.error('No Game Found', {
-			position: toast.POSITION.BOTTOM_RIGHT,
-			autoClose: 5000,
-		  });
-	});
+      toast.error('No Game Found', {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        autoClose: 5000,
+      });
+    });
 
     socket.on('GameFull', () => {
-		toast.error('Game Full', {
-			position: toast.POSITION.BOTTOM_RIGHT,
-			autoClose: 5000,
-		  });
-		  
+      toast.error('Game Full', {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        autoClose: 5000,
+      });
+
     });
 
     return () => {
@@ -65,34 +65,34 @@ const Menu = () => {
 
 
   return (
-	<div className="menu-container">
-	  <div className="search-game">
-		<h2>Recherche de partie</h2>
-		<input
-		  type="text"
-		  value={gameName}
-		  onChange={(e) => setGameName(e.target.value)}
-		  placeholder="Rechercher une partie"
-		/>
-		<button onClick={() => handleSearchGame(gameName)}>Rechercher</button>
-	  </div>
-	  <div className="create-game">
-		<h2>Créer une partie</h2>
-		<div className="menu">
-		  <li>
-			<button className="button" onClick={() => handleLaunchGame('normal')}>Normal</button>
-		  </li>
-		  <li>
-			<button className="button" onClick={() => handleLaunchGame('invisible')}>Invisible</button>
-		  </li>
-		  <li>
-			<button className="button" onClick={() => handleLaunchGame('graviter')}>Graviter Aléatoire</button>
-		  </li>
-		</div>
-	  </div>
-	</div>  
+    <div className="menu-container">
+      <div className="search-game">
+        <h2>Recherche de partie</h2>
+        <input
+          type="text"
+          value={gameName}
+          onChange={(e) => setGameName(e.target.value)}
+          placeholder="Rechercher une partie"
+        />
+        <button onClick={() => handleSearchGame(gameName)}>Rechercher</button>
+      </div>
+      <div className="create-game">
+        <h2>Créer une partie</h2>
+        <div className="menu">
+          <li>
+            <button className="button" onClick={() => handleLaunchGame('normal')}>Normal</button>
+          </li>
+          <li>
+            <button className="button" onClick={() => handleLaunchGame('invisible')}>Invisible</button>
+          </li>
+          <li>
+            <button className="button" onClick={() => handleLaunchGame('graviter')}>Graviter Aléatoire</button>
+          </li>
+        </div>
+      </div>
+    </div>
   );
-  
+
 };
 
 export default Menu;

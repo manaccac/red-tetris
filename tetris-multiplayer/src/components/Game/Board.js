@@ -11,6 +11,7 @@ import Cookies from 'js-cookie';
 import OpponentBoard from './OpponentBoard';
 import RenderNextPiece from './NextPiece';
 import { WaitingScreen, CountdownScreen, GameOverScreen, VictoryScreen } from './Screens';
+import { toast } from 'react-toastify';
 
 const lastMove = {
   ArrowLeft: 0,
@@ -38,7 +39,7 @@ const mapStateToProps = (state) => ({
   gameName: state.gameName,
   myName: state.myName,
   isSpectator: state.isSpectator,
-  playerWon: state.playerWon,
+  playerWhoWon: state.playerWhoWon,
 });
 
 export function getRandomDelay(props) {
@@ -52,11 +53,11 @@ export function getRandomDelay(props) {
 }
 
 const goHome = (props, navigate, setScoreUpdated) => {
-    setScoreUpdated(false);
-    props.resetState();
-    props.setAwaitingOpponent(false);
-    navigate('/');
-  };
+  setScoreUpdated(false);
+  props.resetState();
+  props.setAwaitingOpponent(false);
+  navigate('/');
+};
 
 export const restartGame = async (props, setGameRunning, username) => {
   socket.emit('restartGame', username);
@@ -90,7 +91,7 @@ function Board(props) {
   //   const gameMode = props.gameMode;
   const [isColliding, setIsColliding] = useState(false);
   const [isRotatiding, setIsRotatiding] = useState(false);
-  
+
 
   const username = Cookies.get('username');
   //   props.setMyName(username);
@@ -106,6 +107,13 @@ function Board(props) {
 
 
   const handleRestartGame = () => {
+    if (!props.playerWhoWon) { // pas encore de vainqueur, partie non terminée, pas possible de relancer
+      toast.error('La partie n\'est pas encore terminée', {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        autoClose: 5000,
+      });
+      return;
+    }
     setScoreUpdated(false);
     restartGame(props, setGameRunning, username);
   };
@@ -120,7 +128,7 @@ function Board(props) {
       }
 
       lastMove[event.key] = Date.now();
-	  let collision = false;
+      let collision = false;
 
       switch (event.key) {
         case "ArrowLeft":
@@ -130,23 +138,23 @@ function Board(props) {
           await props.moveRight();
           break;
         case "ArrowUp":
-		  setIsRotatiding(true);
+          setIsRotatiding(true);
           await props.rotate();
           break;
         case "ArrowDown":
           await props.moveDown();
           break;
         case " ":
-			collision = true;
-			setIsColliding(collision);
+          collision = true;
+          setIsColliding(collision);
           await props.dropPiece();
           break;
         default:
           break;
       }
-	//   console.log('collision: ', collision);
-	//   setIsColliding(collision);
-	//   console.log(' iscol: ', isColliding);
+      //   console.log('collision: ', collision);
+      //   setIsColliding(collision);
+      //   console.log(' iscol: ', isColliding);
 
     } catch (error) {
       console.log('Erreur lors de la gestion de la touche enfoncée :', error);
@@ -184,13 +192,13 @@ function Board(props) {
   }, [props.gameStart, gameRunning]);
 
   useEffect(() => {
-	const interval = setInterval(() => {
-		setIsColliding(false)
-		setIsRotatiding(false)
-	}, 500);
-	return () => {
-		clearInterval(interval);
-	  };
+    const interval = setInterval(() => {
+      setIsColliding(false)
+      setIsRotatiding(false)
+    }, 500);
+    return () => {
+      clearInterval(interval);
+    };
   }, [isColliding, isRotatiding])
 
   useEffect(() => {
@@ -212,9 +220,9 @@ function Board(props) {
   }, [props.isGameOver, gameRunning]);
 
   useEffect(() => {
-	scoreUpdatedRef.current = scoreUpdated;
+    scoreUpdatedRef.current = scoreUpdated;
   }, [scoreUpdated]);
-  
+
 
   useEffect(() => {
     socket.on('gameInfos', (data) => {
@@ -228,30 +236,30 @@ function Board(props) {
       props.setOpponentName(response.opponentName);
     });
     socket.on('spectator', () => {
-		console.log('spectator');
+      console.log('spectator');
       props.setLeader(false);
       props.setSpectator(true);
     });
     socket.on('receivedLines', (numberOfLines) => {
       props.addIndestructibleLine(numberOfLines);
     });
-	socket.on('Victory', () => {
-		console.log('Victory : ' , scoreUpdatedRef.current);
-		if (!scoreUpdatedRef.current) {
-		  // Récupérez la valeur actuelle du cookie de score
-		  const currentScore = parseInt(Cookies.get('score'), 10) || 0;
-		  
-		  // Incrémentez le score
-		  const newScore = currentScore + 1;
-		  
-		  // Mettez à jour le cookie de score avec la nouvelle valeur
-		  Cookies.set('score', newScore);
-		  
-		  props.setIsVictory(true);
-		  props.updateScore(newScore); 
-		  setScoreUpdated(true);
-		}
-	  }); 
+    socket.on('Victory', () => {
+      console.log('Victory : ', scoreUpdatedRef.current);
+      if (!scoreUpdatedRef.current) {
+        // Récupérez la valeur actuelle du cookie de score
+        const currentScore = parseInt(Cookies.get('score'), 10) || 0;
+
+        // Incrémentez le score
+        const newScore = currentScore + 1;
+
+        // Mettez à jour le cookie de score avec la nouvelle valeur
+        Cookies.set('score', newScore);
+
+        props.setIsVictory(true);
+        props.updateScore(newScore);
+        setScoreUpdated(true);
+      }
+    });
     socket.on('opponentBoardData', (opponentBoardData, userName) => {
       props.updateOpponentBoard(userName, opponentBoardData);
     })
@@ -286,44 +294,44 @@ function Board(props) {
 
 
   const renderCells = () =>
-  props.board.map((row, y) => {
-	console.log('renderCells iscol: ', isColliding);
-    const isCompleted = row.every((cell) => cell > 0);
-    return row.map((cell, x) => {
-      let active = false;
-      let activePieceId = 0;
-      if (props.piece) {
-        active =
-          props.piece.position.y <= y &&
-          y < props.piece.position.y + props.piece.shape.length &&
-          props.piece.position.x <= x &&
-          x < props.piece.position.x + props.piece.shape[0].length &&
-          props.piece.shape[y - props.piece.position.y][x - props.piece.position.x];
-        if (active) {
-          activePieceId = props.piece.id;
+    props.board.map((row, y) => {
+      console.log('renderCells iscol: ', isColliding);
+      const isCompleted = row.every((cell) => cell > 0);
+      return row.map((cell, x) => {
+        let active = false;
+        let activePieceId = 0;
+        if (props.piece) {
+          active =
+            props.piece.position.y <= y &&
+            y < props.piece.position.y + props.piece.shape.length &&
+            props.piece.position.x <= x &&
+            x < props.piece.position.x + props.piece.shape[0].length &&
+            props.piece.shape[y - props.piece.position.y][x - props.piece.position.x];
+          if (active) {
+            activePieceId = props.piece.id;
+          }
         }
-      }
 
-      const isGameOver = props.isGameOver && !props.isGameWon;
-      let shouldShowPiece = true;
-      if (props.gameMode === 'invisible' && !isGameOver) {
-        shouldShowPiece = false;
-      }
+        const isGameOver = props.isGameOver && !props.isGameWon;
+        let shouldShowPiece = true;
+        if (props.gameMode === 'invisible' && !isGameOver) {
+          shouldShowPiece = false;
+        }
 
-      return (
-        <div
-          key={`${y}-${x}`}
-          className={`cell ${(cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
-            } id-${cell !== 0 && shouldShowPiece ? cell : activePieceId}
+        return (
+          <div
+            key={`${y}-${x}`}
+            className={`cell ${(cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
+              } id-${cell !== 0 && shouldShowPiece ? cell : activePieceId}
 			${isCompleted ? 'destroyed' : ''}
 			${active && isColliding ? 'shake' : ''}
 			${active && isRotatiding ? 'rotate-animation' : ''}
 			`}
-          data-testid={`cell-${y}-${x}`}
-        ></div>
-      );
+            data-testid={`cell-${y}-${x}`}
+          ></div>
+        );
+      });
     });
-  });
 
 
   const startGameHandler = () => {
@@ -354,8 +362,8 @@ function Board(props) {
         {props.opponentName}
       </div>
 
-	  {props.isGameOver && (!props.isGameWon || props.isSpectator) && <GameOverScreen onGoHome={() => goHome(props, navigate, setScoreUpdated)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} opponents={props.opponnents} />}
-	  {props.isGameOver && props.isGameWon && !props.isSpectator && <VictoryScreen onGoHome={() => goHome(props, navigate, setScoreUpdated)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} />}
+      {props.isGameOver && (!props.isGameWon || props.isSpectator) && <GameOverScreen onGoHome={() => goHome(props, navigate, setScoreUpdated)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} opponents={props.opponnents} playerWhoWon={props.playerWhoWon} />}
+      {props.isGameOver && props.isGameWon && !props.isSpectator && <VictoryScreen onGoHome={() => goHome(props, navigate, setScoreUpdated)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} playerWhoWon={props.playerWhoWon} />}
       {!props.isGameOver && (!props.gameStart && !props.isSpectator) && (
         <WaitingScreen
           opponentNames={props.opponents}
