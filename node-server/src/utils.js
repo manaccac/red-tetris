@@ -107,7 +107,8 @@ const askingForGameInfos = (socket) => {
 const handleMatchMaking = (socket, dataStartGame) => {
 	console.log('matchmaking called');
 	if (!players.has(socket.id)) { // si le joueur n'existe pas, création
-		player = new Player(dataStartGame.userName, socket);
+		console.log("new user = ", dataStartGame)
+		player = new Player(dataStartGame.userName, dataStartGame.userWin, dataStartGame.userImage, socket);
 		players.set(socket.id, player);
 	}
 	if (!dataStartGame.gameName) { // pas de game renseignée, c'est donc une création de game{

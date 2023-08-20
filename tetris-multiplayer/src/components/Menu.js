@@ -9,6 +9,9 @@ import { toast } from 'react-toastify';
 const Menu = () => {
   const [gameName, setGameName] = useState('');
   const username = Cookies.get('username');
+  const cookieImage = Cookies.get('image');
+  const winscore = Cookies.get('score');
+
   const image = Cookies.get('image');
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -50,11 +53,11 @@ const Menu = () => {
   }, []);
 
   const handleLaunchGame = (mode) => {
-    socket.emit('lookingForAGame', { userName: username, gameMode: mode, gameName: null });
+    socket.emit('lookingForAGame', { userName: username, userWin: winscore, userImage: image, gameMode: mode, gameName: null });
   };
 
   const handleSearchGame = () => {
-    socket.emit('lookingForAGame', { userName: username, gameMode: null, gameName: gameName });
+    socket.emit('lookingForAGame', { userName: username, userWin: winscore, userImage: image, gameMode: null, gameName: gameName });
   };
 
   dispatch(setMyName(username));

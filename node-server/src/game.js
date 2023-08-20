@@ -28,11 +28,27 @@ class Game {
             return '';
         }
     }
+	getPlayerImages() {
+		if (this.players.length > 0)
+			return this.players.map(player => player.getImage());
+		else {
+			return '';
+		}
+	}
+	getPlayerWins() {
+		if (this.players.length > 0)
+			return this.players.map(player => player.getWinScore());
+		else {
+			return '';
+		}
+	}
 
     get gameInfos() {
         return {
             leader: this.leader,
             players: this.getPlayerNames(),
+			// playersWins: this.getPlayerWins(),
+			// playersImage: this.getPlayerImages(),
             gameMode: this.gameMode,
             gameName: this.gameName,
             role: undefined,
