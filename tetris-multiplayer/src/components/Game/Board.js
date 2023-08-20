@@ -265,38 +265,40 @@ function Board(props) {
 
 
   const renderCells = () =>
-    props.board.map((row, y) =>
-      row.map((cell, x) => {
-        let active = false;
-        let activePieceId = 0;
-        if (props.piece) {
-          active =
-            props.piece.position.y <= y &&
-            y < props.piece.position.y + props.piece.shape.length &&
-            props.piece.position.x <= x &&
-            x < props.piece.position.x + props.piece.shape[0].length &&
-            props.piece.shape[y - props.piece.position.y][x - props.piece.position.x];
-          if (active) {
-            activePieceId = props.piece.id;
-          }
+  props.board.map((row, y) => {
+    const isCompleted = row.every((cell) => cell > 0);
+    return row.map((cell, x) => {
+      let active = false;
+      let activePieceId = 0;
+      if (props.piece) {
+        active =
+          props.piece.position.y <= y &&
+          y < props.piece.position.y + props.piece.shape.length &&
+          props.piece.position.x <= x &&
+          x < props.piece.position.x + props.piece.shape[0].length &&
+          props.piece.shape[y - props.piece.position.y][x - props.piece.position.x];
+        if (active) {
+          activePieceId = props.piece.id;
         }
+      }
 
-        const isGameOver = props.isGameOver && !props.isGameWon;
-        let shouldShowPiece = true;
-        if (props.gameMode === 'invisible' && !isGameOver) {
-          shouldShowPiece = false;
-        }
+      const isGameOver = props.isGameOver && !props.isGameWon;
+      let shouldShowPiece = true;
+      if (props.gameMode === 'invisible' && !isGameOver) {
+        shouldShowPiece = false;
+      }
 
-        return (
-          <div
-            key={`${y}-${x}`}
-            className={`cell ${(cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
-              } id-${cell !== 0 && shouldShowPiece ? cell : activePieceId}`}
-            data-testid={`cell-${y}-${x}`}
-          ></div>
-        );
-      })
-    );
+      return (
+        <div
+          key={`${y}-${x}`}
+          className={`cell ${(cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
+            } id-${cell !== 0 && shouldShowPiece ? cell : activePieceId} ${isCompleted ? 'destroyed' : ''}`}
+          data-testid={`cell-${y}-${x}`}
+        ></div>
+      );
+    });
+  });
+
 
   const startGameHandler = () => {
     socket.emit('startGame', props.gameName);

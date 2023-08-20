@@ -121,25 +121,27 @@ function gameReducer(state = initialState, action) {
 					});
 					if (completedLines.length > 0) {
 						let completedLinesWithoutIndestructible = completedLines.filter(lineIndex => !updatedBoard[lineIndex].includes(-1));
-						completedLinesWithoutIndestructible.reduce((acc, lineIndex) => {
+						setTimeout(() => {
+						  completedLinesWithoutIndestructible.reduce((acc, lineIndex) => {
 							acc.splice(lineIndex, 1);
 							acc.unshift(Array(10).fill(0));
 							return acc;
-						}, updatedBoard);
-						const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
-						if (completedLines.length > 1) {
+						  }, updatedBoard);
+						  const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
+						  if (completedLines.length > 1) {
 							socket.emit('sendLines', completedLines.length - 1);
-						}
-						//action.resolve();
-						return {
+						  }
+						  //action.resolve();
+						  return {
 							...state,
 							board: updatedBoard,
 							piece: state.nextPiece,
 							// nextPiece: nextPiece,
 							score: score,
 							//   opponentBoard: updatedBoard,
-						};
-					}
+						  };
+						}, 500); // Ajoutez un délai de 500 ms avant de supprimer la ligne
+					  }					  
 					//action.resolve();
 					return {
 						...state,
