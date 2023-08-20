@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { socket } from '../socket';
 import { toast } from 'react-toastify';
+import ColorPicker from './ColorPicker';
+import { getBlockColors } from './ColorPicker';
+
+
 
 function UsernamePrompt({ onUsernameSubmit }) {
   const initialUsername = Cookies.get('username') || '';
@@ -33,9 +37,17 @@ function UsernamePrompt({ onUsernameSubmit }) {
   }, [username, selectedImageIndex, onUsernameSubmit]);
 
   const handleUsernameSubmit = (e) => {
-    e.preventDefault();
-    socket.emit('setUsername', username);
+	console.log('handleUsernameSubmitCalled');
+	e.preventDefault();
+	socket.emit('setUsername', username);
+  
+	// Store block colors in cookies
+	const blockColors = getBlockColors();
+	for (const [key, value] of Object.entries(blockColors)) {
+	  Cookies.set(key, value);
+	}
   };
+  
 
   return (
     <form onSubmit={handleUsernameSubmit} data-testid="usernamePrompt">
@@ -54,6 +66,9 @@ function UsernamePrompt({ onUsernameSubmit }) {
           />
         ))}
       </div>
+
+	  <ColorPicker />
+
       <input type="submit" value="Envoyer" />
       {errorMessage && <p className="error-message">{errorMessage}</p>}
     </form>

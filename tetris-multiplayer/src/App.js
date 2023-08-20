@@ -8,7 +8,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import { socket } from './socket';
 import Cookies from 'js-cookie';
 import './App.css';
-import ColorPicker from './components/ColorPicker';
 
 console.log('username = ', Cookies.get('username'));
 console.log('image = ', Cookies.get('image'));
@@ -63,6 +62,16 @@ function App() {
   }, []);
 
   useEffect(() => {
+    // Set block colors from cookies
+    for (let i = 1; i <= 7; i++) {
+      const color = Cookies.get(`block-color-${i}`);
+      if (color) {
+        document.documentElement.style.setProperty(`--block-color-${i}`, color);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     Cookies.set('score', score);
   }, [score]);
 
@@ -79,10 +88,6 @@ function App() {
   return (
     <Router>
       <ToastContainer />
-
-	  <ColorPicker />
-
-
       {!username ? (
         <UsernamePrompt onUsernameSubmit={handleUsernameSubmit} data-testid="usernamePrompt" />
       ) : (

@@ -15,6 +15,15 @@ function BlockShape({ shape, color }) {
 	  </div>
 	);
   }
+
+  export const getBlockColors = () => {
+	const colors = {};
+	for (let i = 1; i <= 7; i++) {
+	  colors[`block-color-${i}`] = getComputedStyle(document.documentElement).getPropertyValue(`--block-color-${i}`).trim();
+	}
+	return colors;
+  };
+  
   
 
   function ColorPicker(props) {
@@ -45,11 +54,17 @@ function BlockShape({ shape, color }) {
 			  style={{ display: 'none' }}
 			/>
 			<button
-			  className="color-picker-button"
-			  style={{
+			type="button"
+			className="color-picker-button"
+			style={{
 				backgroundColor: `var(--block-color-${i + 1})`,
-			  }}
-			  onClick={() => document.getElementById(`color-picker-${i + 1}`).click()}
+			}}
+			onClick={() => {
+				const colorInput = document.getElementById(`color-picker-${i + 1}`);
+				if (colorInput) {
+				colorInput.click();
+				}
+			}}
 			></button>
 		  </div>
 		))}
