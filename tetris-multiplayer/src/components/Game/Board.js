@@ -89,6 +89,7 @@ function Board(props) {
 
   //   const gameMode = props.gameMode;
   const [isColliding, setIsColliding] = useState(false);
+  const [isRotatiding, setIsRotatiding] = useState(false);
   
 
   const username = Cookies.get('username');
@@ -129,6 +130,7 @@ function Board(props) {
           await props.moveRight();
           break;
         case "ArrowUp":
+		  setIsRotatiding(true);
           await props.rotate();
           break;
         case "ArrowDown":
@@ -182,9 +184,18 @@ function Board(props) {
   }, [props.gameStart, gameRunning]);
 
   useEffect(() => {
+	const interval = setInterval(() => {
+		setIsColliding(false)
+		setIsRotatiding(false)
+	}, 500);
+	return () => {
+		clearInterval(interval);
+	  };
+  }, [isColliding, isRotatiding])
+
+  useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     const interval = setInterval(async () => {
-		setIsColliding(false);
       try {
         if (!props.isGameOver && gameRunning) {
           await props.moveDown();
@@ -306,6 +317,7 @@ function Board(props) {
             } id-${cell !== 0 && shouldShowPiece ? cell : activePieceId}
 			${isCompleted ? 'destroyed' : ''}
 			${active && isColliding ? 'shake' : ''}
+			${active && isRotatiding ? 'rotate-animation' : ''}
 			`}
           data-testid={`cell-${y}-${x}`}
         ></div>

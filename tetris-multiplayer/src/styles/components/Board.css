@@ -73,6 +73,29 @@
 	animation: shake 0.5s;
 	animation-iteration-count: 1;
   }
+
+  @keyframes rotate {
+	0% {
+	  transform: rotate(0deg) translateY(0px);
+	}
+	25% {
+	  transform: rotate(90deg) translateY(-10px);
+	}
+	50% {
+	  transform: rotate(180deg) translateY(0px);
+	}
+	75% {
+	  transform: rotate(270deg) translateY(10px);
+	}
+	100% {
+	  transform: rotate(360deg) translateY(0px);
+	}
+  }
+
+  .rotate-animation {
+	animation: rotate 0.5s linear;
+  }
+  
   
 .game-container {
 	width: 100%;
