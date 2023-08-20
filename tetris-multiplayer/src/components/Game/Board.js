@@ -88,6 +88,8 @@ export const mapDispatchToProps = (dispatch) => ({
 function Board(props) {
 
   //   const gameMode = props.gameMode;
+  const [isColliding, setIsColliding] = useState(false);
+  
 
   const username = Cookies.get('username');
   //   props.setMyName(username);
@@ -117,6 +119,7 @@ function Board(props) {
       }
 
       lastMove[event.key] = Date.now();
+	  let collision = false;
 
       switch (event.key) {
         case "ArrowLeft":
@@ -132,15 +135,21 @@ function Board(props) {
           await props.moveDown();
           break;
         case " ":
+			collision = true;
+			setIsColliding(collision);
           await props.dropPiece();
-
           break;
         default:
           break;
       }
+	//   console.log('collision: ', collision);
+	//   setIsColliding(collision);
+	//   console.log(' iscol: ', isColliding);
+
     } catch (error) {
       console.log('Erreur lors de la gestion de la touche enfoncée :', error);
     }
+
   };
 
   useEffect(() => {
@@ -175,6 +184,7 @@ function Board(props) {
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     const interval = setInterval(async () => {
+		setIsColliding(false);
       try {
         if (!props.isGameOver && gameRunning) {
           await props.moveDown();
@@ -266,6 +276,7 @@ function Board(props) {
 
   const renderCells = () =>
   props.board.map((row, y) => {
+	console.log('renderCells iscol: ', isColliding);
     const isCompleted = row.every((cell) => cell > 0);
     return row.map((cell, x) => {
       let active = false;
@@ -292,7 +303,10 @@ function Board(props) {
         <div
           key={`${y}-${x}`}
           className={`cell ${(cell !== 0 || active) && shouldShowPiece ? 'filled' : ''
-            } id-${cell !== 0 && shouldShowPiece ? cell : activePieceId} ${isCompleted ? 'destroyed' : ''}`}
+            } id-${cell !== 0 && shouldShowPiece ? cell : activePieceId}
+			${isCompleted ? 'destroyed' : ''}
+			${active && isColliding ? 'shake' : ''}
+			`}
           data-testid={`cell-${y}-${x}`}
         ></div>
       );
