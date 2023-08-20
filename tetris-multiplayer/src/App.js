@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { socket } from './socket';
 import Cookies from 'js-cookie';
 import './App.css';
+import ColorPicker from './components/ColorPicker';
 
 console.log('username = ', Cookies.get('username'));
 console.log('image = ', Cookies.get('image'));
@@ -78,6 +79,9 @@ function App() {
   return (
     <Router>
       <ToastContainer />
+
+	  <ColorPicker />
+
 
       {!username ? (
         <UsernamePrompt onUsernameSubmit={handleUsernameSubmit} data-testid="usernamePrompt" />

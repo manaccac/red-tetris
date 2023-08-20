@@ -1,28 +1,39 @@
-.cell.id-1, .next-piece-cell.id-1 {
-	background-color: red;
+:root {
+	--block-color-1: red;
+	--block-color-2: orange;
+	--block-color-3: yellow;
+	--block-color-4: green;
+	--block-color-5: blue;
+	--block-color-6: purple;
+	--block-color-7: pink;
+  }
+  
+  .cell.id-1, .next-piece-cell.id-1 {
+	background-color: var(--block-color-1);
   }
   
   .cell.id-2, .next-piece-cell.id-2 {
-	background-color: orange;
+	background-color: var(--block-color-2);
   }
   
   .cell.id-3, .next-piece-cell.id-3 {
-	background-color: yellow;
+	background-color: var(--block-color-3);
   }
   
   .cell.id-4, .next-piece-cell.id-4 {
-	background-color: green;
+	background-color: var(--block-color-4);
   }
+  
   .cell.id-5, .next-piece-cell.id-5 {
-	background-color: blue;
+	background-color: var(--block-color-5);
   }
-
+  
   .cell.id-6, .next-piece-cell.id-6 {
-	background-color: purple;
+	background-color: var(--block-color-6);
   }
-
+  
   .cell.id-7, .next-piece-cell.id-7 {
-	background-color: pink;
+	background-color: var(--block-color-7);
   }
   
 

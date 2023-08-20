@@ -1,0 +1,40 @@
+.color-picker-container {
+	margin-left: 50px;
+	margin-right: 50px;
+	display: flex;
+	justify-content: space-between;
+  }
+  
+  .color-picker-item {
+	display: flex;
+	align-items: center;
+  }
+  
+  .color-picker-button {
+	width: 30px;
+	height: 30px;
+	border: none;
+	cursor: pointer;
+	border: 1px solid black;
+  }
+  
+  .block-shape {
+	display: inline-block;
+	margin-right: 15px;
+
+  }
+  
+  .block-shape-row {
+	display: flex;
+  }
+  
+  .block-shape-cell {
+	width: 15px;
+	height: 15px;
+	border: 1px solid black;
+  }
+  
+  .block-shape-cell.filled {
+	background-color: black;
+  }
+  
