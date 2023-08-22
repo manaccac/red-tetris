@@ -29,7 +29,7 @@ const Menu = () => {
 };
 
   const handleSearchGame = () => {
-	dispatch({ type: 'LOOKING_FOR_A_GAME', payload: { userName: username, userWin: winscore, userImage: image, gameMode: null, gameName: null } });
+	dispatch({ type: 'LOOKING_FOR_A_GAME', payload: { userName: username, userWin: winscore, userImage: image, gameMode: null, gameName: gameName } });
 };
 
   dispatch(setMyName(username));

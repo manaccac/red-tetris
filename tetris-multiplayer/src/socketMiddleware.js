@@ -26,12 +26,16 @@ export const socketMiddleware = (store) => (next) => (action) => {
       });
   }
   if (action.type === 'LOOKING_FOR_A_GAME')
-	  socket.emit('lookingForAGame', action.payload);
+//   { userName: username, userWin: winscore, userImage: image, gameMode: mode, gameName: null }
+  	  socket.emit('lookingForAGame', { userName: action.payload.userName, userWin: action.payload.userWin, userImage: action.payload.userImage, gameMode: action.payload.gameMode, gameName: action.payload.gameName });
+	//   socket.emit('lookingForAGame', action.payload);
 
   if (action.type === 'USERNAME_REP')
 	socket.on('usernameRep', action.payload.handleUsernameRep);
   if (action.type === 'EMIT_USER_INFO')
 	socket.emit('setUserInfos', { username: action.payload.username, image: action.payload.selectedImageIndex });
+  if (action.type === 'RESTART_GAME')
+  socket.emit('restartGame', action.payload.username);
 
   
   return next(action);

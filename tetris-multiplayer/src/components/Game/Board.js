@@ -1,5 +1,5 @@
 import React, { useState, useEffect, setState, useRef } from 'react';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import {
   moveLeft, moveRight, rotate, moveDown, dropPiece, updatePiece,
   resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard,
@@ -59,8 +59,10 @@ const goHome = (props, navigate, setScoreUpdated) => {
   navigate('/');
 };
 
-export const restartGame = async (props, setGameRunning, username) => {
-  socket.emit('restartGame', username);
+export const restartGame = async (username, dispatch) => {
+  dispatch({ type: 'RESTART_GAME', payload: { username } });
+
+//   socket.emit('restartGame', username);
 };
 
 
@@ -91,6 +93,7 @@ function Board(props) {
   //   const gameMode = props.gameMode;
   const [isColliding, setIsColliding] = useState(false);
   const [isRotatiding, setIsRotatiding] = useState(false);
+  const dispatch = useDispatch();
 
 
   const username = Cookies.get('username');
@@ -115,7 +118,7 @@ function Board(props) {
       return;
     }
     setScoreUpdated(false);
-    restartGame(props, setGameRunning, username);
+    restartGame(username, dispatch);
   };
 
 
