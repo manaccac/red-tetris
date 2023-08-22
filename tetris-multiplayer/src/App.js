@@ -27,7 +27,6 @@ export const UserInfo = ({ username, image, score, onProfileClick }) => {
 };
 
 function App() {
-//   const [isConnected, setIsConnected] = useState(socket.connected);
   const [username, setUsername] = useState('');
   const [image, setImage] = useState('');
   const initialScore = parseInt(Cookies.get('score'), 10) || 0;

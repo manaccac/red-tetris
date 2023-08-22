@@ -4,6 +4,11 @@ import { socket } from '../socket';
 import { toast } from 'react-toastify';
 import ColorPicker from './ColorPicker';
 import { getBlockColors } from './ColorPicker';
+import { useDispatch } from 'react-redux';
+
+
+
+
 
 
 
@@ -13,6 +18,7 @@ function UsernamePrompt({ onUsernameSubmit }) {
   const [username, setUsername] = useState(initialUsername);
   const [selectedImageIndex, setSelectedImageIndex] = useState(initialImageIndex);
   const [errorMessage, setErrorMessage] = useState('');
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const handleUsernameRep = (isAvailable) => {
@@ -28,19 +34,14 @@ function UsernamePrompt({ onUsernameSubmit }) {
         });
       }
     };
-
-    socket.on('usernameRep', handleUsernameRep);
-
-    return () => {
-      socket.off('usernameRep', handleUsernameRep);
-    };
+	dispatch({ type: 'USERNAME_REP', payload: { handleUsernameRep } });
   }, [username, selectedImageIndex, onUsernameSubmit]);
 
   const handleUsernameSubmit = (e) => {
     console.log('handleUsernameSubmitCalled');
     e.preventDefault();
 
-    socket.emit('setUserInfos', { username: username, image: selectedImageIndex });
+	dispatch({ type: 'EMIT_USER_INFO', payload: { username, selectedImageIndex } });
     console.log('emitting infos, imageId = ' + selectedImageIndex);
     // Store block colors in cookies
     const blockColors = getBlockColors();

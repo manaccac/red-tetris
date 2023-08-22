@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
-// import { socket } from '../socket';
 import { setMyName } from '../redux/actions';
-import { toast } from 'react-toastify';
 
 
 const Menu = () => {
@@ -25,41 +23,6 @@ const Menu = () => {
 	  navigate: navigate
 	});
   }, [dispatch, username, winscore, cookieImage, navigate]);
-  
-  
-
-
-//   useEffect(() => {
-//     console.log('useEffect called');
-//     socket.on('gameInfos', (data) => {
-//       console.log('start');
-//       console.log(data);
-//       console.log('end');
-//       dispatch({ type: 'SET_GAME_INFO', payload: data });
-//       navigate(`${data.gameName}[${username}]`);
-//     });
-
-//     socket.on('NoGameFound', () => {
-//       toast.error('No Game Found', {
-//         position: toast.POSITION.BOTTOM_RIGHT,
-//         autoClose: 5000,
-//       });
-//     });
-
-//     socket.on('GameFull', () => {
-//       toast.error('Game Full', {
-//         position: toast.POSITION.BOTTOM_RIGHT,
-//         autoClose: 5000,
-//       });
-
-//     });
-
-//     return () => {
-//       socket.off('gameInfos');
-//       socket.off('NoGameFound');
-//       socket.off('GameFull');
-//     };
-//   }, []);
 
   const handleLaunchGame = (mode) => {
 	dispatch({ type: 'LOOKING_FOR_A_GAME', payload: { userName: username, userWin: winscore, userImage: image, gameMode: mode, gameName: null } });
