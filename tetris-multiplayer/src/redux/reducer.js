@@ -36,21 +36,21 @@ function gameReducer(state = initialState, action) {
 	try {
 		switch (action.type) {
 			case 'MOVE_LEFT':
-				console.log("piece:", state.piece);
-				console.log("position:", state.position);
-				console.log("rotation:", state.rotation);
-				console.log("board:", state.board);
-				console.log("score:", state.score);
-				console.log("isGameOver:", state.isGameOver);
-				console.log("nextPiece:", state.nextPiece);
-				console.log("gameStart:", state.gameStart);
-				console.log("awaitingOpponent:", state.awaitingOpponent);
-				console.log("isGameWon:", state.isGameWon);
-				console.log("opponents:", state.opponents);
-				console.log("leader:", state.leader);
-				console.log("role:", state.role);
-				console.log("gameName:", state.gameName);
-				console.log("gameMode:", state.gameMode);
+				// console.log("piece:", state.piece);
+				// console.log("position:", state.position);
+				// console.log("rotation:", state.rotation);
+				// console.log("board:", state.board);
+				// console.log("score:", state.score);
+				// console.log("isGameOver:", state.isGameOver);
+				// console.log("nextPiece:", state.nextPiece);
+				// console.log("gameStart:", state.gameStart);
+				// console.log("awaitingOpponent:", state.awaitingOpponent);
+				// console.log("isGameWon:", state.isGameWon);
+				// console.log("opponents:", state.opponents);
+				// console.log("leader:", state.leader);
+				// console.log("role:", state.role);
+				// console.log("gameName:", state.gameName);
+				// console.log("gameMode:", state.gameMode);
 				piece = { ...state.piece };
 				newPosition = { ...piece.position };
 				newPosition.x -= 1;
@@ -92,6 +92,7 @@ function gameReducer(state = initialState, action) {
 					//action.resolve();
 					return state;
 				}
+				console.log("score:", state.score);
 				piece = { ...state.piece };
 				newPosition = { ...piece.position };
 				newPosition.y += 1;
@@ -123,28 +124,27 @@ function gameReducer(state = initialState, action) {
 					});
 					if (completedLines.length > 0) {
 						let completedLinesWithoutIndestructible = completedLines.filter(lineIndex => !updatedBoard[lineIndex].includes(-1));
+						const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
+						if (completedLines.length > 1) {
+						  socket.emit('sendLines', completedLines.length - 1);
+						}
 						setTimeout(() => {
-							completedLinesWithoutIndestructible.reduce((acc, lineIndex) => {
-								acc.splice(lineIndex, 1);
-								acc.unshift(Array(10).fill(0));
-								return acc;
-							}, updatedBoard);
-							const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
-							if (completedLines.length > 1) {
-								socket.emit('sendLines', completedLines.length - 1);
-							}
-							//action.resolve();
-							socket.emit('updateBoard', { updateBoard: updatedBoard, score: score });
-							return {
-								...state,
-								board: updatedBoard,
-								piece: state.nextPiece,
-								// nextPiece: nextPiece,
-								score: score,
-								//   opponentBoard: updatedBoard,
-							};
+						  completedLinesWithoutIndestructible.reduce((acc, lineIndex) => {
+							acc.splice(lineIndex, 1);
+							acc.unshift(Array(10).fill(0));
+							return acc;
+						  }, updatedBoard);
+						  socket.emit('updateBoard', { updateBoard: updatedBoard, score: score });
 						}, 500); // Ajoutez un délai de 500 ms avant de supprimer la ligne
-					}
+					  
+						return {
+						  ...state,
+						  board: updatedBoard,
+						  piece: state.nextPiece,
+						  score: score,
+						};
+					  }
+					  
 					socket.emit('updateBoard', { updateBoard: updatedBoard, score: state.score });
 					//action.resolve();
 					return {

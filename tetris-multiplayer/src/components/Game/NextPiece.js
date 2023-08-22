@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 
-function NextPiece({ gameStart, nextPiece }) {
+function NextPiece({ gameStart, nextPiece, score }) {
 	const renderNextPiece = () => {
 		const boardw = Array.from({ length: 4 }, () => Array(4).fill(0));
 	
@@ -37,15 +37,21 @@ function NextPiece({ gameStart, nextPiece }) {
 	  };
 
 	return (
-		<div className="next-piece">
-		{gameStart && renderNextPiece()}
+		<div>
+			<div className="show_score">
+				Score: {score}
+			</div>
+			<div className="next-piece">
+			{gameStart && renderNextPiece()}
+			</div>
 		</div>
 	);
 }
 
 const mapStateToProps = (state) => ({
     nextPiece: state.nextPiece,
-    gameStart: state.gameStart
+    gameStart: state.gameStart,
+	score: state.score,
 });
 
 export default connect(mapStateToProps)(NextPiece);
