@@ -95,7 +95,7 @@ function App() {
           <UserInfo username={username} image={image} score={score} onProfileClick={handleProfileClick} />
           <Routes>
             <Route path="/" element={<Home />} />
-			<Route path="/:hash" element={<Game updateScore={updateScore} />} />
+            <Route path="/:hash" element={<Game updateScore={updateScore} />} />
           </Routes>
         </>
       )}

@@ -47,8 +47,8 @@ class Game {
         return {
             leader: this.leader,
             players: this.getPlayerNames(),
-            // playersWins: this.getPlayerWins(),
-            // playersImage: this.getPlayerImages(),
+            playersWins: this.getPlayerWins(),
+            playersImage: this.getPlayerImages(),
             gameMode: this.gameMode,
             gameName: this.gameName,
             role: undefined,

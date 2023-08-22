@@ -76,13 +76,13 @@ export const mapDispatchToProps = (dispatch) => ({
   resetState: () => new Promise((resolve) => dispatch(resetState(resolve))),
   setIsVictory: (status) => dispatch(setIsVictory(status)),
   setAwaitingOpponent: (awaiting) => dispatch(setAwaitingOpponent(awaiting)),
-  updateOpponentBoard: (name, board) => dispatch(updateOpponentBoard(name, board)),
+  updateOpponentBoard: (name, board, score) => dispatch(updateOpponentBoard(name, board, score)),
   setOpponentName: (oppName) => dispatch(setOpponentName(oppName)),
   setLeader: (leader) => dispatch(setLeader(leader)),
   setMyName: (myname) => dispatch(setMyName(myname)),
   setSpectator: (spectator) => dispatch(setSpectator(spectator)),
   setGameInfo: (gameInfos) => dispatch(setGameInfo(gameInfos)),
-  setPlayerWon: (playerWon) => dispatch(setPlayerWon(playerWon)),
+  setPlayerWon: (playerWon, winnerScore) => dispatch(setPlayerWon(playerWon, winnerScore)),
   resetGameState: () => dispatch(resetGameState()),
 });
 
@@ -245,29 +245,27 @@ function Board(props) {
     });
     socket.on('Victory', () => {
       console.log('Victory : ', scoreUpdatedRef.current);
-      if (!scoreUpdatedRef.current) {
-        // Récupérez la valeur actuelle du cookie de score
-        const currentScore = parseInt(Cookies.get('score'), 10) || 0;
+      // Récupérez la valeur actuelle du cookie de score
+      const currentScore = parseInt(Cookies.get('score'), 10) || 0;
 
-        // Incrémentez le score
-        const newScore = currentScore + 1;
+      // Incrémentez le score
+      const newScore = currentScore + 1;
 
-        // Mettez à jour le cookie de score avec la nouvelle valeur
-        Cookies.set('score', newScore);
-
-        props.setIsVictory(true);
-        props.updateScore(newScore);
-        setScoreUpdated(true);
-      }
+      // Mettez à jour le cookie de score avec la nouvelle valeur
+      Cookies.set('score', newScore);
+      props.updateScore(newScore);
+      props.setIsVictory(true);
+      setScoreUpdated(true);
     });
-    socket.on('opponentBoardData', (opponentBoardData, userName) => {
-      props.updateOpponentBoard(userName, opponentBoardData);
+    socket.on('opponentBoardData', (opponentBoardData, userName, score) => {
+      console.log('received in socketOnOpponentBoardData: ' + score);
+      props.updateOpponentBoard(userName, opponentBoardData, score);
     })
     socket.on('updateNextPiece', (nextPiece) => {
       props.updatePiece(nextPiece);
     });
-    socket.on('playerWon', (playerWhoWon) => {
-      props.setPlayerWon(playerWhoWon);
+    socket.on('playerWon', (playerWhoWon, winnerScore) => {
+      props.setPlayerWon(playerWhoWon, winnerScore);
     });
     socket.emit('askingGameInfos');
     // socket.emit('lookingForAGame', { userName: username, gameMode: props.gameMode, gameName: props.gameName });
@@ -295,7 +293,7 @@ function Board(props) {
 
   const renderCells = () =>
     props.board.map((row, y) => {
-      console.log('renderCells iscol: ', isColliding);
+      // console.log('renderCells iscol: ', isColliding);
       const isCompleted = row.every((cell) => cell > 0);
       return row.map((cell, x) => {
         let active = false;

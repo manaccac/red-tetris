@@ -8,10 +8,12 @@ class Player {
 	pieceId = 2;
 	gameOver = false;
 	status; //Statut: [player/spectator]
-	constructor(name, image, socket) {
+	constructor(name, userWin, image, socket) {
 		this.name = name;
 		this.image = image;
+		this.winScore = userWin;
 		this.socket = socket;
+		console.log('player constructor called, image:' + this.image);
 	}
 
 	getPlayeInfo() {

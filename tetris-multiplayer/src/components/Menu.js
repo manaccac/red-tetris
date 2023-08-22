@@ -28,7 +28,7 @@ const Menu = () => {
     });
 
     //WHILE DEBUG ONLY
-    socket.emit('setUserInfos', { username: username, image: cookieImage });
+    socket.emit('setUserInfos', { username: username, userWin: winscore, imageId: cookieImage });
 
     socket.on('NoGameFound', () => {
       toast.error('No Game Found', {

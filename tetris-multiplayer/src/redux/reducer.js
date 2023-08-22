@@ -26,6 +26,7 @@ const initialState = {
 	myName: null,
 	isSpectator: false,
 	playerWhoWon: null,
+	winnerScore: 0,
 };
 
 function gameReducer(state = initialState, action) {
@@ -133,7 +134,7 @@ function gameReducer(state = initialState, action) {
 								socket.emit('sendLines', completedLines.length - 1);
 							}
 							//action.resolve();
-							socket.emit('updateBoard', updatedBoard);
+							socket.emit('updateBoard', { updateBoard: updatedBoard, score: score });
 							return {
 								...state,
 								board: updatedBoard,
@@ -144,7 +145,7 @@ function gameReducer(state = initialState, action) {
 							};
 						}, 500); // Ajoutez un délai de 500 ms avant de supprimer la ligne
 					}
-					socket.emit('updateBoard', updatedBoard);
+					socket.emit('updateBoard', { updateBoard: updatedBoard, score: state.score });
 					//action.resolve();
 					return {
 						...state,
@@ -203,6 +204,7 @@ function gameReducer(state = initialState, action) {
 					isSpectator: false,
 					isGameWon: false,
 					role: 'player',
+					score: 0,
 					playerWhoWon: null
 				};
 			case 'ADD_INDESTRUCTIBLE_LINE':
@@ -259,6 +261,7 @@ function gameReducer(state = initialState, action) {
 				const name_received = action.name;
 				console.log('opponentName', name_received);
 				console.log('state.myName', state.myName);
+				console.log('received score: ', action.score);
 				if (name_received === undefined) {
 					console.warn(`Trying to update non-existing opponent: ${name_received}`);
 					return state;
@@ -335,7 +338,8 @@ function gameReducer(state = initialState, action) {
 			case 'SET_PLAYER_WON':
 				return {
 					...state,
-					playerWhoWon: action.payload,
+					playerWhoWon: action.playerWon,
+					winnerScore: action.winnerScore
 				}
 			default:
 				return state;

@@ -67,10 +67,11 @@ export const setAwaitingOpponent = (awaiting) => ({
 	payload: awaiting,
 });
 
-export const updateOpponentBoard = (name, board) => ({
+export const updateOpponentBoard = (name, board, score) => ({
 	type: 'UPDATE_OPPONENT_BOARD',
 	name: name,
-	board: board
+	board: board,
+	score: score,
 });
 
 
@@ -106,7 +107,8 @@ export const setSpectator = (isSpectator) => ({
 	payload: isSpectator
 });
 
-export const setPlayerWon = (playerWon) => ({
+export const setPlayerWon = (playerWon, winnerScore) => ({
 	type: SET_PLAYER_WON,
-	payload: playerWon
+	playerWon: playerWon,
+	winnerScore: winnerScore
 });

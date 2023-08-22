@@ -39,8 +39,9 @@ function UsernamePrompt({ onUsernameSubmit }) {
   const handleUsernameSubmit = (e) => {
     console.log('handleUsernameSubmitCalled');
     e.preventDefault();
-    socket.emit('setUserInfos', { username: username, image: selectedImageIndex });
 
+    socket.emit('setUserInfos', { username: username, image: selectedImageIndex });
+    console.log('emitting infos, imageId = ' + selectedImageIndex);
     // Store block colors in cookies
     const blockColors = getBlockColors();
     for (const [key, value] of Object.entries(blockColors)) {

@@ -38,7 +38,7 @@ const leavingGame = (socket) => {
 	}
 };
 
-const sendBoardAndPieceToPlayer = (socket, dataBoard) => {
+const sendBoardAndPieceToPlayer = (socket, updatedBoardAndScore) => {
 	for (const [gameId, gameData] of games.entries()) {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
 			// si besoin on créé la nouvelle pièce dans la game
@@ -48,8 +48,9 @@ const sendBoardAndPieceToPlayer = (socket, dataBoard) => {
 			//on envoit la pièce suivante au joueur qui vient de poser
 			socket.emit('updateNextPiece', [gameData.pieces[players.get(socket.id).pieceId]]);
 			players.get(socket.id).pieceId++;
+			players.get(socket.id).score = updatedBoardAndScore.score;
 			//on envoit le board a l'adversaire
-			socket.broadcast.to(gameId).emit('opponentBoardData', dataBoard, players.get(socket.id).name);
+			socket.broadcast.to(gameId).emit('opponentBoardData', updatedBoardAndScore.updateBoard, players.get(socket.id).name, players.get(socket.id).score);
 			return;
 		}
 	}
@@ -66,7 +67,7 @@ const sendLinesToPlayer = (socket, numberOfLines) => {
 
 const gameOver = (socket) => {
 	for (const [gameId, gameData] of games.entries()) {
-		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
+		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name) && gameData.isRunning) {
 			players.get(socket.id).gameOver = true;
 			// on prévient l'autre joueur de sa victoire
 			socket.broadcast.to(gameId).emit('playerLost', players.get(socket.id).name);
@@ -76,7 +77,7 @@ const gameOver = (socket) => {
 				console.log('winnerName ?:' + winner.name);
 				winner.socket.emit('Victory');
 				winner.winScore++;
-				io.to(gameId).emit('playerWon', winner.name);
+				io.to(gameId).emit('playerWon', winner.name, winner.score);
 				gameData.isRunning = false;
 			}
 			return;
