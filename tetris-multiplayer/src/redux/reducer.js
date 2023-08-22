@@ -310,23 +310,28 @@ function gameReducer(state = initialState, action) {
 
 				// console.log('Setting game info...');
 				// console.log(action.payload);
-				const { leader, players, gameMode, gameName, role } = action.payload;
-				const filteredPlayers = players.filter(playerName => playerName !== state.myName);
-				if (role === 'spectator')
-					state.isSpectator = true;
+				const { leader, players, gameMode, gameName, role, playersImage, playersWins } = action.payload;
+				const opponents = {};
+				players.forEach((playerName, index) => {
+				  if (playerName !== state.myName) {
+					opponents[playerName] = {
+					  name: playerName,
+					  board: [],
+					  image: playersImage[index],
+					  win: playersWins[index],
+					};
+				  }
+				});
+				if (role === 'spectator') {
+				  state.isSpectator = true;
+				}
 				return {
-					...state,
-					leader,
-					opponents: filteredPlayers.reduce((opponentsObj, playerName) => {
-						opponentsObj[playerName] = {
-							name: playerName,
-							board: [],
-						};
-						return opponentsObj;
-					}, {}),
-					gameMode,
-					gameName,
-					role,
+				  ...state,
+				  leader,
+				  opponents,
+				  gameMode,
+				  gameName,
+				  role,
 				};
 			case 'SET_MY_NAME':
 				return {
