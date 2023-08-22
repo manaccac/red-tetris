@@ -92,7 +92,7 @@ function gameReducer(state = initialState, action) {
 					//action.resolve();
 					return state;
 				}
-				console.log("score:", state.score);
+				// console.log("score:", state.score);
 				piece = { ...state.piece };
 				newPosition = { ...piece.position };
 				newPosition.y += 1;

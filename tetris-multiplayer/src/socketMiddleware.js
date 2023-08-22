@@ -72,7 +72,35 @@ export const socketMiddleware = (store) => (next) => (action) => {
 		action.props.updateScore(newScore);
 		action.props.setIsVictory(true);
 		action.setScoreUpdated(true);
-	  });
+	});
+	socket.on('opponentBoardData', (opponentBoardData, userName, score) => {
+		console.log('received in socketOnOpponentBoardData: ' + score);
+		action.props.updateOpponentBoard(userName, opponentBoardData, score);
+	});
+	socket.on('updateNextPiece', (nextPiece) => {
+		console.log('updateNextPiece');
+		action.props.updatePiece(nextPiece);
+	});
+	socket.on('playerWon', (playerWhoWon, winnerScore) => {
+		console.log('playerWon');
+		action.props.setPlayerWon(playerWhoWon, winnerScore);
+	});
+	socket.emit('askingGameInfos');
+  }
+  if (action.type === 'CLEANUP_SOCKET_GAME') {
+	socket.emit('leftGame');
+	socket.off('Victory');
+	socket.off('receivedLines');
+	socket.off('gameStart');
+	socket.off('opponentBoardData');
+	socket.off('updateNextPiece');
+	socket.off('gameInfos');
+	socket.off('spectator');
+	socket.off('playerWon');
+  }
+
+  if (action.type === 'START_GAME') {
+	socket.emit('startGame', action.props.gameName);
   }
 
   
