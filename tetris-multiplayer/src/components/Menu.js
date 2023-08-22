@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
-import { socket } from '../socket';
+// import { socket } from '../socket';
 import { setMyName } from '../redux/actions';
 import { toast } from 'react-toastify';
+
 
 const Menu = () => {
   const [gameName, setGameName] = useState('');
@@ -18,47 +19,55 @@ const Menu = () => {
   const gameNameFromReducer = useSelector(state => state.gameName);
 
   useEffect(() => {
-    console.log('useEffect called');
-    socket.on('gameInfos', (data) => {
-      console.log('start');
-      console.log(data);
-      console.log('end');
-      dispatch({ type: 'SET_GAME_INFO', payload: data });
-      navigate(`${data.gameName}[${username}]`);
-    });
+	dispatch({
+	  type: 'INIT_SOCKET_MENU',
+	  payload: { username: username, winscore: winscore, cookieImage: cookieImage },
+	  navigate: navigate
+	});
+  }, [dispatch, username, winscore, cookieImage, navigate]);
+  
+  
 
-    //WHILE DEBUG ONLY
-    socket.emit('setUserInfos', { username: username, userWin: winscore, imageId: cookieImage });
 
-    socket.on('NoGameFound', () => {
-      toast.error('No Game Found', {
-        position: toast.POSITION.BOTTOM_RIGHT,
-        autoClose: 5000,
-      });
-    });
+//   useEffect(() => {
+//     console.log('useEffect called');
+//     socket.on('gameInfos', (data) => {
+//       console.log('start');
+//       console.log(data);
+//       console.log('end');
+//       dispatch({ type: 'SET_GAME_INFO', payload: data });
+//       navigate(`${data.gameName}[${username}]`);
+//     });
 
-    socket.on('GameFull', () => {
-      toast.error('Game Full', {
-        position: toast.POSITION.BOTTOM_RIGHT,
-        autoClose: 5000,
-      });
+//     socket.on('NoGameFound', () => {
+//       toast.error('No Game Found', {
+//         position: toast.POSITION.BOTTOM_RIGHT,
+//         autoClose: 5000,
+//       });
+//     });
 
-    });
+//     socket.on('GameFull', () => {
+//       toast.error('Game Full', {
+//         position: toast.POSITION.BOTTOM_RIGHT,
+//         autoClose: 5000,
+//       });
 
-    return () => {
-      socket.off('gameInfos');
-      socket.off('NoGameFound');
-      socket.off('GameFull');
-    };
-  }, []);
+//     });
+
+//     return () => {
+//       socket.off('gameInfos');
+//       socket.off('NoGameFound');
+//       socket.off('GameFull');
+//     };
+//   }, []);
 
   const handleLaunchGame = (mode) => {
-    socket.emit('lookingForAGame', { userName: username, userWin: winscore, userImage: image, gameMode: mode, gameName: null });
-  };
+	dispatch({ type: 'LOOKING_FOR_A_GAME', payload: { userName: username, userWin: winscore, userImage: image, gameMode: mode, gameName: null } });
+};
 
   const handleSearchGame = () => {
-    socket.emit('lookingForAGame', { userName: username, userWin: winscore, userImage: image, gameMode: null, gameName: gameName });
-  };
+	dispatch({ type: 'LOOKING_FOR_A_GAME', payload: { userName: username, userWin: winscore, userImage: image, gameMode: null, gameName: null } });
+};
 
   dispatch(setMyName(username));
 
