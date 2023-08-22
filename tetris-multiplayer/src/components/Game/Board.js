@@ -61,8 +61,6 @@ const goHome = (props, navigate, setScoreUpdated) => {
 
 export const restartGame = async (username, dispatch) => {
   dispatch({ type: 'RESTART_GAME', payload: { username } });
-
-//   socket.emit('restartGame', username);
 };
 
 
@@ -228,6 +226,10 @@ function Board(props) {
 
 
   useEffect(() => {
+	// dispatch({ type: 'INIT_SOCKET_GAME' });
+
+
+
     socket.on('gameInfos', (data) => {
       console.log('gameInfos received');
       props.setGameInfo(data);
@@ -271,7 +273,7 @@ function Board(props) {
       props.setPlayerWon(playerWhoWon, winnerScore);
     });
     socket.emit('askingGameInfos');
-    // socket.emit('lookingForAGame', { userName: username, gameMode: props.gameMode, gameName: props.gameName });
+
     props.setAwaitingOpponent(true);
 
     return () => {
