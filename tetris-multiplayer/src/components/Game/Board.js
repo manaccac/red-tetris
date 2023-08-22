@@ -226,42 +226,42 @@ function Board(props) {
 
 
   useEffect(() => {
-	// dispatch({ type: 'INIT_SOCKET_GAME' });
+	dispatch({ type: 'INIT_SOCKET_GAME', props, setGameRunning, scoreUpdatedRef, parseInt, setScoreUpdated});
 
 
 
-    socket.on('gameInfos', (data) => {
-      console.log('gameInfos received');
-      props.setGameInfo(data);
-    });
-    socket.on('gameStart', (response) => {
-      props.resetGameState();
-      setGameRunning(false);
-      props.updatePiece([response.piece, response.nextPiece]);
-      props.setOpponentName(response.opponentName);
-    });
-    socket.on('spectator', () => {
-      console.log('spectator');
-      props.setLeader(false);
-      props.setSpectator(true);
-    });
-    socket.on('receivedLines', (numberOfLines) => {
-      props.addIndestructibleLine(numberOfLines);
-    });
-    socket.on('Victory', () => {
-      console.log('Victory : ', scoreUpdatedRef.current);
-      // Récupérez la valeur actuelle du cookie de score
-      const currentScore = parseInt(Cookies.get('score'), 10) || 0;
+    // socket.on('gameInfos', (data) => {
+    //   console.log('gameInfos received');
+    //   props.setGameInfo(data);
+    // });
+    // socket.on('gameStart', (response) => {
+    //   props.resetGameState();
+    //   setGameRunning(false);
+    //   props.updatePiece([response.piece, response.nextPiece]);
+    //   props.setOpponentName(response.opponentName);
+    // });
+    // socket.on('spectator', () => {
+    //   console.log('spectator');
+    //   props.setLeader(false);
+    //   props.setSpectator(true);
+    // });
+    // socket.on('receivedLines', (numberOfLines) => {
+    //   props.addIndestructibleLine(numberOfLines);
+    // });
+    // socket.on('Victory', () => {
+    //   console.log('Victory : ', scoreUpdatedRef.current);
+    //   // Récupérez la valeur actuelle du cookie de score
+    //   const currentScore = parseInt(Cookies.get('score'), 10) || 0;
 
-      // Incrémentez le score
-      const newScore = currentScore + 1;
+    //   // Incrémentez le score
+    //   const newScore = currentScore + 1;
 
-      // Mettez à jour le cookie de score avec la nouvelle valeur
-      Cookies.set('score', newScore);
-      props.updateScore(newScore);
-      props.setIsVictory(true);
-      setScoreUpdated(true);
-    });
+    //   // Mettez à jour le cookie de score avec la nouvelle valeur
+    //   Cookies.set('score', newScore);
+    //   props.updateScore(newScore);
+    //   props.setIsVictory(true);
+    //   setScoreUpdated(true);
+    // });
     socket.on('opponentBoardData', (opponentBoardData, userName, score) => {
       console.log('received in socketOnOpponentBoardData: ' + score);
       props.updateOpponentBoard(userName, opponentBoardData, score);
