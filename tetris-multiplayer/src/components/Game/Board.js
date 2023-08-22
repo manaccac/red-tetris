@@ -3,7 +3,8 @@ import { connect, useDispatch } from 'react-redux';
 import {
   moveLeft, moveRight, rotate, moveDown, dropPiece, updatePiece,
   resetState, addIndestructibleLine, gameStarted, setAwaitingOpponent, updateOpponentBoard,
-  setIsVictory, resetGameState, setOpponentName, setLeader, setMyName, setSpectator, setGameInfo, setPlayerWon
+  setIsVictory, resetGameState, setOpponentName, setLeader, setMyName, setSpectator, setGameInfo, setPlayerWon,
+  updateBoardState, send
 } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../socket';
@@ -40,6 +41,8 @@ const mapStateToProps = (state) => ({
   myName: state.myName,
   isSpectator: state.isSpectator,
   playerWhoWon: state.playerWhoWon,
+  updateBoard: state.updateBoard,
+  send: state.send,
 });
 
 export function getRandomDelay(props) {
@@ -84,6 +87,8 @@ export const mapDispatchToProps = (dispatch) => ({
   setGameInfo: (gameInfos) => dispatch(setGameInfo(gameInfos)),
   setPlayerWon: (playerWon, winnerScore) => dispatch(setPlayerWon(playerWon, winnerScore)),
   resetGameState: () => dispatch(resetGameState()),
+  updateBoardState: () => dispatch(updateBoardState()),
+  send_board: () => dispatch(send()),
 });
 
 function Board(props) {
@@ -162,6 +167,22 @@ function Board(props) {
     }
 
   };
+
+  useEffect(() => {
+	console.log('in useEffect updateBoard ', props.updateBoard);
+	console.log('in useEffect send ', props.send);
+	if (props.isGameOver) {
+		dispatch({ type: 'GAME_OVER'});
+	}
+	if (props.updateBoard) {
+		dispatch({ type: 'UPDATE_BOARD_SOCKET', props});
+		props.updateBoardState();
+	}
+	if (props.send > 0) {
+		dispatch({ type: 'SEND_LINES', props});
+		props.send_board();
+	}
+  }, [props.isGameOver, props.updateBoard, props.send]);
 
   useEffect(() => {
     let countdownInterval;

@@ -27,6 +27,8 @@ const initialState = {
 	isSpectator: false,
 	playerWhoWon: null,
 	winnerScore: 0,
+	updateBoard: false,
+	send: 0,
 };
 
 function gameReducer(state = initialState, action) {
@@ -88,6 +90,7 @@ function gameReducer(state = initialState, action) {
 				//action.resolve();
 				return { ...state, piece };
 			case 'MOVE_DOWN':
+				console.log("updateBoard:      ", state.updateBoard);
 				if (state.isGameOver) {
 					//action.resolve();
 					return state;
@@ -98,7 +101,6 @@ function gameReducer(state = initialState, action) {
 				newPosition.y += 1;
 				if (isCollision(piece, newPosition.x, newPosition.y, state.board)) {
 					if (piece.position.y < 0) {
-						socket.emit('gameOver');
 						return {
 							...state,
 							// board: updatedBoard,
@@ -115,7 +117,6 @@ function gameReducer(state = initialState, action) {
 							}
 						});
 					});
-					// socket.emit('updateBoard', updatedBoard);
 					const completedLines = [];
 					updatedBoard.forEach((row, y) => {
 						if (row.every((cell) => cell > 0)) {
@@ -123,34 +124,36 @@ function gameReducer(state = initialState, action) {
 						}
 					});
 					if (completedLines.length > 0) {
+						let send = 0;
 						let completedLinesWithoutIndestructible = completedLines.filter(lineIndex => !updatedBoard[lineIndex].includes(-1));
 						const score = state.score + calculateScore(completedLinesWithoutIndestructible.length);
-						if (completedLines.length > 1) {
-						  socket.emit('sendLines', completedLines.length - 1);
-						}
 						setTimeout(() => {
 						  completedLinesWithoutIndestructible.reduce((acc, lineIndex) => {
 							acc.splice(lineIndex, 1);
 							acc.unshift(Array(10).fill(0));
 							return acc;
 						  }, updatedBoard);
-						  socket.emit('updateBoard', { updateBoard: updatedBoard, score: score });
 						}, 500); // Ajoutez un délai de 500 ms avant de supprimer la ligne
+						if (completedLines.length > 1) {
+							console.log("completedLines.length: ", completedLines.length);
+							send = completedLines.length - 1;
+						}
 					  
 						return {
 						  ...state,
+						  send: send,
 						  board: updatedBoard,
 						  piece: state.nextPiece,
 						  score: score,
+						  updateBoard: true,
 						};
 					  }
 					  
-					socket.emit('updateBoard', { updateBoard: updatedBoard, score: state.score });
-					//action.resolve();
 					return {
 						...state,
 						board: updatedBoard,
 						piece: state.nextPiece,
+						updateBoard: true,
 						// nextPiece: nextPiece,
 						//   opponentBoard: updatedBoard,
 					};
@@ -341,6 +344,16 @@ function gameReducer(state = initialState, action) {
 					playerWhoWon: action.playerWon,
 					winnerScore: action.winnerScore
 				}
+			case 'UPDATE_BOARD_STATE':
+				return {
+					...state,
+					updateBoard: false,
+				};
+			case 'SEND':
+				return {
+					...state,
+					send: 0,
+				};
 			default:
 				return state;
 		}

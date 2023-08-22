@@ -17,6 +17,8 @@ export const SET_LEADER = 'SET_LEADER';
 export const SET_MY_NAME = 'SET_MY_NAME';
 export const SET_SPECTATOR = 'SET_SPECTATOR';
 export const SET_PLAYER_WON = 'SET_PLAYER_WON';
+export const UPDATE_BOARD_STATE = 'UPDATE_BOARD_STATE';
+export const SEND = 'SEND';
 
 export function moveLeft(resolve = () => { }) {
 	return { type: MOVE_LEFT, resolve };
@@ -111,4 +113,12 @@ export const setPlayerWon = (playerWon, winnerScore) => ({
 	type: SET_PLAYER_WON,
 	playerWon: playerWon,
 	winnerScore: winnerScore
+});
+
+export const updateBoardState = () => ({
+	type: UPDATE_BOARD_STATE,
+});
+
+export const send = () => ({
+	type: SEND,
 });

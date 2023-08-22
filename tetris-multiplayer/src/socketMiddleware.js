@@ -103,6 +103,17 @@ export const socketMiddleware = (store) => (next) => (action) => {
 	socket.emit('startGame', action.props.gameName);
   }
 
+  if (action.type === 'GAME_OVER') {
+	socket.emit('gameOver');
+}
+if (action.type === 'UPDATE_BOARD_SOCKET') {
+	socket.emit('updateBoard', { updateBoard: action.props.board, score: action.props.score });
+}
+if (action.type === 'SEND_LINES') {
+	// socket.emit('sendLines', completedLines.length - 1);
+	console.log('sendLines 	socket.emit(sendLines,  action.props.send');
+	socket.emit('sendLines',  action.props.send );
+}
   
   return next(action);
 };
