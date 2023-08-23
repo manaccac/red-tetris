@@ -74,7 +74,7 @@ export const socketMiddleware = (store) => (next) => (action) => {
 		action.setScoreUpdated(true);
 	});
 	socket.on('opponentBoardData', (opponentBoardData, userName, score) => {
-		console.log('received in socketOnOpponentBoardData: ' + score);
+		console.log('received in socketOnOpponent score: ' + score);
 		action.props.updateOpponentBoard(userName, opponentBoardData, score);
 	});
 	socket.on('updateNextPiece', (nextPiece) => {
@@ -107,8 +107,9 @@ export const socketMiddleware = (store) => (next) => (action) => {
 	socket.emit('gameOver');
 }
 if (action.type === 'UPDATE_BOARD_SOCKET') {
-	socket.emit('updateBoard', { updateBoard: action.props.board, score: action.props.score });
-}
+	const updatedBoardAndScore = { updateBoard: action.props.board, score: action.props.score };
+	socket.emit('updateBoard', updatedBoardAndScore);
+  }
 if (action.type === 'SEND_LINES') {
 	// socket.emit('sendLines', completedLines.length - 1);
 	console.log('sendLines 	socket.emit(sendLines,  action.props.send');

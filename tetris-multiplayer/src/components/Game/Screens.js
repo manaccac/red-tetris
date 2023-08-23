@@ -46,12 +46,15 @@ function CountdownScreen({ countdown }) {
     );
 }
 
-function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader, opponents, playerWhoWon }) {
-    let canDisplayRestart = !opponents || playerWon ? true : false;
+function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader, opponents, playerWhoWon, score }) {
+    let canDisplayRestart = !opponents.length || playerWon ? true : false;
     return (
         <div className="overlay">
             <div className="message">
                 <h1>Partie terminée</h1>
+				<h2>
+					Le joueur: <span className='name-color'>{playerWhoWon}</span> a gagné la partie avec un score de: <span className='score-color'>{score}</span>
+				</h2>
                 <button onClick={onGoHome}>Retour à la page d'accueil.</button>
                 {canDisplayRestart && myName === isLeader && (
                     <button onClick={onRestart}>{playerWhoWon ? 'Recommencer' : 'Partie en cours'}</button>

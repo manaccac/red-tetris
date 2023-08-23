@@ -43,6 +43,8 @@ const mapStateToProps = (state) => ({
   playerWhoWon: state.playerWhoWon,
   updateBoard: state.updateBoard,
   send: state.send,
+  score: state.score,
+  winnerScore: state.winnerScore,
 });
 
 export function getRandomDelay(props) {
@@ -331,7 +333,7 @@ function Board(props) {
         {props.opponentName}
       </div>
 
-      {props.isGameOver && (!props.isGameWon || props.isSpectator) && <GameOverScreen onGoHome={() => goHome(props, navigate, setScoreUpdated)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} opponents={props.opponnents} playerWhoWon={props.playerWhoWon} />}
+      {props.isGameOver && (!props.isGameWon || props.isSpectator) && <GameOverScreen onGoHome={() => goHome(props, navigate, setScoreUpdated)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} opponents={props.opponents} playerWhoWon={props.playerWhoWon} score={props.winnerScore} />}
       {props.isGameOver && props.isGameWon && !props.isSpectator && <VictoryScreen onGoHome={() => goHome(props, navigate, setScoreUpdated)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} playerWhoWon={props.playerWhoWon} />}
       {!props.isGameOver && (!props.gameStart && !props.isSpectator) && (
         <WaitingScreen

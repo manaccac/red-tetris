@@ -48,9 +48,12 @@ io.on('connection', (socket) => {
         leavingGame(socket);
     });
 
-    socket.on('updateBoard', (updatedBoardAndScore) => {
-        sendBoardAndPieceToPlayer(socket, updatedBoardAndScore, players.get(socket.id).name);
-    });
+	socket.on('updateBoard', (updatedBoardAndScore) => {
+		const { updateBoard, score } = updatedBoardAndScore;
+		console.log('updateBoard called');
+		sendBoardAndPieceToPlayer(socket, updatedBoardAndScore, players.get(socket.id).name);
+	  });
+	  
 
     socket.on('sendLines', (numberOfLines) => {
         console.log('reiceived sendLines, sending:' + numberOfLines);

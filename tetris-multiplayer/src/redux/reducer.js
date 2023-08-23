@@ -277,7 +277,8 @@ function gameReducer(state = initialState, action) {
 							...state.opponents,
 							[name_received]: {
 								...state.opponents[name_received],
-								board: board_received
+								board: board_received,
+								score: action.score
 							}
 						}
 					};
@@ -319,6 +320,7 @@ function gameReducer(state = initialState, action) {
 					  board: [],
 					  image: playersImage[index],
 					  win: playersWins[index],
+					  score: 0
 					};
 				  }
 				});

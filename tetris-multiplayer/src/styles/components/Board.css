@@ -263,3 +263,14 @@
 	height: 50px;
 	border: 2px solid transparent;
 }
+
+.name-color {
+	color: rebeccapurple;
+	font-weight: 900;
+  }
+  
+  .score-color {
+	color: rebeccapurple;
+	font-weight: 900;
+  }
+  
