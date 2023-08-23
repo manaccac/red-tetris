@@ -17,6 +17,7 @@ const Menu = () => {
   const gameNameFromReducer = useSelector(state => state.gameName);
 
   useEffect(() => {
+	console.log('gameNameFromReducer: ' );
 	dispatch({
 	  type: 'INIT_SOCKET_MENU',
 	  payload: { username: username, winscore: winscore, cookieImage: cookieImage },
@@ -32,7 +33,10 @@ const Menu = () => {
 	dispatch({ type: 'LOOKING_FOR_A_GAME', payload: { userName: username, userWin: winscore, userImage: image, gameMode: null, gameName: gameName } });
 };
 
-  dispatch(setMyName(username));
+useEffect(() => {
+	dispatch(setMyName(username));
+  }, [dispatch, username]); // Le dispatch et le username sont ajoutés comme dépendances
+  
 
 
 

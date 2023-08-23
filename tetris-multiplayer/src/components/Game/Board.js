@@ -14,6 +14,7 @@ import RenderNextPiece from './NextPiece';
 import { WaitingScreen, CountdownScreen, GameOverScreen, VictoryScreen } from './Screens';
 import { toast } from 'react-toastify';
 
+
 const lastMove = {
   ArrowLeft: 0,
   ArrowRight: 0,
@@ -112,6 +113,39 @@ function Board(props) {
   const [gameRunning, setGameRunning] = useState(false);
 
   const scoreUpdatedRef = useRef(scoreUpdated);
+
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+	  Cookies.set('realod', true);
+      e.preventDefault();
+      e.returnValue = "Êtes-vous sûr de vouloir quitter cette page ?";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  useEffect(() => {
+	Cookies.get('realod');
+	console.log('in useEffect realod: ', Cookies.get('realod'));
+	if (Cookies.get('realod')) {
+		navigate('/');
+		Cookies.remove('realod');
+	}
+  }, [Cookies.get('realod')]);
+
+
+  useEffect(() => {
+    const navigationEntries = window.performance.getEntriesByType("navigation");
+	console.log('navigationEntries: ', navigationEntries[0].startTime);
+    if (navigationEntries.length > 0 && navigationEntries[0].startTime !== 0) {
+      navigate("/"); // Redirige vers la page d'accueil
+    }
+  }, [navigate]);
 
 
   const handleRestartGame = () => {
