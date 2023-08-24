@@ -258,6 +258,7 @@ describe('gameReducer', () => {
 	const customInitial = {
 		piece: null,
 		position: { x: 0, y: 0 },
+		playerWhoWon: null,
 		rotation: 0,
 		board: createEmptyBoard(),
 		score: 0,
@@ -271,6 +272,11 @@ describe('gameReducer', () => {
 		role: null, //spectator, player
 		gameName: null, // le hash
 		gameMode: null, // normal, gravity, invisible
+		send: 0,
+		updateBoard: false,
+		winnerScore: 0,
+		myName: undefined,
+		isSpectator: false,
     };
 
     store = mockStore(customInitialState);

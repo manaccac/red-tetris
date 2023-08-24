@@ -47,6 +47,7 @@ describe('Board', () => {
 
 
   beforeEach(() => {
+	window.performance.getEntriesByType = jest.fn(() => [{ startTime: 0 }]);
 	props = {
 		board: Array(20).fill(Array(10).fill(0)),
 		piece: null,

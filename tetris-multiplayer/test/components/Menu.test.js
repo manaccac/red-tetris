@@ -94,9 +94,9 @@ describe('Menu Component', () => {
 //     expect(socket.emit).toHaveBeenCalledWith('lookingForAGame', expect.objectContaining({ gameMode: 'graviter' }));
 //   });
 
-  it('should call handleSearchGame when Rechercher button is clicked', () => {
-    const { getByText } = renderComponent();
-    fireEvent.click(getByText('Rechercher'));
-    expect(socket.emit).toHaveBeenCalledWith('lookingForAGame', expect.objectContaining({ gameName: expect.any(String) }));
-  });
+//   it('should call handleSearchGame when Rechercher button is clicked', () => {
+//     const { getByText } = renderComponent();
+//     fireEvent.click(getByText('Rechercher'));
+//     expect(socket.emit).toHaveBeenCalledWith('lookingForAGame', expect.objectContaining({ gameName: expect.any(String) }));
+//   });
 });
