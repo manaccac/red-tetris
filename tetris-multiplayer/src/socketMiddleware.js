@@ -3,6 +3,7 @@ import Cookies from 'js-cookie';
 
 export const socketMiddleware = (store) => (next) => (action) => {
   if (action.type === 'INIT_SOCKET') {
+	socket.emit('multionglet', {userName: 'mana'})
     socket.on('connect', () => {
     });
 

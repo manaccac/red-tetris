@@ -34,6 +34,41 @@ function App() {
 
   const dispatch = useDispatch();
 
+  const [isSessionBlocked, setIsSessionBlocked] = useState(false);
+
+  useEffect(() => {
+    // Générer un identifiant unique pour cette session
+    let sessionId = sessionStorage.getItem('sessionId');
+    if (!sessionId) {
+      sessionId = Math.random().toString(36).substr(2, 9);
+      sessionStorage.setItem('sessionId', sessionId);
+    }
+
+    // Vérifier si une autre session est active
+    const activeSessionId = localStorage.getItem('activeSessionId');
+    if (activeSessionId && activeSessionId !== sessionId) {
+      setIsSessionBlocked(true);
+      alert('Une session de jeu est déjà ouverte dans un autre onglet.');
+    } else {
+      localStorage.setItem('activeSessionId', sessionId);
+    }
+
+    // Écouter les changements dans localStorage
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'activeSessionId' && event.newValue !== sessionId) {
+        setIsSessionBlocked(true);
+        alert('Une session de jeu est déjà ouverte dans un autre onglet.');
+      }
+    });
+
+    // Supprimer l'identifiant de session lors de la fermeture de l'onglet
+    window.addEventListener('unload', () => {
+      if (localStorage.getItem('activeSessionId') === sessionId) {
+        localStorage.removeItem('activeSessionId');
+      }
+    });
+  }, []);
+
   useEffect(() => {
     dispatch({ type: 'INIT_SOCKET' });
   }, [dispatch]);
@@ -76,6 +111,8 @@ function App() {
   };
 
   return (
+	<div style={{ pointerEvents: isSessionBlocked ? 'none' : 'auto' }}>
+
     <Router>
       <ToastContainer />
       {!username ? (
@@ -90,6 +127,7 @@ function App() {
         </>
       )}
     </Router>
+	</div>
   );
 }
 
