@@ -53,6 +53,7 @@ function BlockShape({ shape, color }) {
 			<input
 			  type="color"
 			  id={`color-picker-${i + 1}`}
+			  data-testid={`color-picker-${i + 1}`}
 			  onChange={(event) => handleColorChange(event, i + 1)}
 			  style={{ display: 'none' }}
 			/>
