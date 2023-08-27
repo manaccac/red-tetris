@@ -8,7 +8,7 @@ describe('GameOverScreen', () => {
         const onGoHomeMock = jest.fn();
         const onRestartMock = jest.fn();
 
-        const { getByText } = render(<GameOverScreen onGoHome={onGoHomeMock} onRestart={onRestartMock} />);
+        const { getByText } = render(<GameOverScreen onGoHome={onGoHomeMock} onRestart={onRestartMock} playerWhoWon='John' score={100} opponents={[]} isLeader={'mana'} myName= {'mana'}/>);
 
         expect(getByText('Partie terminée')).toBeInTheDocument();
 
@@ -25,7 +25,7 @@ describe('VictoryScreen', () => {
         const onGoHomeMock = jest.fn();
         const onRestartMock = jest.fn();
 
-        const { getByText } = render(<VictoryScreen onGoHome={onGoHomeMock} onRestart={onRestartMock} />);
+        const { getByText } = render(<VictoryScreen onGoHome={onGoHomeMock} onRestart={onRestartMock} playerWhoWon='John' isLeader={'mana'} myName= {'mana'}/>);
 
         expect(getByText('Victoire !')).toBeInTheDocument();
 
@@ -39,20 +39,22 @@ describe('VictoryScreen', () => {
 
 
 describe('WaitingScreen', () => {
-    it('should render opponent names and respond to start game button click', () => {
-        const opponentNamesMock = ['Alice', 'Bob'];
-        const onStartGameMock = jest.fn();
-
-        const { getByText, getAllByRole } = render(<WaitingScreen opponentNames={opponentNamesMock} isLeader={true} onStartGame={onStartGameMock} />);
-
-        expect(getByText('En attente d\'adversaires...')).toBeInTheDocument();
-
-        const listItems = getAllByRole('listitem');
-        expect(listItems).toHaveLength(opponentNamesMock.length);
-        expect(listItems[0]).toHaveTextContent('Alice');
-        expect(listItems[1]).toHaveTextContent('Bob');
-
-        fireEvent.click(getByText('Démarrer la partie'));
-        expect(onStartGameMock).toHaveBeenCalledTimes(1);
-    });
-});
+	it('should render opponent names and respond to start game button click', () => {
+	  const opponentNamesMock = { Alice: true, Bob: true };
+	  const isLeaderMock = 'John';
+	  const myNameMock = 'John';
+	  const onStartGameMock = jest.fn();
+  
+	  const { getAllByRole, getByTestId } = render(<WaitingScreen opponentNames={opponentNamesMock} isLeader={isLeaderMock} onStartGame={onStartGameMock} myName={myNameMock} />);
+  
+	  const listItems = getAllByRole('listitem');
+	  expect(listItems).toHaveLength(Object.keys(opponentNamesMock).length + 1); // +1 for myName
+	  expect(listItems[0]).toHaveTextContent(myNameMock);
+	  expect(listItems[1]).toHaveTextContent('Alice');
+	  expect(listItems[2]).toHaveTextContent('Bob');
+  
+	  const startGameButton = getByTestId('start-game-btn');
+	  fireEvent.click(startGameButton);
+	  expect(onStartGameMock).toHaveBeenCalledTimes(1);
+	});
+  });

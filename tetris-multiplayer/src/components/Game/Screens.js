@@ -1,30 +1,27 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-function WaitingScreen({ opponentNames, isLeader, onStartGame, myName }) {
-    console.log('leader: ' + isLeader);
-    console.log(opponentNames);
-    return (
-        <div className="overlay">
-            <div className="message">
-                <h1>En attente d'adversaires...</h1>
-                <h2>Chef de salle {isLeader} </h2>
-                <ul>
-                    <li>{myName}</li>
-                    {opponentNames && Object.keys(opponentNames).map((name, index) => (
-                        <li key={index}>{name} + fail</li>
-                    ))}
-                </ul>
-                <p>Nombre de joueurs : {opponentNames ? Object.keys(opponentNames).length + 1 : 0}</p>
-                {isLeader === myName && (
-                    <button onClick={onStartGame} data-testid="start-game-btn">Démarrer la partie</button>
-                )}
-                <div className="loading-animation"></div>
-            </div>
-        </div>
-    );
-}
-
+const WaitingScreen = ({ opponentNames, isLeader, onStartGame, myName }) => {
+	return (
+	  <div className='overlay'>
+		<div className='message'>
+		  <h1>En attente d'adversaires...</h1>
+		  <h2>Chef de salle {isLeader} </h2>
+		  <ul>
+			<li>{myName}</li>
+			{opponentNames && Object.keys(opponentNames).map((name, index) => (
+			  <li key={index}>{name}</li>
+			))}
+		  </ul>
+		  <p>Nombre de joueurs : {opponentNames ? Object.keys(opponentNames).length + 1 : 0}</p>
+		  {isLeader === myName && (
+			<button onClick={onStartGame} data-testid='start-game-btn'>Démarrer la partie</button>
+		  )}
+		  <div className='loading-animation'></div>
+		</div>
+	  </div>
+	);
+  };
 
 
 const mapStateToProps = (state) => ({
@@ -48,6 +45,11 @@ function CountdownScreen({ countdown }) {
 
 function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader, opponents, playerWhoWon, score }) {
     let canDisplayRestart = !opponents.length || playerWon ? true : false;
+	console.log('playerWon: ' + playerWon);
+	console.log('canDisplayRestart: ' + canDisplayRestart);
+	if (!opponents.length) {
+		playerWhoWon = myName;
+	}
     return (
         <div className="overlay">
             <div className="message">
