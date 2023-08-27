@@ -55,6 +55,9 @@
     "socket.io-mock": "^1.3.2"
   },
   "jest": {
+	"moduleNameMapper": {
+	  "\\.(css|less|sass|scss)$": "<rootDir>/fileMock.js"
+	},
     "testEnvironment": "jsdom"
   }
 }

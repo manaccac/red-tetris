@@ -131,7 +131,6 @@ function Board(props) {
 
   useEffect(() => {
 	Cookies.get('realod');
-	console.log('in useEffect realod: ', Cookies.get('realod'));
 	if (Cookies.get('realod')) {
 		navigate('/');
 		Cookies.remove('realod');
@@ -141,7 +140,6 @@ function Board(props) {
 
   useEffect(() => {
     const navigationEntries = window.performance.getEntriesByType("navigation");
-	console.log('navigationEntries: ', navigationEntries[0].startTime);
     if (navigationEntries.length > 0 && navigationEntries[0].startTime !== 0) {
       navigate("/"); // Redirige vers la page d'accueil
     }
@@ -205,8 +203,6 @@ function Board(props) {
   };
 
   useEffect(() => {
-	console.log('in useEffect updateBoard ', props.updateBoard);
-	console.log('in useEffect send ', props.send);
 	if (props.isGameOver) {
 		dispatch({ type: 'GAME_OVER'});
 	}
@@ -223,12 +219,10 @@ function Board(props) {
   useEffect(() => {
     let countdownInterval;
 
-    console.log('in countdown useeffect');
-    console.log(props.gameStart);
+    // console.log(props.gameStart);
     if (props.gameStart) {
       // console.log('gameStart is true, but countdown is: ')
       countdownInterval = setInterval(() => {
-        console.log("hello count :", countdownInterval);
         setCountdown((prevCountdown) => {
           if (prevCountdown <= 1) {
             console.log('clearInterval got called');
@@ -290,7 +284,7 @@ function Board(props) {
     return () => {
 	  dispatch({ type: 'CLEANUP_SOCKET_GAME' });
       props.resetState();
-      console.log('returned called');
+    //   console.log('returned called');
       props.gameStarted(false);
     };
   }, []);

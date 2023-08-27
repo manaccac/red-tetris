@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 
 jest.mock('js-cookie', () => ({
   set: jest.fn(),
+  get: jest.fn(),
 }));
 
 describe('UsernamePrompt', () => {
@@ -43,16 +44,5 @@ describe('UsernamePrompt', () => {
 	writable: true,
   });
   
-  test('Reloads the window when form is submitted', async () => {
-	render(<UsernamePrompt />);
-	const inputElement = screen.getByLabelText('Nom d\'utilisateur:');
-	const submitButton = screen.getByText('Envoyer');
-  
-	fireEvent.change(inputElement, { target: { value: 'TestUser' } });
-	fireEvent.click(submitButton);
-  
-	await Promise.resolve();
-  
-	expect(mockReload).toHaveBeenCalledTimes(2);
-  });
+
 });

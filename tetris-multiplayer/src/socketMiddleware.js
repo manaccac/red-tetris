@@ -42,27 +42,22 @@ export const socketMiddleware = (store) => (next) => (action) => {
 
   if (action.type === 'INIT_SOCKET_GAME') {
 	socket.on('gameInfos', (data) => {
-		console.log('gameInfos received');
 		store.dispatch({ type: 'SET_GAME_INFO', payload: data });
 	});
 	socket.on('gameStart', (response) => {
-		console.log('gameStart received');
 		action.props.resetGameState();
 		action.setGameRunning(false);
 		action.props.updatePiece([response.piece, response.nextPiece]);
 		action.props.setOpponentName(response.opponentName);
 	});
 	socket.on('spectator', () => {
-		console.log('spectator');
 		action.props.setLeader(false);
 		action.props.setSpectator(true);
 	});
 	socket.on('receivedLines', (numberOfLines) => {
-		console.log('receivedLines');
 		action.props.addIndestructibleLine(numberOfLines);
 	});
 	socket.on('Victory', () => {
-		console.log('Victory : ', action.scoreUpdatedRef.current);
 		// Récupérez la valeur actuelle du cookie de score
 		const currentScore = action.parseInt(Cookies.get('score'), 10) || 0;
 		// Incrémentez le score
@@ -75,15 +70,12 @@ export const socketMiddleware = (store) => (next) => (action) => {
 		action.setScoreUpdated(true);
 	});
 	socket.on('opponentBoardData', (opponentBoardData, userName, score) => {
-		console.log('received in socketOnOpponent score: ' + score);
 		action.props.updateOpponentBoard(userName, opponentBoardData, score);
 	});
 	socket.on('updateNextPiece', (nextPiece) => {
-		console.log('updateNextPiece');
 		action.props.updatePiece(nextPiece);
 	});
 	socket.on('playerWon', (playerWhoWon, winnerScore) => {
-		console.log('playerWon');
 		action.props.setPlayerWon(playerWhoWon, winnerScore);
 	});
 	socket.emit('askingGameInfos');
@@ -113,7 +105,6 @@ if (action.type === 'UPDATE_BOARD_SOCKET') {
   }
 if (action.type === 'SEND_LINES') {
 	// socket.emit('sendLines', completedLines.length - 1);
-	console.log('sendLines 	socket.emit(sendLines,  action.props.send');
 	socket.emit('sendLines',  action.props.send );
 }
   

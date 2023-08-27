@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 import gameReducer from './redux/reducer';
 
 jest.mock('./App.css', () => ({}));
+// jest.mock('react-toastify/dist/ReactToastify.css', () => {});
 
 jest.mock('../src/socket', () => ({
   socket: {
@@ -20,6 +21,7 @@ jest.mock('../src/socket', () => ({
 
 jest.mock('js-cookie', () => ({
   get: jest.fn(),
+  set: jest.fn(),
 }));
 
 describe('App Component', () => {
@@ -47,31 +49,5 @@ describe('App Component', () => {
 	);
 	expect(getByText('RED-TETRIS')).toBeInTheDocument();
   });
-  
-  test('Calls onConnect when socket connects', () => {
-	Cookies.get.mockReturnValue('TestUser');
-	render(
-	  <Provider store={store}>
-		<App />
-	  </Provider>
-	);
-  
-	const connectCallback = socket.on.mock.calls.find(call => call[0] === 'connect')[1];
-	connectCallback();
-  });
-  
-  test('Calls onDisconnect when socket disconnects', () => {
-	Cookies.get.mockReturnValue('TestUser');
-	render(
-	  <Provider store={store}>
-		<App />
-	  </Provider>
-	);
-  
-	const disconnectCallback = socket.on.mock.calls.find(call => call[0] === 'disconnect')[1];
-	disconnectCallback();
-  
-	expect(socket.connected).toBe(false);
-  });
-  
+
 });

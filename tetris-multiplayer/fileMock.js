@@ -3,4 +3,3 @@ module.exports = {
 	  "\\.(css|less|sass|scss)$": "<rootDir>/fileMock.js",
 	},
   };
-  

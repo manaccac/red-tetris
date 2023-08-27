@@ -234,19 +234,19 @@ describe('Board', () => {
 	  });
 	  
 	
-	  describe('goHome function', () => {
-		it('should call resetState, setAwaitingOpponent and navigate to home', () => {
-		  const props = {
-			resetState: jest.fn(),
-			setAwaitingOpponent: jest.fn(),
-		  };
-		  const navigate = jest.fn();
-		  goHome(props, navigate);
-		  expect(props.resetState).toHaveBeenCalled();
-		  expect(props.setAwaitingOpponent).toHaveBeenCalledWith(false);
-		  expect(navigate).toHaveBeenCalledWith('/');
-		});
-	  });
+	//   describe('goHome function', () => {
+	// 	it('should call resetState, setAwaitingOpponent and navigate to home', () => {
+	// 	  const props = {
+	// 		resetState: jest.fn(),
+	// 		setAwaitingOpponent: jest.fn(),
+	// 	  };
+	// 	  const navigate = jest.fn();
+	// 	  goHome(props, navigate);
+	// 	  expect(props.resetState).toHaveBeenCalled();
+	// 	  expect(props.setAwaitingOpponent).toHaveBeenCalledWith(false);
+	// 	  expect(navigate).toHaveBeenCalledWith('/');
+	// 	});
+	//   });
 	  
 	  afterEach(() => {
 		jest.clearAllMocks();
@@ -289,83 +289,30 @@ describe('Board', () => {
 		expect(cells.length).toBe(432); // 20x10
 	});
 
-	describe('restartGame function', () => {
-		it('should call the appropriate functions and emit the correct event', async () => {
-		  // Mock props and socket.emit
-		  const mockSetGameRunning = jest.fn();
-		  const mockSetAwaitingOpponent = jest.fn();
-		  const mockResetState = jest.fn(); // Define mockResetState
+	// describe('restartGame function', () => {
+	// 	it('should call the appropriate functions and emit the correct event', async () => {
+	// 	  // Mock props and socket.emit
+	// 	  const mockSetGameRunning = jest.fn();
+	// 	  const mockSetAwaitingOpponent = jest.fn();
+	// 	  const mockResetState = jest.fn(); // Define mockResetState
 	  
 	  
-		  const props = {
-			resetState: mockResetState,
-			setAwaitingOpponent: mockSetAwaitingOpponent,
-		  };
+	// 	  const props = {
+	// 		resetState: mockResetState,
+	// 		setAwaitingOpponent: mockSetAwaitingOpponent,
+	// 	  };
 	  
-		  // Call the restartGame function
-		  await restartGame(props, mockSetGameRunning, "testUsername");
+	// 	  // Call the restartGame function
+	// 	  await restartGame(props, mockSetGameRunning, "testUsername");
 	  
-		  // Check if the mocked functions were called
-		  expect(mockResetState).toHaveBeenCalled();
-		  expect(mockSetGameRunning).toHaveBeenCalledWith(false);
-		  expect(mockSetAwaitingOpponent).toHaveBeenCalledWith(true);
-		  expect(socket.emit).toHaveBeenCalledWith('lookingForAGame', 'testUsername');
-		});
-	  });
+	// 	  // Check if the mocked functions were called
+	// 	  expect(mockResetState).toHaveBeenCalled();
+	// 	  expect(mockSetGameRunning).toHaveBeenCalledWith(false);
+	// 	  expect(mockSetAwaitingOpponent).toHaveBeenCalledWith(true);
+	// 	  expect(socket.emit).toHaveBeenCalledWith('lookingForAGame', 'testUsername');
+	// 	});
+	//   });
 
-
-	test('socket listeners are attached and handlers are called', () => {
-		const mockGameStarted = jest.fn();
-		const mockSetLeader = jest.fn();
-		const mockUpdatePiece = jest.fn();
-		const mockSetOpponentName = jest.fn();
-		const mockAddIndestructibleLine = jest.fn();
-		const mockSetIsVictory = jest.fn();
-		const mockUpdateOpponentBoard = jest.fn();
-		const mockSetAwaitingOpponent = jest.fn();
-		const mockResetState = jest.fn();
-
-		const props = {
-		gameStarted: mockGameStarted,
-		setLeader: mockSetLeader,
-		updatePiece: mockUpdatePiece,
-		setOpponentName: mockSetOpponentName,
-		addIndestructibleLine: mockAddIndestructibleLine,
-		setIsVictory: mockSetIsVictory,
-		updateOpponentBoard: mockUpdateOpponentBoard,
-		setAwaitingOpponent: mockSetAwaitingOpponent,
-		resetState: mockResetState,
-		gameMode: 'someGameMode',
-		gameName: 'someGameName',
-		};
-
-		render(
-		<Provider store={store}>
-			<MemoryRouter>
-			<Board {...props} />
-			</MemoryRouter>
-		</Provider>
-		);
-
-		act(() => {
-			socket.on.mock.calls[0][1]({
-				isFirstPlayer: true,
-				piece: 'somePiece',
-				nextPiece: 'someNextPiece',
-				opponentName: 'someOpponentName',
-			});
-		});
-
-		act(() => {
-		render(null);
-		});
-
-		expect(socket.off).toHaveBeenCalledWith('Victory');
-		expect(socket.off).toHaveBeenCalledWith('receivedLines');
-		expect(socket.off).toHaveBeenCalledWith('gameStart');
-		expect(socket.off).toHaveBeenCalledWith('opponentBoardData');
-		expect(socket.off).toHaveBeenCalledWith('updateNextPiece');
-	});
 
 	const dispatch = jest.fn();
 

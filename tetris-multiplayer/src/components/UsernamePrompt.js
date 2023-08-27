@@ -6,12 +6,6 @@ import ColorPicker from './ColorPicker';
 import { getBlockColors } from './ColorPicker';
 import { useDispatch } from 'react-redux';
 
-
-
-
-
-
-
 function UsernamePrompt({ onUsernameSubmit }) {
   const initialUsername = Cookies.get('username') || '';
   const initialImageIndex = parseInt(Cookies.get('image'), 10) || 1;

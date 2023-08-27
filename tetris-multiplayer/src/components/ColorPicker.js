@@ -1,3 +1,6 @@
+import React from 'react';
+
+
 function BlockShape({ shape, color }) {
 	return (
 	  <div className="block-shape">
