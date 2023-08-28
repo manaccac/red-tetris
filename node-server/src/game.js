@@ -57,7 +57,8 @@ class Game {
 
     addPlayer(socket) {
         console.log('adding player to game');
-        this.players.push(players.get(socket.id));
+        const playerData = players.get(socket.id);
+		this.players.push(new Player(playerData.name, playerData.winScore, playerData.image, playerData.socket));
     }
 
     removePlayer(socket) {

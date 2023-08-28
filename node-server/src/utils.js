@@ -15,9 +15,12 @@ const leaveAllRooms = (socket) => {
 };
 
 const leavingGame = (socket) => {
-	console.log('leavingGame');
 	leaveAllRooms(socket);
-	if (!players.has(socket.id)) return;
+	if (!players.has(socket.id)){
+		console.log('player not found');
+		return;
+	} 
+	// return;
 	for (const [gameId, gameData] of games.entries()) {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
 			if (players.get(socket.id).role !== 'spectator') {
@@ -89,6 +92,7 @@ const restartGame = (socket) => {
 	for (const [gameId, gameData] of games.entries()) {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
 			gameData.changeLeader();
+			console.log("Value of io:", io);
 			io.to(gameId).emit('gameInfos', { ...gameData.gameInfos });
 			startGame(socket, gameId);
 			return;
