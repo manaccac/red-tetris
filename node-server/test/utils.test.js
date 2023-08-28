@@ -105,4 +105,24 @@ describe('utils.js tests', () => {
     expect(socketMock.emit).toHaveBeenCalledWith('gameInfos', expect.anything());
     expect(players.get('1').role).toBe('player');
   });
+  test('should handle match making with specific game name', () => {
+    const dataStartGame = { userName: 'John', userWin: 0, userImage: 'image_path', gameName: 'game1' };
+    const mockGame = { gameName: 'game1', gameInfos: {}, isRunning: true, players: [], addPlayer: jest.fn() };
+    games.set('game1', mockGame);
+    players.set('1', new Player('John', 0, 'image_path', socketMock));
+
+    handleMatchMaking(socketMock, dataStartGame);
+
+    expect(socketMock.join).toHaveBeenCalledWith('game1');
+    expect(socketMock.emit).toHaveBeenCalledWith('gameInfos', expect.anything());
+    expect(players.get('1').role).toBe('spectator');
+  });
+  test('should handle match making game full', () => {
+    const dataStartGame = { userName: 'John', userWin: 0, userImage: 'image_path', gameName: 'game1' };
+    const mockGame = { gameName: 'game1', gameInfos: {}, isRunning: false, players: ['1', '2', '3', '4', '5', '6', '7'], addPlayer: jest.fn() };
+    games.set('game1', mockGame);
+    players.set('1', new Player('John', 0, 'image_path', socketMock));
+
+    handleMatchMaking(socketMock, dataStartGame);
+  });
 });
