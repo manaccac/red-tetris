@@ -16,7 +16,7 @@ io.on('connection', (socket) => {
             }
         }
         if (isAvailable) {
-            let player = new Player(userInfos.username, userInfos.userWin, userInfos.imageId, socket);
+            let player = new Player(userInfos.username, 0, userInfos.image,socket);
             players.set(socket.id, player);
         }
 

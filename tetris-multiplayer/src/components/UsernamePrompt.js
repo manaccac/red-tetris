@@ -29,6 +29,10 @@ function UsernamePrompt({ onUsernameSubmit }) {
       }
     };
 	dispatch({ type: 'USERNAME_REP', payload: { handleUsernameRep } });
+	return () => {
+		dispatch({ type: 'socketoff_usernameRep'});
+		socket.off('usernameRep');
+	};
   }, [username, selectedImageIndex, onUsernameSubmit]);
 
   const handleUsernameSubmit = (e) => {

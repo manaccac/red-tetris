@@ -36,7 +36,9 @@ export const socketMiddleware = (store) => (next) => (action) => {
   if (action.type === 'USERNAME_REP')
 	socket.on('usernameRep', action.payload.handleUsernameRep);
   if (action.type === 'EMIT_USER_INFO')
-	socket.emit('setUserInfos', { username: action.payload.username, image: action.payload.selectedImageIndex });
+	socket.emit('setUserInfos', { username: action.payload.username, image: action.payload.selectedImageIndex, userwin: action.payload.userWin });
+  if (action.type === 'socketoff_usernameRep')
+	socket.off('usernameRep');
   if (action.type === 'RESTART_GAME')
   socket.emit('restartGame', action.payload.username);
 
