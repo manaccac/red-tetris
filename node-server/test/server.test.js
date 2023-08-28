@@ -59,5 +59,30 @@ describe('socket.io additional tests', () => {
 	  // Vérifiez si 'restartGame' a été appelé
 	  expect(restartGame).toHaveBeenCalledWith(expect.anything());
 	});
+
+	// Test pour vérifier le démarrage d'un jeu
+	test('should handle game start', async () => {
+		const gameName = 'TestGame';
+		clientSocket.emit('startGame', gameName);
+		await new Promise(resolve => setTimeout(resolve, 100));
+		expect(startGame).toHaveBeenCalledWith(expect.anything(), gameName);
+	  });
+  
+	
+	  // Test pour vérifier la mise à jour du tableau
+	  test('should handle board update', async () => {
+		const updatedBoardAndScore = { updateBoard: [[0, 1], [1, 0]], score: 10 };
+		clientSocket.emit('updateBoard', updatedBoardAndScore);
+		await new Promise(resolve => setTimeout(resolve, 100));
+		expect(sendBoardAndPieceToPlayer).toHaveBeenCalledWith(expect.anything(), updatedBoardAndScore, expect.anything());
+	  });
+	
+	  // Test pour vérifier l'envoi de lignes
+	  test('should handle sending lines', async () => {
+		const numberOfLines = 5;
+		clientSocket.emit('sendLines', numberOfLines);
+		await new Promise(resolve => setTimeout(resolve, 100));
+		expect(sendLinesToPlayer).toHaveBeenCalledWith(expect.anything(), numberOfLines);
+	  });
   
   });
