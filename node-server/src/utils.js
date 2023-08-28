@@ -138,6 +138,7 @@ const handleMatchMaking = (socket, dataStartGame) => {
 				players.get(socket.id).role = 'player';
 			}
 		} else { // la partie n'existe pas, prévenir l'user et retour menu
+			console.log("NoGameFound")
 			socket.emit('NoGameFound');
 		}
 	}

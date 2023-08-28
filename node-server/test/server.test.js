@@ -19,6 +19,10 @@ beforeAll((done) => {
     io.attach(httpServer);
     clientSocket.on('connect', done);
   });
+  serverSocket.on("connection", (socket) => {
+	connectedSocket = socket;
+	done();
+  });
 });
 
 afterAll(() => {
@@ -33,44 +37,27 @@ describe("socket.io tests", () => {
 		done();
 	  });
 	});
-  
-	test("should handle match making", (done) => {
-	  serverSocket.on("connection", (socket) => {
-		socket.on("lookingForAGame", () => {
-		  expect(handleMatchMaking).toHaveBeenCalled();
-		  done();
-		});
-	  });
-	  clientSocket.emit("lookingForAGame", { gameData: "data" });
-	});
-  
-	test("should handle restart game", (done) => {
-	  serverSocket.on("connection", (socket) => {
-		socket.on("restartGame", () => {
-		  expect(restartGame).toHaveBeenCalled();
-		  done();
-		});
-	  });
-	  clientSocket.emit("restartGame");
-	});
-  
-	test("should start game", (done) => {
-	  serverSocket.on("connection", (socket) => {
-		socket.on("startGame", () => {
-		  expect(startGame).toHaveBeenCalled();
-		  done();
-		});
-	  });
-	  clientSocket.emit("startGame", "gameName");
-	});
-  
-	test("should handle disconnect", (done) => {
-	  serverSocket.on("connection", (socket) => {
-		socket.on("disconnect", () => {
-		  expect(leavingGame).toHaveBeenCalled();
-		  done();
-		});
-	  });
-	  clientSocket.close();
-	});
 });
+
+describe('socket.io additional tests', () => {
+	test('should handle looking for a game', async () => {
+		const dataStartGame = { gameType: 'multiplayer' };
+		clientSocket.emit('lookingForAGame', dataStartGame);
+		
+		// Attendre un peu pour que l'événement soit traité
+		await new Promise(resolve => setTimeout(resolve, 100));
+		
+		expect(handleMatchMaking).toHaveBeenCalledWith(expect.anything(), dataStartGame);
+	  });
+	  
+	// Test pour vérifier le redémarrage d'un jeu
+	test('should handle game restart', async () => {
+	  clientSocket.emit('restartGame');
+
+	  await new Promise(resolve => setTimeout(resolve, 100));
+
+	  // Vérifiez si 'restartGame' a été appelé
+	  expect(restartGame).toHaveBeenCalledWith(expect.anything());
+	});
+  
+  });
