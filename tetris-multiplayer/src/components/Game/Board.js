@@ -117,7 +117,7 @@ function Board(props) {
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-	  Cookies.set('realod', true);
+      Cookies.set('realod', true);
       e.preventDefault();
       e.returnValue = "Êtes-vous sûr de vouloir quitter cette page ?";
     };
@@ -130,11 +130,11 @@ function Board(props) {
   }, []);
 
   useEffect(() => {
-	Cookies.get('realod');
-	if (Cookies.get('realod')) {
-		navigate('/');
-		Cookies.remove('realod');
-	}
+    Cookies.get('realod');
+    if (Cookies.get('realod')) {
+      navigate('/');
+      Cookies.remove('realod');
+    }
   }, [Cookies.get('realod')]);
 
 
@@ -203,17 +203,17 @@ function Board(props) {
   };
 
   useEffect(() => {
-	if (props.isGameOver) {
-		dispatch({ type: 'GAME_OVER'});
-	}
-	if (props.updateBoard) {
-		dispatch({ type: 'UPDATE_BOARD_SOCKET', props});
-		props.updateBoardState();
-	}
-	if (props.send > 0) {
-		dispatch({ type: 'SEND_LINES', props});
-		props.send_board();
-	}
+    if (props.isGameOver) {
+      dispatch({ type: 'GAME_OVER' });
+    }
+    if (props.updateBoard) {
+      dispatch({ type: 'UPDATE_BOARD_SOCKET', props });
+      props.updateBoardState();
+    }
+    if (props.send > 0) {
+      dispatch({ type: 'SEND_LINES', props });
+      props.send_board();
+    }
   }, [props.isGameOver, props.updateBoard, props.send]);
 
   useEffect(() => {
@@ -277,14 +277,14 @@ function Board(props) {
 
 
   useEffect(() => {
-	dispatch({ type: 'INIT_SOCKET_GAME', props, setGameRunning, scoreUpdatedRef, parseInt, setScoreUpdated});
+    dispatch({ type: 'INIT_SOCKET_GAME', props, setGameRunning, scoreUpdatedRef, parseInt, setScoreUpdated });
 
     props.setAwaitingOpponent(true);
 
     return () => {
-	  dispatch({ type: 'CLEANUP_SOCKET_GAME' });
+      dispatch({ type: 'CLEANUP_SOCKET_GAME' });
       props.resetState();
-    //   console.log('returned called');
+      //   console.log('returned called');
       props.gameStarted(false);
     };
   }, []);
@@ -334,7 +334,7 @@ function Board(props) {
 
 
   const startGameHandler = () => {
-	dispatch({ type: 'START_GAME', props });
+    dispatch({ type: 'START_GAME', props });
     props.gameStarted(true);
   };
 
@@ -361,7 +361,7 @@ function Board(props) {
         {props.opponentName}
       </div>
 
-      {props.isGameOver && (!props.isGameWon || props.isSpectator) && <GameOverScreen onGoHome={() => goHome(props, navigate, setScoreUpdated)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} opponents={props.opponents} playerWhoWon={props.playerWhoWon} score={props.winnerScore} />}
+      {((props.isGameOver && !props.isGameWon) || (props.playerWhoWon && props.isSpectator)) && <GameOverScreen onGoHome={() => goHome(props, navigate, setScoreUpdated)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} opponents={props.opponents} playerWhoWon={props.playerWhoWon} score={props.winnerScore} />}
       {props.isGameOver && props.isGameWon && !props.isSpectator && <VictoryScreen onGoHome={() => goHome(props, navigate, setScoreUpdated)} onRestart={handleRestartGame} playerWon={props.playerWon} myName={props.myName} isLeader={props.leader} playerWhoWon={props.playerWhoWon} />}
       {!props.isGameOver && (!props.gameStart && !props.isSpectator) && (
         <WaitingScreen

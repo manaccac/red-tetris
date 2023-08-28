@@ -2,26 +2,26 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 const WaitingScreen = ({ opponentNames, isLeader, onStartGame, myName }) => {
-	return (
-	  <div className='overlay'>
-		<div className='message'>
-		  <h1>En attente d'adversaires...</h1>
-		  <h2>Chef de salle {isLeader} </h2>
-		  <ul>
-			<li>{myName}</li>
-			{opponentNames && Object.keys(opponentNames).map((name, index) => (
-			  <li key={index}>{name}</li>
-			))}
-		  </ul>
-		  <p>Nombre de joueurs : {opponentNames ? Object.keys(opponentNames).length + 1 : 0}</p>
-		  {isLeader === myName && (
-			<button onClick={onStartGame} data-testid='start-game-btn'>Démarrer la partie</button>
-		  )}
-		  <div className='loading-animation'></div>
-		</div>
-	  </div>
-	);
-  };
+    return (
+        <div className='overlay'>
+            <div className='message'>
+                <h1>En attente d'adversaires...</h1>
+                <h2>Chef de salle {isLeader} </h2>
+                <ul>
+                    <li>{myName}</li>
+                    {opponentNames && Object.keys(opponentNames).map((name, index) => (
+                        <li key={index}>{name}</li>
+                    ))}
+                </ul>
+                <p>Nombre de joueurs : {opponentNames ? Object.keys(opponentNames).length + 1 : 0}</p>
+                {isLeader === myName && (
+                    <button onClick={onStartGame} data-testid='start-game-btn'>Démarrer la partie</button>
+                )}
+                <div className='loading-animation'></div>
+            </div>
+        </div>
+    );
+};
 
 
 const mapStateToProps = (state) => ({
@@ -43,20 +43,22 @@ function CountdownScreen({ countdown }) {
     );
 }
 
-function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader, opponents, playerWhoWon, score }) {
-    let canDisplayRestart = !opponents.length || playerWon ? true : false;
-	console.log('playerWon: ' + playerWon);
-	console.log('canDisplayRestart: ' + canDisplayRestart);
-	if (!opponents.length) {
-		playerWhoWon = myName;
-	}
+function GameOverScreen({ onGoHome, onRestart, playerWon, myName, isLeader, opponents, playerWhoWon, score, opponentNames }) {
+    let canDisplayRestart = Object.keys(opponents).length === 0 || playerWhoWon ? true : false;
+
+
+    if (Object.keys(opponents).length === 0) {
+        playerWhoWon = myName;
+    }
     return (
         <div className="overlay">
             <div className="message">
-                <h1>Partie terminée</h1>
-				<h2>
-					Le joueur: <span className='name-color'>{playerWhoWon}</span> a gagné la partie avec un score de: <span className='score-color'>{score}</span>
-				</h2>
+                <h1>{playerWhoWon ? 'Partie terminée' : 'Partie en cours'}</h1>
+                {playerWhoWon && (
+                    <h2>
+                        Le joueur: <span className='name-color'>{playerWhoWon}</span> a gagné la partie avec un score de: <span className='score-color'>{score}</span>
+                    </h2>
+                )}
                 <button onClick={onGoHome}>Retour à la page d'accueil.</button>
                 {canDisplayRestart && myName === isLeader && (
                     <button onClick={onRestart}>{playerWhoWon ? 'Recommencer' : 'Partie en cours'}</button>

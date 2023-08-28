@@ -15,11 +15,12 @@ const leaveAllRooms = (socket) => {
 };
 
 const leavingGame = (socket) => {
+	console.log('leaving game called from: ' + players.get(socket.id));
 	leaveAllRooms(socket);
-	if (!players.has(socket.id)){
+	if (!players.has(socket.id)) {
 		console.log('player not found');
 		return;
-	} 
+	}
 	// return;
 	for (const [gameId, gameData] of games.entries()) {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
@@ -51,7 +52,11 @@ const sendBoardAndPieceToPlayer = (socket, updatedBoardAndScore) => {
 			//on envoit la pièce suivante au joueur qui vient de poser
 			socket.emit('updateNextPiece', [gameData.pieces[players.get(socket.id).pieceId]]);
 			players.get(socket.id).pieceId++;
+			console.log('score received from soloPlayer: ' + updatedBoardAndScore.score);
 			players.get(socket.id).score = updatedBoardAndScore.score;
+
+			console.log('new piece from ' + players.get(socket.id).name);
+			console.log('pieceId from him: ' + players.get(socket.id).pieceId);
 			//on envoit le board a l'adversaire
 			socket.broadcast.to(gameId).emit('opponentBoardData', updatedBoardAndScore.updateBoard, players.get(socket.id).name, players.get(socket.id).score);
 			return;
@@ -69,18 +74,26 @@ const sendLinesToPlayer = (socket, numberOfLines) => {
 }
 
 const gameOver = (socket) => {
+	console.log('gameOverGotCalled for player:' + players.get(socket.id).name);
 	for (const [gameId, gameData] of games.entries()) {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name) && gameData.isRunning) {
+			console.log('number of players in the game:' + gameData.players.length);
 			players.get(socket.id).gameOver = true;
 			// on prévient l'autre joueur de sa victoire
 			socket.broadcast.to(gameId).emit('playerLost', players.get(socket.id).name);
 			// si tous les joueurs ont perdus sauf un, il a gagné
 			winner = gameData.getWinner(); // rempli si gagnant sinon null
+			soloPlayerData = gameData.getSoloPlayerDataIfSolo();
 			if (winner) {
 				console.log('winnerName ?:' + winner.name);
 				winner.socket.emit('Victory');
 				winner.winScore++;
 				io.to(gameId).emit('playerWon', winner.name, winner.score);
+				console.log('score for winner: ' + winner.score);
+				gameData.isRunning = false;
+			} else if (soloPlayerData) { // quand joueur solo avec spectaeurs
+				io.to(gameId).emit('playerWon', soloPlayerData.name, soloPlayerData.score);
+				console.log('soloplayer name/score: ' + soloPlayerData.name + '/' + soloPlayerData.score);
 				gameData.isRunning = false;
 			}
 			return;
@@ -92,7 +105,6 @@ const restartGame = (socket) => {
 	for (const [gameId, gameData] of games.entries()) {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name)) {
 			gameData.changeLeader();
-			console.log("Value of io:", io);
 			io.to(gameId).emit('gameInfos', { ...gameData.gameInfos });
 			startGame(socket, gameId);
 			return;
@@ -126,13 +138,14 @@ const handleMatchMaking = (socket, dataStartGame) => {
 	} else { // nom renseigné, le joueur cherche une partie avec un nom spécifique
 		currentGame = games.get(dataStartGame.gameName);
 		if (currentGame) { // la partie existe
-			if (currentGame.isRunning) {// game en cours, prevenir le client qu'il sera spectateur
+			if (currentGame.isRunning && currentGame.players.length < maxPlayerPerGame) {// game en cours, prevenir le client qu'il sera spectateur
 				socket.join(currentGame.gameName);
 				currentGame.addPlayer(socket);
 				//tell everyone new comer but tell him he's spectator
 				socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'spectator' });
 				players.get(socket.id).role = 'spectator';
 			} else if (currentGame.players.length == maxPlayerPerGame) {// game pleine, on prévient
+				console.log('GameFull');
 				socket.emit('GameFull');
 			} else { // partie trouvée et places dispos, ajout à la salle d'attente
 				socket.join(currentGame.gameName);

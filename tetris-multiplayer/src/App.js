@@ -48,7 +48,7 @@ function App() {
     const activeSessionId = localStorage.getItem('activeSessionId');
     if (activeSessionId && activeSessionId !== sessionId) {
       setIsSessionBlocked(true);
-      alert('Une session de jeu est déjà ouverte dans un autre onglet.');
+      alert('Un onglet est déjà ouvert sur ce navigateur.');
     } else {
       localStorage.setItem('activeSessionId', sessionId);
     }
@@ -57,7 +57,7 @@ function App() {
     window.addEventListener('storage', (event) => {
       if (event.key === 'activeSessionId' && event.newValue !== sessionId) {
         setIsSessionBlocked(true);
-        alert('Une session de jeu est déjà ouverte dans un autre onglet.');
+        alert('Un onglet est déjà ouvert sur ce navigateur.');
       }
     });
 
@@ -111,23 +111,23 @@ function App() {
   };
 
   return (
-	<div style={{ pointerEvents: isSessionBlocked ? 'none' : 'auto' }}>
+    <div style={{ pointerEvents: isSessionBlocked ? 'none' : 'auto' }}>
 
-    <Router>
-      <ToastContainer />
-      {!username ? (
-        <UsernamePrompt onUsernameSubmit={handleUsernameSubmit} data-testid="usernamePrompt" />
-      ) : (
-        <>
-          <UserInfo username={username} image={image} score={score} onProfileClick={handleProfileClick} />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/:hash" element={<Game updateScore={updateScore} />} />
-          </Routes>
-        </>
-      )}
-    </Router>
-	</div>
+      <Router>
+        <ToastContainer />
+        {!username ? (
+          <UsernamePrompt onUsernameSubmit={handleUsernameSubmit} data-testid="usernamePrompt" />
+        ) : (
+          <>
+            <UserInfo username={username} image={image} score={score} onProfileClick={handleProfileClick} />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/:hash" element={<Game updateScore={updateScore} />} />
+            </Routes>
+          </>
+        )}
+      </Router>
+    </div>
   );
 }
 

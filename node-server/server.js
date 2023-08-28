@@ -16,7 +16,7 @@ io.on('connection', (socket) => {
             }
         }
         if (isAvailable) {
-            let player = new Player(userInfos.username, 0, userInfos.image,socket);
+            let player = new Player(userInfos.username, 0, userInfos.image, socket);
             players.set(socket.id, player);
         }
 
@@ -48,15 +48,15 @@ io.on('connection', (socket) => {
         leavingGame(socket);
     });
 
-	socket.on('updateBoard', (updatedBoardAndScore) => {
-		const { updateBoard, score } = updatedBoardAndScore;
-		console.log('updateBoard called');
-		sendBoardAndPieceToPlayer(socket, updatedBoardAndScore, players.get(socket.id).name);
-	  });
-	  
+    socket.on('updateBoard', (updatedBoardAndScore) => {
+        // const { updateBoard, score } = updatedBoardAndScore;
+        // console.log('updateBoard called');
+        sendBoardAndPieceToPlayer(socket, updatedBoardAndScore, players.get(socket.id).name);
+    });
+
 
     socket.on('sendLines', (numberOfLines) => {
-        console.log('reiceived sendLines, sending:' + numberOfLines);
+        // console.log('reiceived sendLines, sending:' + numberOfLines);
         sendLinesToPlayer(socket, numberOfLines);
     });
 

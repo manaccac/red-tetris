@@ -17,8 +17,8 @@ class Game {
         this.leader = players.get(socket.id).name;
         this.players.push(players.get(socket.id));
         this.gameMode = gameMode
-        this.pieces.push(new Piece());
-        this.pieces.push(new Piece());
+        // this.pieces.push(new Piece());
+        // this.pieces.push(new Piece());
     }
 
     getPlayerNames() {
@@ -56,9 +56,7 @@ class Game {
     }
 
     addPlayer(socket) {
-        console.log('adding player to game');
-        const playerData = players.get(socket.id);
-		this.players.push(new Player(playerData.name, playerData.winScore, playerData.image, playerData.socket));
+        this.players.push(players.get(socket.id));
     }
 
     removePlayer(socket) {
@@ -78,6 +76,15 @@ class Game {
         }
     }
 
+    getSoloPlayerDataIfSolo() {
+        const playersWhoNotSpectators = this.players.filter(player => player.role !== 'spectator');
+        if (playersWhoNotSpectators.length === 1) {
+            return { name: playersWhoNotSpectators[0].name, score: playersWhoNotSpectators[0].score };
+        } else {
+            return null;
+        }
+    }
+
     changeLeader() {
         this.leader = this.players[Math.floor(Math.random() * this.players.length)].name;
     }
@@ -86,10 +93,13 @@ class Game {
         this.pieces = [];
         this.pieces.push(new Piece());
         this.pieces.push(new Piece());
-        currentGame.players.forEach((player) => {
+        this.players.forEach((player) => {
+            console.log('playerName: ' + player.name);
+            console.log('before reset: ' + player.pieceId);
             player.gameOver = false;
             player.pieceId = 2;
             player.role = 'player';
+            console.log('after reset: ' + player.pieceId);
         });
     }
 }
