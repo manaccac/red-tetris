@@ -77,7 +77,6 @@ const gameOver = (socket) => {
 	console.log('gameOverGotCalled for player:' + players.get(socket.id).name);
 	for (const [gameId, gameData] of games.entries()) {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name) && gameData.isRunning) {
-			console.log('number of players in the game:' + gameData.players.length);
 			players.get(socket.id).gameOver = true;
 			// on prévient l'autre joueur de sa victoire
 			socket.broadcast.to(gameId).emit('playerLost', players.get(socket.id).name);

@@ -89,3 +89,54 @@ describe('Game class functions', () => {
 
     });
 });
+
+describe('Game class functions', () => {
+    let game;
+
+    beforeEach(() => {
+        // Set up player data
+        players.set('1', { name: 'John' });
+
+        game = new Game(socketMock, 'gameMode');
+    });
+	
+
+    test('getWinner should return a player if there is only one player left with gameOver false', () => {
+        const playerData = { name: 'Alice', winScore: 0, image: 'image_path', socket: '1' };
+
+        Player.mockImplementation(() => ({
+            getName: () => 'Alice',
+            gameOver: false,
+            role: 'player'
+        }));
+
+        game.addPlayer(socketMock);
+
+        const winner = game.getWinner();
+
+        expect(winner).toBe(null);
+
+        players.get('1').gameOver = true;
+    });
+
+    test('resetGame should reset game properties and player states', () => {
+        Player.mockImplementation(() => ({
+            getName: () => 'Alice',
+            score: 100,
+            pieceId: 5,
+            role: 'player',
+            gameOver: true
+        }));
+
+        game.addPlayer(socketMock);
+
+        game.resetGame();
+
+        expect(game.pieces.length).toBe(2);
+        expect(game.players[0].gameOver).toBe(false);
+        expect(game.players[0].pieceId).toBe(2);
+        expect(game.players[0].role).toBe('player');
+    });
+
+    // Add more test cases for other methods as needed
+});

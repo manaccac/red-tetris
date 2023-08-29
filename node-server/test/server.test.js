@@ -84,5 +84,23 @@ describe('socket.io additional tests', () => {
 		await new Promise(resolve => setTimeout(resolve, 100));
 		expect(sendLinesToPlayer).toHaveBeenCalledWith(expect.anything(), numberOfLines);
 	  });
+
+	  test('should handle leaving game', async () => {
+		clientSocket.emit('leftGame');
+		
+		// Wait for a while to ensure the event is processed
+		await new Promise(resolve => setTimeout(resolve, 100));
+		
+		expect(leavingGame).toHaveBeenCalledWith(expect.anything());
+	  });
   
+
+	  test('should handle leaving game', async () => {
+		clientSocket.emit('gameOver');
+		
+		// Wait for a while to ensure the event is processed
+		await new Promise(resolve => setTimeout(resolve, 100));
+		
+		expect(gameOver).toHaveBeenCalledWith(expect.anything());
+	  });
   });
