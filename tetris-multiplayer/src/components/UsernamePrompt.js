@@ -15,8 +15,10 @@ function UsernamePrompt({ onUsernameSubmit }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
+	dispatch({ type: 'CLEANUP_SOCKET_MENU' });
     const handleUsernameRep = (isAvailable) => {
       console.log('handleUsernameRepCalled');
+
       if (isAvailable || username === initialUsername) {
         Cookies.set('username', username);
         Cookies.set('image', selectedImageIndex);
@@ -31,7 +33,6 @@ function UsernamePrompt({ onUsernameSubmit }) {
 	dispatch({ type: 'USERNAME_REP', payload: { handleUsernameRep } });
 	return () => {
 		dispatch({ type: 'socketoff_usernameRep'});
-		socket.off('usernameRep');
 	};
   }, [username, selectedImageIndex, onUsernameSubmit]);
 

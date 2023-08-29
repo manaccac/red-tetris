@@ -38,10 +38,19 @@ export const socketMiddleware = (store) => (next) => (action) => {
 				});
 			});
 	}
+	if (action.type === 'CLEANUP_SOCKET_MENU') {
+		socket.off('NoGameFound');
+		socket.off('GameFull');
+		socket.off('gameInfos');
+	}
 	if (action.type === 'LOOKING_FOR_A_GAME')
 		socket.emit('lookingForAGame', { userName: action.payload.userName, userWin: action.payload.userWin, userImage: action.payload.userImage, gameMode: action.payload.gameMode, gameName: action.payload.gameName });
-	if (action.type === 'USERNAME_REP')
-		socket.on('usernameRep', action.payload.handleUsernameRep);
+	if (action.type === 'USERNAME_REP') {
+		socket.on('usernameRep', (data) => {
+		  action.payload.handleUsernameRep(data);
+		});
+	  }
+		  
 	if (action.type === 'EMIT_USER_INFO')
 		socket.emit('setUserInfos', { username: action.payload.username, image: action.payload.selectedImageIndex, userwin: action.payload.userWin });
 	if (action.type === 'socketoff_usernameRep')

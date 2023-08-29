@@ -50,7 +50,7 @@ const mapStateToProps = (state) => ({
 
 export function getRandomDelay(props) {
   if (props.gameMode === 'graviter') {
-    let grav = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
+    let grav = Math.floor(Math.random() * (200)) + 200;
     console.log('graviter mode = ' + grav);
     return grav;
   }
