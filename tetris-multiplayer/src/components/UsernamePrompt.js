@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { socket } from '../socket';
 import { toast } from 'react-toastify';
 import ColorPicker from './ColorPicker';
 import { getBlockColors } from './ColorPicker';

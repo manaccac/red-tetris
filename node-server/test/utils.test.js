@@ -1,4 +1,4 @@
-const { leavingGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, gameOver, restartGame, handleMatchMaking , askingForGameInfos, startGame} = require('../src/utils');
+const { leavingGame, sendBoardAndPieceToPlayer, sendLinesToPlayer, handleMatchMaking , askingForGameInfos} = require('../src/utils');
 const { games, players } = require('../src/gameState');
 const Player = require('../src/player');
 

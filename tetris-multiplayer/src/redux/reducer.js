@@ -1,4 +1,3 @@
-import { socket } from '../socket';
 import {
 	isCollision,
 	rotateMatrix,

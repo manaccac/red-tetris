@@ -1,4 +1,4 @@
-import React, { useState, useEffect, setState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { connect, useDispatch } from 'react-redux';
 import {
   moveLeft, moveRight, rotate, moveDown, dropPiece, updatePiece,
@@ -7,7 +7,6 @@ import {
   updateBoardState, send
 } from '../../redux/actions';
 import { useNavigate } from 'react-router-dom';
-import { socket } from '../../socket';
 import Cookies from 'js-cookie';
 import OpponentBoard from './OpponentBoard';
 import RenderNextPiece from './NextPiece';
