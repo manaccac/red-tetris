@@ -6,22 +6,23 @@ http.listen(3001, () => {
 });
 
 io.on('connection', (socket) => {
-
     socket.on('setUserInfos', (userInfos) => {
         var isAvailable = true;
         for (const [socketId, player] of players) {
-            if (player.getName() === userInfos.username) {
+            if (player.getName() === userInfos.username && socket.id != socketId) {
                 isAvailable = false;
                 break;
             }
         }
-        if (isAvailable) {
-			let player = new Player(userInfos.username, userInfos.userWin, userInfos.image, socket);
-
-            players.set(socket.id, player);
+        if (isAvailable) { // si name available, on effectue la modif
+            if (players.get(socket.id) === undefined) { // si joueur non existant (premier userNamePrompt)
+                let player = new Player(userInfos.username, userInfos.userWin, userInfos.image, socket);
+                players.set(socket.id, player);
+            } else { //Sinon si joueur change de nom ou image
+                players.get(socket.id).name = userInfos.username;
+                players.get(socket.id).image = userInfos.image;
+            }
         }
-
-        console.log('name available ? : ' + isAvailable);
         socket.emit('usernameRep', isAvailable);
     });
 
@@ -34,13 +35,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('startGame', (gameName) => {
-        console.log('gameName called');
-        console.log(gameName);
+        console.log('gameName called: ' + gameName);
         startGame(socket, gameName);
     });
 
     socket.on('disconnect', () => {
-        console.log('socket Id disconnected :' + socket.id);
         leavingGame(socket);
         players.delete(socket.id);
     });
@@ -50,14 +49,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('updateBoard', (updatedBoardAndScore) => {
-        // const { updateBoard, score } = updatedBoardAndScore;
-        // console.log('updateBoard called');
         sendBoardAndPieceToPlayer(socket, updatedBoardAndScore, players.get(socket.id).name);
     });
 
 
     socket.on('sendLines', (numberOfLines) => {
-        // console.log('reiceived sendLines, sending:' + numberOfLines);
         sendLinesToPlayer(socket, numberOfLines);
     });
 

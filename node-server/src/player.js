@@ -13,7 +13,6 @@ class Player {
 		this.image = image;
 		this.winScore = userWin;
 		this.socket = socket;
-		console.log('player constructor called, image:' + this.image);
 	}
 
 	getPlayeInfo() {

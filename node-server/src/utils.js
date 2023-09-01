@@ -9,16 +9,13 @@ const leaveAllRooms = (socket) => {
 	rooms.forEach(room => {
 		if (room !== socket.id) { // Ne quittez pas la room correspondant à l'ID de socket lui-même
 			socket.leave(room);
-			console.log('leaving a room ?????????????');
 		}
 	});
 };
 
 const leavingGame = (socket) => {
-	console.log('leaving game called from: ' + players.get(socket.id));
 	leaveAllRooms(socket);
 	if (!players.has(socket.id)) {
-		console.log('player not found');
 		return;
 	}
 	// return;
@@ -33,6 +30,7 @@ const leavingGame = (socket) => {
 			} else {
 				if (gameData.leader == players.get(socket.id).name) {// si le leaver est leader, alors change leader
 					gameData.changeLeader();
+					io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
 				}
 				if (players.get(socket.id).role !== 'spectator') {
 					io.to(currentGame.gameName).emit('gameInfos', { ...currentGame.gameInfos });
@@ -52,11 +50,7 @@ const sendBoardAndPieceToPlayer = (socket, updatedBoardAndScore) => {
 			//on envoit la pièce suivante au joueur qui vient de poser
 			socket.emit('updateNextPiece', [gameData.pieces[players.get(socket.id).pieceId]]);
 			players.get(socket.id).pieceId++;
-			console.log('score received from soloPlayer: ' + updatedBoardAndScore.score);
 			players.get(socket.id).score = updatedBoardAndScore.score;
-
-			console.log('new piece from ' + players.get(socket.id).name);
-			console.log('pieceId from him: ' + players.get(socket.id).pieceId);
 			//on envoit le board a l'adversaire
 			socket.broadcast.to(gameId).emit('opponentBoardData', updatedBoardAndScore.updateBoard, players.get(socket.id).name, players.get(socket.id).score);
 			return;
@@ -74,7 +68,6 @@ const sendLinesToPlayer = (socket, numberOfLines) => {
 }
 
 const gameOver = (socket) => {
-	console.log('gameOverGotCalled for player:' + players.get(socket.id).name);
 	for (const [gameId, gameData] of games.entries()) {
 		if (gameData.doesPlayerBelongToGame(players.get(socket.id).name) && gameData.isRunning) {
 			players.get(socket.id).gameOver = true;
@@ -84,15 +77,12 @@ const gameOver = (socket) => {
 			winner = gameData.getWinner(); // rempli si gagnant sinon null
 			soloPlayerData = gameData.getSoloPlayerDataIfSolo();
 			if (winner) {
-				console.log('winnerName ?:' + winner.name);
 				winner.socket.emit('Victory');
 				winner.winScore++;
 				io.to(gameId).emit('playerWon', winner.name, winner.score);
-				console.log('score for winner: ' + winner.score);
 				gameData.isRunning = false;
 			} else if (soloPlayerData) { // quand joueur solo avec spectaeurs
 				io.to(gameId).emit('playerWon', soloPlayerData.name, soloPlayerData.score);
-				console.log('soloplayer name/score: ' + soloPlayerData.name + '/' + soloPlayerData.score);
 				gameData.isRunning = false;
 			}
 			return;
@@ -122,9 +112,7 @@ const askingForGameInfos = (socket) => {
 }
 
 const handleMatchMaking = (socket, dataStartGame) => {
-	console.log('matchmaking called');
 	if (!players.has(socket.id)) { // si le joueur n'existe pas, création
-		console.log("new user = ", dataStartGame)
 		player = new Player(dataStartGame.userName, dataStartGame.userWin, dataStartGame.userImage, socket);
 		players.set(socket.id, player);
 	}
@@ -144,7 +132,6 @@ const handleMatchMaking = (socket, dataStartGame) => {
 				socket.emit('gameInfos', { ...currentGame.gameInfos, role: 'spectator' });
 				players.get(socket.id).role = 'spectator';
 			} else if (currentGame.players.length == maxPlayerPerGame) {// game pleine, on prévient
-				console.log('GameFull');
 				socket.emit('GameFull');
 			} else { // partie trouvée et places dispos, ajout à la salle d'attente
 				socket.join(currentGame.gameName);
@@ -154,7 +141,6 @@ const handleMatchMaking = (socket, dataStartGame) => {
 				players.get(socket.id).role = 'player';
 			}
 		} else { // la partie n'existe pas, prévenir l'user et retour menu
-			console.log("NoGameFound")
 			socket.emit('NoGameFound');
 		}
 	}

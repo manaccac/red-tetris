@@ -94,12 +94,9 @@ class Game {
         this.pieces.push(new Piece());
         this.pieces.push(new Piece());
         this.players.forEach((player) => {
-            console.log('playerName: ' + player.name);
-            console.log('before reset: ' + player.pieceId);
             player.gameOver = false;
             player.pieceId = 2;
             player.role = 'player';
-            console.log('after reset: ' + player.pieceId);
         });
     }
 }
