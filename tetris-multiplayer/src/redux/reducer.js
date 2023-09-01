@@ -38,21 +38,7 @@ function gameReducer(state = initialState, action) {
 	try {
 		switch (action.type) {
 			case 'MOVE_LEFT':
-				// console.log("piece:", state.piece);
-				// console.log("position:", state.position);
-				// console.log("rotation:", state.rotation);
-				// console.log("board:", state.board);
-				// console.log("score:", state.score);
-				// console.log("isGameOver:", state.isGameOver);
-				// console.log("nextPiece:", state.nextPiece);
-				// console.log("gameStart:", state.gameStart);
-				// console.log("awaitingOpponent:", state.awaitingOpponent);
-				// console.log("isGameWon:", state.isGameWon);
-				// console.log("opponents:", state.opponents);
-				// console.log("leader:", state.leader);
-				// console.log("role:", state.role);
-				// console.log("gameName:", state.gameName);
-				// console.log("gameMode:", state.gameMode);
+
 				piece = { ...state.piece };
 				newPosition = { ...piece.position };
 				newPosition.x -= 1;
@@ -90,12 +76,9 @@ function gameReducer(state = initialState, action) {
 				//action.resolve();
 				return { ...state, piece };
 			case 'MOVE_DOWN':
-				console.log("updateBoard:      ", state.updateBoard);
 				if (state.isGameOver) {
-					//action.resolve();
 					return state;
 				}
-				// console.log("score:", state.score);
 				piece = { ...state.piece };
 				newPosition = { ...piece.position };
 				newPosition.y += 1;
@@ -135,7 +118,6 @@ function gameReducer(state = initialState, action) {
 						  }, updatedBoard);
 						}, 500); // Ajoutez un délai de 500 ms avant de supprimer la ligne
 						if (completedLines.length > 1) {
-							console.log("completedLines.length: ", completedLines.length);
 							send = completedLines.length - 1;
 						}
 					  
@@ -171,9 +153,7 @@ function gameReducer(state = initialState, action) {
 				// //action.resolve();
 				return { ...state, piece: droppedPiece };
 			case 'UPDATE_PIECE':
-				// console.log('in UPDATE_PIECE');
 				const pieces = action.payload;
-				// console.log(action.payload);
 				if (pieces.length === 1) {
 					return { ...state, nextPiece: action.payload[0] };
 				} else if (pieces.length === 2) {
@@ -211,7 +191,6 @@ function gameReducer(state = initialState, action) {
 					playerWhoWon: null
 				};
 			case 'ADD_INDESTRUCTIBLE_LINE':
-				console.log('Adding indestructible lines...');
 				let newBoard = [...state.board];
 				for (let i = 0; i < action.x; i++) {
 					newBoard.shift(); // remove the first line from the top
@@ -242,8 +221,6 @@ function gameReducer(state = initialState, action) {
 				if (opponentName === undefined) {
 					return state;
 				}
-				// console.log('opponentName', opponentName);
-				// console.log('state.myName', state.myName);
 				if (opponentName !== state.myName) {
 					return {
 						...state,
@@ -262,9 +239,6 @@ function gameReducer(state = initialState, action) {
 			case 'UPDATE_OPPONENT_BOARD':
 				const board_received = action.board;
 				const name_received = action.name;
-				console.log('opponentName', name_received);
-				console.log('state.myName', state.myName);
-				console.log('received score: ', action.score);
 				if (name_received === undefined) {
 					console.warn(`Trying to update non-existing opponent: ${name_received}`);
 					return state;
@@ -297,20 +271,6 @@ function gameReducer(state = initialState, action) {
 					leader: action.payload
 				};
 			case 'SET_GAME_INFO':
-				// console.log("leader: " + state.leader)
-				// Object.values(state.opponents).forEach(opponent => {
-				// 	console.log("Opponent Name:", opponent.name);
-				// 	console.log("Opponent Board:", opponent.board);
-				// });
-				// console.log("gameMode: " + state.gameMode)
-				// console.log("gameName: " + action.payload.gameName);
-				console.log("state.myName:", state.myName);
-				console.log("action.payload.players:", action.payload);
-
-				// console.log("role: " + state.role)
-
-				// console.log('Setting game info...');
-				// console.log(action.payload);
 				const { leader, players, gameMode, gameName, role, playersImage, playersWins } = action.payload;
 				const opponents = {};
 				players.forEach((playerName, index) => {

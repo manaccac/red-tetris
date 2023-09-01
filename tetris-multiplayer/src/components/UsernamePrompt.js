@@ -17,8 +17,6 @@ function UsernamePrompt({ onUsernameSubmit }) {
   useEffect(() => {
 	dispatch({ type: 'CLEANUP_SOCKET_MENU' });
     const handleUsernameRep = (isAvailable) => {
-      console.log('handleUsernameRepCalled');
-
       if (isAvailable || username === initialUsername) {
         Cookies.set('username', username);
         Cookies.set('image', selectedImageIndex);
@@ -37,11 +35,9 @@ function UsernamePrompt({ onUsernameSubmit }) {
   }, [username, selectedImageIndex, onUsernameSubmit]);
 
   const handleUsernameSubmit = (e) => {
-    console.log('handleUsernameSubmitCalled');
     e.preventDefault();
 
 	dispatch({ type: 'EMIT_USER_INFO', payload: { username, selectedImageIndex } });
-    console.log('emitting infos, imageId = ' + selectedImageIndex);
     // Store block colors in cookies
     const blockColors = getBlockColors();
     for (const [key, value] of Object.entries(blockColors)) {

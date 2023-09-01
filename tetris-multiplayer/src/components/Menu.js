@@ -17,7 +17,6 @@ const Menu = () => {
   const gameNameFromReducer = useSelector(state => state.gameName);
 
   useEffect(() => {
-	console.log('gameNameFromReducer: ' );
 	dispatch({
 	  type: 'INIT_SOCKET_MENU',
 	  payload: { username: username, winscore: winscore, cookieImage: cookieImage },

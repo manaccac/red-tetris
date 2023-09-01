@@ -51,7 +51,6 @@ const mapStateToProps = (state) => ({
 export function getRandomDelay(props) {
   if (props.gameMode === 'graviter') {
     let grav = Math.floor(Math.random() * (200)) + 200;
-    console.log('graviter mode = ' + grav);
     return grav;
   }
   else
@@ -192,9 +191,6 @@ function Board(props) {
         default:
           break;
       }
-      //   console.log('collision: ', collision);
-      //   setIsColliding(collision);
-      //   console.log(' iscol: ', isColliding);
 
     } catch (error) {
       console.log('Erreur lors de la gestion de la touche enfoncée :', error);
@@ -219,13 +215,10 @@ function Board(props) {
   useEffect(() => {
     let countdownInterval;
 
-    // console.log(props.gameStart);
     if (props.gameStart) {
-      // console.log('gameStart is true, but countdown is: ')
       countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => {
           if (prevCountdown <= 1) {
-            console.log('clearInterval got called');
             clearInterval(countdownInterval);
             setGameRunning(true);
             return 5;
@@ -284,7 +277,6 @@ function Board(props) {
     return () => {
       dispatch({ type: 'CLEANUP_SOCKET_GAME' });
       props.resetState();
-      //   console.log('returned called');
       props.gameStarted(false);
     };
   }, []);
@@ -294,7 +286,6 @@ function Board(props) {
 
   const renderCells = () =>
     props.board.map((row, y) => {
-      // console.log('renderCells iscol: ', isColliding);
       const isCompleted = row.every((cell) => cell > 0);
       return row.map((cell, x) => {
         let active = false;

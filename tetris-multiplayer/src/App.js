@@ -9,10 +9,6 @@ import Cookies from 'js-cookie';
 import './App.css';
 import { useSelector, useDispatch } from 'react-redux';
 
-
-console.log('username = ', Cookies.get('username'));
-console.log('image = ', Cookies.get('image'));
-
 export const UserInfo = ({ username, image, score, onProfileClick }) => {
   return (
     <div className="user-info" onClick={onProfileClick}>

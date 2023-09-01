@@ -105,8 +105,6 @@ describe('gameReducer', () => {
 
     const newState = gameReducer(store.getState(), actions[0]);
     const updatedPiece = newState.piece;
-	// console.log("piece update:",updatedPiece);
-	// console.log("piece initial:",initialPiece);
 
     // Vérifier que la pièce a été tournée en modifiant sa forme
     expect(updatedPiece.shape).not.toEqual(initialPiece.shape);
@@ -222,8 +220,6 @@ describe('gameReducer', () => {
     const newState = gameReducer(store.getState(), actions[0]);
     const updatedPiece = newState.piece;
     const updatedNextPiece = newState.nextPiece;
-	// console.log("old piece =",oldPiece);
-	// console.log("new piece =",newPiece);
 
     // Vérifier que la pièce a été mise à jour correctement
     expect(updatedPiece).not.toEqual(oldPiece);
@@ -311,9 +307,6 @@ describe('gameReducer', () => {
     // Get the updated state after the actions are dispatched
     const newState = gameReducer(store.getState(), actions[1]);
 
-    console.log('newState.awaitingOpponent:', newState.awaitingOpponent);
-    console.log('newState.gameStart:', newState.gameStart);
-  
     // Check if the state has been updated correctly
     expect(newState.awaitingOpponent).toEqual(false);
     expect(newState.gameStart).toEqual(true);
@@ -441,8 +434,6 @@ describe('gameReducer', () => {
     const newState = gameReducer(store.getState(), actions[0]);
   
     // Check if the piece position and the board are unchanged after the collision
-    // console.log("newState.piece.position = " ,newState.piece.position)
-    // console.log("initialState_moveD.piece.position.y = " , initialState_moveD.piece.position.y)
     if (newState.piece) {
         // eslint-disable-next-line jest/no-conditional-expect
         expect(newState.piece.position.x).toEqual(initialState_moveD.piece.position.x);

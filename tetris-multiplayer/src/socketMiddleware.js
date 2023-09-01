@@ -14,7 +14,6 @@ export const socketMiddleware = (store) => (next) => (action) => {
 	switch (action.type) {
 		case 'INIT_SOCKET_MENU':
 			socket.on('gameInfos', (data) => {
-				console.log('start');
 				store.dispatch({ type: 'SET_GAME_INFO', payload: data });
 				action.navigate(`${data.gameName}[${action.payload.username}]`);
 				socket.off('NoGameFound');
@@ -91,11 +90,9 @@ export const socketMiddleware = (store) => (next) => (action) => {
 			action.props.updateOpponentBoard(userName, opponentBoardData, score);
 		});
 		socket.on('updateNextPiece', (nextPiece) => {
-			console.log('receivedNewPiece');
 			action.props.updatePiece(nextPiece);
 		});
 		socket.on('playerWon', (playerWhoWon, winnerScore) => {
-			console.log('received player won ?');
 			action.props.setPlayerWon(playerWhoWon, winnerScore);
 
 		});
