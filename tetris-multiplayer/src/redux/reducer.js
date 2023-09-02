@@ -158,7 +158,6 @@ function gameReducer(state = initialState, action) {
 				} else if (pieces.length === 2) {
 					return { ...state, piece: action.payload[0], nextPiece: action.payload[1] };
 				}
-				console.log('Error: Receiveid <1 or >2 pieces in update_piece');
 				return { ...state };
 			case 'UPDATE_BOARD':
 				//action.resolve();

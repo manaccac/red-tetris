@@ -1,6 +1,6 @@
 const games = new Map(); // [randomStringName, gameObject]
 const players = new Map(); // [socketId,playerObject]
-const maxPlayerPerGame = 7;
+const maxPlayerPerGame = 3;
 
 const express = require('express');
 const app = express();
